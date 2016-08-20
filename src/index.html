@@ -7,12 +7,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="content-type" content="text/html;charset=UTF-8">
         <!-- @if NODE_ENV='development' -->
-        <link rel="stylesheet" type="text/css" href="openlayers.css">
+        <link rel="stylesheet" type="text/css" href="css/color-picker.css">
+        <link rel="stylesheet" type="text/css" href="css/openlayers.css">
+        <link rel="stylesheet" href="css/font-awesome.css">
         <!-- @endif -->
-        <link rel="stylesheet" type="text/css" href="interactivemap.css" />
+        <link rel="stylesheet" type="text/css" href="css/interactivemap.css" />
 	</head>
 	<body>
+        <div id="toolbar">
+            <i class="fa fa-dot-circle-o"></i><input type="text" class="stroke-option" id="stroke-width" value="5">
+            <i class="fa fa-adjust"></i><input type="text" class="stroke-option" id="stroke-opacity" value="1">
+            <input type="text" class="stroke-option" id="icon-size" value="500">
+            <input type="text" class="stroke-option" id="icon-opacity" value="1">
+            <i id="color-preview" class="fa fa-square"></i><input type="text" class="stroke-option" id="color-picker">
+            <i class="fa fa-map-marker"></i><select class="stroke-option" id="icon-image">
+                <option value="./img/ward_sentry.png">Sentry Ward</option>
+                <option value="./img/ward_observer.png">Observer Ward</option>
+                <option value="/media/images/miniheroes/lina.png">Lina</option>
+            </select>
+        </div>
 		<div id="map"></div>
+        <div id="map-export">
+            <input type="button" value="Export Map" id="export"> <br>
+            <p>Exported map:</p>
+            <canvas id="exportedImage" class="smallmap" width="512" height="256"></canvas> <br>
+            <!-- <a id="downloadLink" href="#" target="_blank">Download Image</a> (-> Save Link as) -->
+        </div>
 		<div id="controls-container" class="controls-container">
             <a id="controls-max" class="controls-button maximizeDiv olButton olAlphaImg" href="#">+</a>
             <a id="controls-min" class="controls-button minimizeDiv olButton olAlphaImg" href="#">&times;</a>
@@ -23,16 +43,12 @@
                         <label for="noneToggle"><input type="radio" name="type" value="none" id="noneToggle" checked="checked" /> Navigate</label>
                     </li>
                     <li>
-                        <label for="lineToggle"><input type="radio" name="type" value="line" id="lineToggle" /> Measure Distance</label>
+                        <label for="dragToggle"><input type="radio" name="type" value="drag" id="dragToggle" /> Draw</label>
+                    </li>
+                    <li>
+                        <label for="iconToggle"><input type="radio" name="type" value="icon" id="iconToggle" /> Icon</label>
                     </li>
                 </ul>
-                <div id="output-panel">
-                    <div id="output"></div>
-                    <div id="traveltime-container" style="display: none">
-                        <div>Travel time: <span id="traveltime"></span>s</div>
-                        <div id="movespeed-container">with <input type="text" id="movespeed" value="300" /> ms</div>
-                    </div>
-                </div>
             </div>
         </div>
         <script type="text/javascript">
@@ -49,8 +65,13 @@
 
         </script>
         <!-- @if NODE_ENV='development' -->
+        <script src="color-picker.js"></script>
         <script src="../ol2/build/OpenLayers.js"></script>
-        <script src="openlayers.dragfeature.js"></script>
+        <script src="openlayers.exportmap.js"></script>
+        <script src="openlayers.custompoint.js"></script>
+        <script src="openlayers.customclick.js"></script>
+        <script src="openlayers.customdrawfeature.js"></script>
+        <script src="openlayers.custompath.js"></script>
         <!-- @endif -->
         <script src="interactivemap.js"></script>
 	</body>

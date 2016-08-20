@@ -8,6 +8,20 @@ img[src="img/ward_observer.png"]:hover, img[src="img/ward_sentry.png"]:hover {
     width: 100%;
     height: 100%;
 }
+#map-export {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 9999;
+}
+#toolbar {
+    width: 100%;
+}
+.stroke-option {
+    display: inline-block;
+}
 .controls-container {
     position:absolute;
     top:100px;
