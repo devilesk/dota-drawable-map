@@ -403,8 +403,6 @@
         renderers: renderer //["Canvas"]
     });
     map.addLayer(vectors);
-    var exportMapControl = new OpenLayers.Control.ExportMap();
-    map.addControl(exportMapControl);
     map.addControl(coordinateControl);
     map.addControl(new OpenLayers.Control.TouchNavigation({
         dragPanOptions: {
@@ -640,13 +638,4 @@
             picker.exit();
         }, false);
     picker.picker.appendChild(x);
-    
-    document.getElementById('export').addEventListener('click', exportMap, false);
-    function exportMap() {
-        var canvas = OpenLayers.Util.getElement("exportedImage");
-        exportMapControl.trigger(canvas);   
-        
-//                // set download url (toDataURL() requires the use of a proxy)
-//                OpenLayers.Util.getElement("downloadLink").href = canvas.toDataURL();
-    }
 }());
