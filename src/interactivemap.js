@@ -499,105 +499,6 @@
         }
     }
 
-    function onMapDataLoad(data) {
-        var markers = {},
-            marker,
-            vectorLayer = map.getLayersByName("Placed Wards")[0],
-            box_points = [],
-            box_rect, box_feature;
-        ["trigger_multiple","ent_dota_tree","dota_item_rune_spawner","ent_dota_shop","npc_dota_barracks","npc_dota_building","npc_dota_fort","npc_dota_tower"].forEach(function (k) {
-            console.log(k);
-            // Create markers for non-neutral spawn box and non-tree layers
-            if (k != "trigger_multiple" && k != "ent_dota_tree" && k != "trigger_no_wards" && k != "ent_fow_blocker_node") {
-                markers[k] = new OpenLayers.Layer.Markers(layerNames[k]);
-                map.addLayer(markers[k]);
-                markers[k].setVisibility(false);
-                for (var i = 0; i < data[k].length; i++) {
-                    var latlon = worldToLatLon(data[k][i].x, data[k][i].y);
-                    marker = addMarker(markers[k], new OpenLayers.LonLat(latlon.x, latlon.y), OpenLayers.Popup.FramedCloud, "Click to toggle range overlay", false);
-                    marker.day_vision_radius = TOWER_DAY_VISION_RADIUS;
-                    marker.night_vision_radius = TOWER_NIGHT_VISION_RADIUS;
-                    marker.true_sight_radius = TOWER_TRUE_SIGHT_RADIUS;
-                    marker.attack_range_radius = TOWER_ATTACK_RANGE_RADIUS;
-                    marker.showInfo = false;
-
-                    if (k == "npc_dota_tower") {
-                        console.log('npc_dota_tower');
-                        marker.events.register("mousedown", markers[k], handleTowerMarkerClick);
-                        marker.events.register("touchend", markers[k], handleTowerMarkerClick);
-                        marker.tower_loc = data[k][i];
-                    }
-                }
-            }
-            // Set up tree layer without creating tree markers yet
-            else if (k == "ent_dota_tree") {
-                markers[k] = new OpenLayers.Layer.Markers(layerNames[k]);
-                map.addLayer(markers[k]);
-                markers[k].setVisibility(false);
-                markers[k].data = data[k];
-            }
-            // Create neutral spawn markers and rectangles
-            else if (k == "trigger_multiple") {
-                loadJSONData(markers, k, "npc_dota_neutral_spawner_box", data[k]);
-            }
-        });
-
-        map_data = data;
-        
-        map.raiseLayer(vectorLayer, map.layers.length);
-
-        // Create tree markers the first time the tree layer is switched to
-        map.events.register("changelayer", null, function(event) {
-            if (event.property === "visibility" && event.layer.name == layerNames["ent_dota_tree"] && !event.layer.loaded) {
-                loadTreeData();
-            }
-
-            if (event.property === "visibility") {
-                console.log(event.layer.name, event.layer.visibility, event.layer.isBaseLayer);
-                if (event.layer.isBaseLayer) {
-                    setQueryString('BaseLayer', event.layer.name.replace(/ /g, ''));
-                }
-                else {
-                    setQueryString(event.layer.name.replace(/ /g, ''), event.layer.visibility ? true : null);
-                }
-            }
-        });
-
-        parseQueryString();
-    }
-
-    function loadTreeData() {
-        console.log('start tree load');
-        var layer = map.getLayersByName(layerNames["ent_dota_tree"])[0];
-        for (var i = 0; i < layer.data.length; i++) {
-            var latlon = worldToLatLon(layer.data[i].x, layer.data[i].y);
-            marker = addMarker(layer, new OpenLayers.LonLat(latlon.x, latlon.y), OpenLayers.Popup.FramedCloud, "Click to toggle tree as alive or cut-down.<br>This will affect the simulated placed wards vision.<br>Tree coordinate: " + layer.data[i].x + ', ' + layer.data[i].y, false);
-            marker.treeVisible = true;
-            marker.tree_loc = layer.data[i].x + ',' + layer.data[i].y;
-            treeMarkers[layer.data[i].x + ',' + layer.data[i].y] = marker;
-        }
-        layer.loaded = !layer.loaded;
-        console.log('end tree load');
-    }
-
-    function loadJSONData(markers, k, name, data) {
-        markers[name] = new OpenLayers.Layer.Vector(layerNames[k]);
-        map.addLayer(markers[name]);
-        markers[name].setVisibility(false);
-        for (var i = 0; i < data.length; i++) {
-            pnt = [];
-            for (var j = 0; j < data[i].length; j++) {
-                var latlon = worldToLatLon(data[i][j].x, data[i][j].y);
-                pnt.push(new OpenLayers.Geometry.Point(latlon.x, latlon.y));
-            }
-
-
-            ln = new OpenLayers.Geometry.LinearRing(pnt);
-            pf = new OpenLayers.Feature.Vector(ln, null, style.green);
-            markers[name].addFeatures([pf]);
-        }
-    }
-
     // Initialize map settings based on query string values
     function parseQueryString() {
         var zoom = getParameterByName('zoom');
@@ -692,13 +593,6 @@
     baseLayers.forEach(function(layer) {
         map.addLayer(layer);
     });
-    map.addLayer(dayRangeLayer);
-    map.addLayer(nightRangeLayer);
-    map.addLayer(trueSightRangeLayer);
-    map.addLayer(attackRangeLayer);
-    map.addLayer(polygonLayer);
-    map.addLayer(wardVisionLayer);
-    map.addLayer(iconLayer);
     map.addControl(coordinateControl);
     map.addControl(new OpenLayers.Control.TouchNavigation({
         dragPanOptions: {
@@ -951,15 +845,6 @@
         layerSwitcher.minimizeControl();
     }
 
-    // Show/hide X/Y coordinate display
-    document.getElementById("coordControl").addEventListener("change", function(e) {
-        if (this.checked) {
-            document.querySelector(".olControlMousePosition").style.display = 'block';
-        } else {
-            document.querySelector(".olControlMousePosition").style.display = 'none';
-        }
-    }, false);
-
     // Update travel time display when movespeed input changes
     document.getElementById("movespeed").addEventListener("change", function(e) {
         document.getElementById("traveltime").innerHTML = (lastDistance / document.getElementById("movespeed").value).toFixed(2);
@@ -971,6 +856,4 @@
     document.getElementById('circleToggle').addEventListener('click', toggleControl, false);
     document.getElementById('observerToggle').addEventListener('click', toggleControl, false);
     document.getElementById('sentryToggle').addEventListener('click', toggleControl, false);
-
-    getJSON(map_data_path, onMapDataLoad);
 }());
