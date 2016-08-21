@@ -23,6 +23,7 @@ OpenLayers.Control.CustomDrawFeature = OpenLayers.Class(OpenLayers.Control.DrawF
      * Method: drawFeature
      */
     drawFeature: function(geometry) {
+        console.log('customdrawfeature', geometry);
         var feature = new OpenLayers.Feature.Vector(geometry);
         feature.attributes.style = this.style;
         var proceed = this.layer.events.triggerEvent(

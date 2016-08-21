@@ -252,8 +252,20 @@
                     $('#toolbar').show();
                     updateTools(key);
                 }
+                if (key == 'drag') {
+                    vectors.events.register("sketchcomplete", drawControls.drag, onBrushSketchCompleted);
+                }
+                else if (key == 'icon') {
+                    vectors.events.register("sketchcomplete", drawControls.icon, onIconSketchCompleted);
+                }
             } else {
                 control.deactivate();
+                if (key == 'drag') {
+                    vectors.events.unregister("sketchcomplete", drawControls.drag, onBrushSketchCompleted);
+                }
+                else if (key == 'icon') {
+                    vectors.events.unregister("sketchcomplete", drawControls.icon, onIconSketchCompleted);
+                }
             }
         }
         if (this.value === "draw") {
@@ -367,52 +379,221 @@
     baseLayers.forEach(function(layer) {
         map.addLayer(layer);
     });
-    var context = {
-        getStrokeWidth: function(feature) {
-            if (!feature.attributes.style) return 0;
-            return feature.attributes.style.strokeWidth / map.getResolution();
+    
+    var defaultStyles = {
+        brush: {
+            strokeWidth: 50,
+            strokeColor: '#ff0000',
+            strokeOpacity: 1,
+            pointRadius: 1,
+            fillColor: '#ff0000'
         },
-        getStrokeColor: function(feature) {
-            if (!feature.attributes.style) return '';
-            return feature.attributes.style.strokeColor;
-        },
-        getStrokeOpacity: function(feature) {
-            if (!feature.attributes.style) return 1;
-            return feature.attributes.style.strokeOpacity;
-        },
-        getGraphicHeight: function(feature) {
-            if (!feature.attributes.style) return 1;
-            return feature.attributes.style.graphicHeight / map.getResolution();
-        },
-        getGraphicOpacity: function(feature) {
-            if (!feature.attributes.style) return 1;
-            return feature.attributes.style.graphicOpacity;
-        },
-        getGraphicYOffset: function(feature) {
-            if (!feature.attributes.style) return 1;
-            if (feature.attributes.style.externalGraphic && ((feature.attributes.style.externalGraphic.indexOf('ward_sentry') != -1) ||
-                (feature.attributes.style.externalGraphic.indexOf('ward_observer') != -1))) {
-                return -feature.attributes.style.graphicHeight / map.getResolution();
+        icon: {
+            externalGraphic: null,
+            graphicHeight: 512,
+            graphicOpacity: 1
+        }
+    };
+    function formatPercent(value) {
+        return value + '%';
+    }
+    
+    $.widget( "ui.percentspinner", $.ui.spinner, {
+        _format: formatPercent,
+        _parse: function(value) { return parseFloat(value); }
+    });
+    
+    var strokeOpacityPreview = document.querySelector('#stroke-opacity-icon .opacity-preview');
+    $('#stroke-opacity').percentspinner({
+        min: 0,
+        max: 100,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(defaultStyles.brush.strokeOpacity * 100);
             }
             else {
-                return -feature.attributes.style.graphicHeight / 2 / map.getResolution();
+                defaultStyles.brush.strokeOpacity = v/100;
+                strokeOpacityPreview.style.opacity = defaultStyles.brush.strokeOpacity;
+            }
+            $(this).val(formatPercent(v));
+        },
+        spin: function(event, ui) {
+            strokeOpacityPreview.style.opacity = ui.value/100;
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                defaultStyles.brush.strokeOpacity = v/100;
+                strokeOpacityPreview.style.opacity = defaultStyles.brush.strokeOpacity;
+            }
+        }
+    }).val(formatPercent(defaultStyles.brush.strokeOpacity*100));
+
+    $('#stroke-width').spinner({
+        min: 1,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(defaultStyles.brush.strokeWidth);
+            }
+            else {
+                defaultStyles.brush.strokeWidth = v;
+            }
+            $(this).val(v);
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                defaultStyles.brush.strokeWidth = v;
+            }
+        }
+    }).val(defaultStyles.brush.strokeWidth);
+    
+    var colorPreview = document.getElementById('color-preview');
+    var picker = new CP(document.getElementById('color-picker'));
+    picker.on("enter", function() {
+        var color = '#' + this._HSV2HEX(this.set());
+        colorPreview.title = color;
+        colorPreview.style.backgroundColor = color;
+    });
+    picker.on("change", function(color) {
+        this.target.value = '#' + color;
+        colorPreview.style.backgroundColor = '#' + color;
+        defaultStyles.brush.strokeColor = '#' + color;
+    });
+    picker.on("exit", function() {
+        this.target.value = colorPreview.title;
+    });
+    $('#color-preview').click(function () {
+        if (!picker.visible) {
+            picker.enter();
+        }
+    });
+    
+    var closeButton = document.createElement('button');
+    closeButton.innerHTML = 'Close';
+    closeButton.className = 'color-picker-close tool-button';
+    closeButton.addEventListener("click", function() {
+        picker.exit();
+    }, false);
+    picker.picker.appendChild(closeButton);
+    
+    $('#marker-size').spinner({
+        min: 32,
+        step: 32,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(defaultStyles.icon.graphicHeight);
+            }
+            else {
+                defaultStyles.icon.graphicHeight = v;
+            }
+            $(this).val(v);
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                defaultStyles.icon.graphicHeight = v;
+            }
+        }
+    }).val(defaultStyles.icon.graphicHeight);
+    
+    var markerOpacityPreview = document.querySelector('#marker-opacity-icon .opacity-preview');
+    $('#marker-opacity').percentspinner({
+        min: 0,
+        max: 100,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(defaultStyles.icon.graphicOpacity * 100);
+            }
+            else {
+                defaultStyles.icon.graphicOpacity = v/100;
+                markerOpacityPreview.style.opacity = defaultStyles.icon.graphicOpacity;
+            }
+            $(this).val(formatPercent(v));
+        },
+        spin: function(event, ui) {
+            markerOpacityPreview.style.opacity = ui.value/100;
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                defaultStyles.icon.graphicOpacity = v/100;
+                markerOpacityPreview.style.opacity = defaultStyles.icon.graphicOpacity;
+            }
+        }
+    }).val(formatPercent(defaultStyles.icon.graphicOpacity*100));
+    
+    function getBrushStyle() {
+        return OpenLayers.Util.applyDefaults({}, defaultStyles.brush);
+    }
+    function getIconStyle() {
+        return OpenLayers.Util.applyDefaults({}, defaultStyles.icon);
+    }
+    
+    // Returns style property stored in feature attribute or get current default style property
+    var brushStyleContext = {
+        getPointRadius: function(feature) {
+            return (feature.attributes.style ? feature.attributes.style.pointRadius : getBrushStyle().pointRadius) / map.getResolution();
+        },
+        getStrokeWidth: function(feature) {
+            return (feature.attributes.style ? feature.attributes.style.strokeWidth : getBrushStyle().strokeWidth) / map.getResolution();
+        },
+        getStrokeColor: function(feature) {
+            return feature.attributes.style ? feature.attributes.style.strokeColor : getBrushStyle().strokeColor;
+        },
+        getStrokeOpacity: function(feature) {
+            return feature.attributes.style ? feature.attributes.style.strokeOpacity : getBrushStyle().strokeOpacity;
+        }
+    };
+    var iconStyleContext = {
+        getGraphicHeight: function(feature) {
+            return (feature.attributes.style ? feature.attributes.style.graphicHeight : getIconStyle().graphicHeight) / map.getResolution();
+        },
+        getGraphicOpacity: function(feature) {
+            return feature.attributes.style ? feature.attributes.style.graphicOpacity : getIconStyle().graphicOpacity;
+        },
+        getGraphicYOffset: function(feature) {
+            var externalGraphic = getIconStyle().externalGraphic
+            if (externalGraphic.indexOf('ward_sentry') == -1 && externalGraphic.indexOf('ward_observer') == -1) {
+                return -getIconStyle().graphicHeight / map.getResolution() / 2;
+            }
+            else {
+                return -getIconStyle().graphicHeight / map.getResolution();
             }
         },
         getExternalGraphic: function(feature) {
-            if (!feature.attributes.style || !feature.attributes.style.externalGraphic) return '';
-            return feature.attributes.style.externalGraphic;
+            return feature.attributes.style ? feature.attributes.style.externalGraphic : getIconStyle().externalGraphic;
         }
     };
-    var template = {
+    var styleContext = {}
+    OpenLayers.Util.extend(styleContext, brushStyleContext);
+    OpenLayers.Util.extend(styleContext, iconStyleContext);
+    
+    var brushStyleTemplate = {
+        pointRadius: "${getPointRadius}",
         strokeWidth: "${getStrokeWidth}",
         strokeColor: "${getStrokeColor}",
-        strokeOpacity: "${getStrokeOpacity}",
+        strokeOpacity: "${getStrokeOpacity}"
+    };
+    var iconStyleTemplate = {
         graphicOpacity: "${getGraphicOpacity}",
         externalGraphic: "${getExternalGraphic}",
         graphicYOffset: "${getGraphicYOffset}",
         graphicHeight: "${getGraphicHeight}"
     };
-    var style = new OpenLayers.Style(template, {context: context});
+    var styleTemplate = {}
+    OpenLayers.Util.extend(styleTemplate, brushStyleTemplate);
+    OpenLayers.Util.extend(styleTemplate, iconStyleTemplate);
+    var style = new OpenLayers.Style(styleTemplate, {context: styleContext});
+    var brushStyle = new OpenLayers.Style(brushStyleTemplate, {context: brushStyleContext});
+    var iconStyle = new OpenLayers.Style(iconStyleTemplate, {context: iconStyleContext});
     renderer = renderer ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
     var vectors = new OpenLayers.Layer.Vector("Canvas", {
         styleMap: new OpenLayers.StyleMap(style),
@@ -517,19 +698,43 @@
 
     // Controls configuration
     drawControls = {
-        drag: new OpenLayers.Control.CustomDrawFeature(vectors, OpenLayers.Handler.CustomPath),
-        icon: new OpenLayers.Control.CustomDrawFeature(vectors, OpenLayers.Handler.CustomPoint)
+        drag: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Path,
+        {
+            handlerOptions: {
+                freehand: true,
+                layerOptions: {
+                    styleMap: new OpenLayers.StyleMap(brushStyle)
+                }
+            }//,
+            // title: "DrawFeature",
+            // displayClass: "olControlDrawFeaturePolygon",
+            //multi: true
+        }),
+        icon: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Point,
+        {
+            handlerOptions: {
+                layerOptions: {
+                    styleMap: new OpenLayers.StyleMap(iconStyle)
+                }
+            }
+        })
     };
-    drawControls.drag.setStyle({
+    /*drawControls.drag.setStyle({
         strokeWidth: 50,
         strokeColor: '#ff0000',
         strokeOpacity: 1
-    });
-    drawControls.icon.setStyle({
+    });*/
+    function onBrushSketchCompleted(event) {
+        event.feature.attributes.style = getBrushStyle();
+    }
+    function onIconSketchCompleted(event) {
+        event.feature.attributes.style = getIconStyle();
+    }
+    /*drawControls.icon.setStyle({
         externalGraphic: null,
         graphicHeight: 512,
         graphicOpacity: 1
-    });
+    });*/
     console.log('drawControls', drawControls.icon.style);
     // Add controls to map
     for (var key in drawControls) {
@@ -580,145 +785,13 @@
     document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
     document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
     
-    var colorPreview = document.getElementById('color-preview');
-    var picker = new CP(document.getElementById('color-picker'));
-    picker.on("enter", function() {
-        var color = '#' + this._HSV2HEX(this.set());
-        colorPreview.title = color;
-        colorPreview.style.backgroundColor = color;
-    });
-    picker.on("change", function(color) {
-        this.target.value = '#' + color;
-        colorPreview.style.backgroundColor = '#' + color;
-        drawControls.drag.setStyle({strokeColor: '#' + color});
-    });
-    picker.on("exit", function() {
-        this.target.value = colorPreview.title;
-    });
-    $('#color-preview').click(function () {
-        if (!picker.visible) {
-            picker.enter();
-        }
-    });
     
-    var closeButton = document.createElement('button');
-    closeButton.innerHTML = 'Close';
-    closeButton.className = 'color-picker-close tool-button';
-    closeButton.addEventListener("click", function() {
-        picker.exit();
-    }, false);
-    picker.picker.appendChild(closeButton);
     
-    function formatPercent(value) {
-        return value + '%';
-    }
-    
-    $.widget( "ui.percentspinner", $.ui.spinner, {
-        _format: formatPercent,
-        _parse: function(value) { return parseFloat(value); }
-    });
-    
-    var strokeOpacityPreview = document.querySelector('#stroke-opacity-icon .opacity-preview');
-    $('#stroke-opacity').percentspinner({
-        min: 0,
-        max: 100,
-        step: 1,
-        change: function (event, ui) {
-            var v = parseInt(this.value);
-            if (isNaN(v)) {
-                v = parseInt(drawControls.drag.style.strokeOpacity * 100);
-            }
-            else {
-                drawControls.drag.setStyle({strokeOpacity: v/100});
-                strokeOpacityPreview.style.opacity = drawControls.drag.style.strokeOpacity;
-            }
-            $(this).val(formatPercent(v));
-        },
-        spin: function(event, ui) {
-            strokeOpacityPreview.style.opacity = ui.value/100;
-        },
-        stop: function (event, ui) {
-            var v = parseInt(this.value);
-            if (!isNaN(v)) {
-                drawControls.drag.setStyle({strokeOpacity: v/100});
-                strokeOpacityPreview.style.opacity = drawControls.drag.style.strokeOpacity;
-            }
-        }
-    }).val(formatPercent(drawControls.drag.style.strokeOpacity*100));
-    
-    var markerOpacityPreview = document.querySelector('#marker-opacity-icon .opacity-preview');
-    $('#marker-opacity').percentspinner({
-        min: 0,
-        max: 100,
-        step: 1,
-        change: function (event, ui) {
-            var v = parseInt(this.value);
-            if (isNaN(v)) {
-                v = parseInt(drawControls.icon.style.graphicOpacity * 100);
-            }
-            else {
-                drawControls.icon.setStyle({graphicOpacity: v/100});
-                markerOpacityPreview.style.opacity = drawControls.icon.style.graphicOpacity;
-            }
-            $(this).val(formatPercent(v));
-        },
-        spin: function(event, ui) {
-            markerOpacityPreview.style.opacity = ui.value/100;
-        },
-        stop: function (event, ui) {
-            var v = parseInt(this.value);
-            if (!isNaN(v)) {
-                drawControls.icon.setStyle({graphicOpacity: v/100});
-                markerOpacityPreview.style.opacity = drawControls.icon.style.graphicOpacity;
-            }
-        }
-    }).val(formatPercent(drawControls.icon.style.graphicOpacity*100));
-    
-    $('#stroke-width').spinner({
-        min: 1,
-        step: 1,
-        change: function (event, ui) {
-            var v = parseInt(this.value);
-            if (isNaN(v)) {
-                v = parseInt(drawControls.drag.style.strokeWidth);
-            }
-            else {
-                drawControls.drag.setStyle({strokeWidth: v});
-            }
-            $(this).val(v);
-        },
-        stop: function (event, ui) {
-            var v = parseInt(this.value);
-            if (!isNaN(v)) {
-                drawControls.drag.setStyle({strokeWidth: v});
-            }
-        }
-    }).val(drawControls.drag.style.strokeWidth);
+
     
         //var parser = new OpenLayers.Format.GeoJSON()
         //console.log(vectors);
         //console.log(parser.write(vectors.features));
-       
-    $('#marker-size').spinner({
-        min: 32,
-        step: 32,
-        change: function (event, ui) {
-            var v = parseInt(this.value);
-            if (isNaN(v)) {
-                v = parseInt(drawControls.icon.style.graphicHeight);
-            }
-            else {
-                drawControls.icon.setStyle({graphicHeight: v});
-            }
-            $(this).val(v);
-        },
-        stop: function (event, ui) {
-            var v = parseInt(this.value);
-            if (!isNaN(v)) {
-                drawControls.icon.setStyle({graphicHeight: v});
-            }
-        }
-    }).val(drawControls.icon.style.graphicHeight);
     
     $.widget("custom.iconselectmenu", $.ui.selectmenu, {
         _renderItem: function(ul, item) {
@@ -759,13 +832,11 @@
         $( "#marker-image" ).iconselectmenu({
             change: function( event, ui ) {
                 console.log('change', event, ui);
-                drawControls.icon.setStyle({externalGraphic: ui.item.value});
+                defaultStyles.icon.externalGraphic = ui.item.value;
             }
         });
         
-        drawControls.icon.setStyle({
-            externalGraphic: $('#marker-image > option')[0].value
-        });
+        defaultStyles.icon.externalGraphic = $('#marker-image > option')[0].value;
     });
     
     $(".tool-radiobutton").checkboxradio({
