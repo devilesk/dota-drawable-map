@@ -23,6 +23,8 @@
                     <input type="radio" name="tool-radio" id="drag-tool" class="tool-radiobutton" value="drag">
                     <label for="icon-tool"><i class="fa fa-map-marker"></i><span class="tool-field-label"> Icon</span></label>
                     <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
+                    <label for="line-tool"><div class="line-icon"></div><span class="tool-field-label"> Line</span></label>
+                    <input type="radio" name="tool-radio" id="line-tool" class="tool-radiobutton" value="line">
                 </fieldset>
             </div>
             <div class="tool-setting drag-tool-group" title="Stroke Size">
@@ -37,12 +39,13 @@
                         <div id="color-preview" class="preview-icon opacity-preview"></div>
                     </div>
                 </div>
-                <input type="text" class="tool-control" id="color-picker">
+                <input type="text" class="tool-control" id="drag-color-picker">
             </div>
             <div class="tool-setting drag-tool-group" title="Stroke Opacity">
                 <span class="tool-label">Opacity</span>
                 <input class="tool-control" id="stroke-opacity">
             </div>
+            
             <div class="tool-setting icon-tool-group" title="Icon Size">
                 <span class="tool-label">Size</span>
                 <input type="text" class="tool-control" id="marker-size" maxlength="4">
@@ -63,6 +66,25 @@
                 </select>
             </div>
 
+            <div class="tool-setting line-tool-group" title="Stroke Size">
+                <i class="fa fa-paint-brush tool-icon"></i>
+                <i class="fa fa-arrows-v tool-icon"></i>
+                <span class="tool-label show-wide">Size</span>
+                <input type="text" class="tool-control" id="stroke-width" maxlength="4">
+            </div>
+            <div class="tool-setting line-tool-group" title="Stroke Color">
+                <div class="tool-icon" id="stroke-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="color-preview" class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <input type="text" class="tool-control" id="line-color-picker">
+            </div>
+            <div class="tool-setting line-tool-group" title="Stroke Opacity">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="stroke-opacity">
+            </div>
+            
             <div class="setting">
                 <button id="draw-undo" class="tool-button" title="Undo (Ctrl+X)"><i class="fa fa-undo"></i></button>
                 <button id="draw-redo" class="tool-button" title="Redo (Ctrl+Y)"><i class="fa fa-repeat"></i></button>
@@ -109,6 +131,6 @@
         <script src="color-picker.js"></script>
         <script src="../ol2/build/OpenLayers.js"></script>
         <!-- @endif -->
-        <script src="interactivemap.js"></script>
+        <script src="interactivemap.core.js"></script>
 	</body>
 </html>

@@ -1,19 +1,5 @@
 (function() {
     var IMG_DIR = "img/",
-        ENTITIES = {
-            observer: {
-                icon_path: IMG_DIR + "ward_observer.png",
-                radius: 1600
-            },
-            sentry: {
-                icon_path: IMG_DIR + "ward_sentry.png",
-                radius: 850
-            }
-        },
-        TOWER_DAY_VISION_RADIUS = 1900,
-        TOWER_NIGHT_VISION_RADIUS = 800,
-        TOWER_TRUE_SIGHT_RADIUS = 900,
-        TOWER_ATTACK_RANGE_RADIUS = 700,
         map_data_path = "data.json",
         map_data,
         map_tile_path = "http://devilesk.com/media/images/map/687/",
@@ -30,20 +16,6 @@
             maxResolution: Math.pow(2, 5-1 ),
             units: "m"
         }),
-        layerNames = {
-            npc_dota_roshan_spawner: "Roshan",
-            dota_item_rune_spawner: "Runes",
-            ent_dota_tree: "Trees",
-            npc_dota_fort: "Ancients",
-            ent_dota_shop: "Shops",
-            npc_dota_tower: "Towers",
-            npc_dota_barracks: "Barracks",
-            npc_dota_building: "Buildings",
-            trigger_multiple: "Neutral Camps Spawn Boxes",
-            npc_dota_neutral_spawner: "Neutral Camps",
-            trigger_no_wards: "Invalid Ward Locations",
-            ent_fow_blocker_node: "Vision Blocker"
-        },
         baseLayers = [
             new OpenLayers.Layer.TMS("Default", map_tile_path, {
                 type: "jpg",
@@ -63,39 +35,7 @@
         }),
         coordinateControl = new OpenLayers.Control.MousePosition(),
         renderer = OpenLayers.Util.getParameters(window.location.href).renderer,
-        drawControls,
-        lastDistance,
-        style = {
-            lightblue: {
-                strokeColor: "#007FFF",
-                strokeOpacity: 1,
-                strokeWidth: 1,
-                fillColor: "#007FFF",
-                fillOpacity: .4
-            },
-            red: {
-                strokeColor: "#FF0000",
-                strokeOpacity: 1,
-                strokeWidth: 1,
-                fillColor: "#FF0000",
-                fillOpacity: .4
-            },
-            green: {
-                strokeColor: "#00FF00",
-                strokeOpacity: 1,
-                strokeWidth: 1,
-                fillColor: "#00FF00",
-                fillOpacity: .4
-            },
-            yellow: {
-                strokeColor: "#FFFF00",
-                strokeOpacity: 1,
-                strokeWidth: 1,
-                fillColor: "#FFFF00",
-                fillOpacity: .4
-            }
-        },
-        treeMarkers = {};
+        drawControls;
 
     /***********************************
      * QUERY STRING FUNCTIONS *
@@ -240,6 +180,7 @@
 
     function toggleControl() {
         var control;
+        var tools = ['drag', 'icon', 'line'];
         $('#toolbar').hide();
         for (var key in drawControls) {
             control = drawControls[key];
@@ -248,7 +189,7 @@
                 control.activate();
                 map.updateSize();
                 console.log(key);
-                if (key == 'drag' || key == 'icon') {
+                if (tools.indexOf(key) != -1) {
                     $('#toolbar').show();
                     updateTools(key);
                 }
@@ -337,16 +278,6 @@
                     map.setBaseLayer(layer);
                     break;
                 }
-            }
-        }
-        
-        for (k in layerNames) {
-            var layerName = layerNames[k].replace(/ /g, '');
-            value = getParameterByName(layerName);
-            if (value) {
-                var layer = map.getLayersByName(layerNames[k])[0];
-                console.log(layer, layerNames[k], layerName);
-                layer.setVisibility(value == "true");
             }
         }
     }
@@ -453,23 +384,23 @@
     }).val(defaultStyles.brush.strokeWidth);
     
     var colorPreview = document.getElementById('color-preview');
-    var picker = new CP(document.getElementById('color-picker'));
-    picker.on("enter", function() {
+    var dragColorPicker = new CP(document.getElementById('drag-color-picker'));
+    dragColorPicker.on("enter", function() {
         var color = '#' + this._HSV2HEX(this.set());
         colorPreview.title = color;
         colorPreview.style.backgroundColor = color;
     });
-    picker.on("change", function(color) {
+    dragColorPicker.on("change", function(color) {
         this.target.value = '#' + color;
         colorPreview.style.backgroundColor = '#' + color;
         defaultStyles.brush.strokeColor = '#' + color;
     });
-    picker.on("exit", function() {
+    dragColorPicker.on("exit", function() {
         this.target.value = colorPreview.title;
     });
     $('#color-preview').click(function () {
-        if (!picker.visible) {
-            picker.enter();
+        if (!dragColorPicker.visible) {
+            dragColorPicker.enter();
         }
     });
     
@@ -477,9 +408,9 @@
     closeButton.innerHTML = 'Close';
     closeButton.className = 'color-picker-close tool-button';
     closeButton.addEventListener("click", function() {
-        picker.exit();
+        dragColorPicker.exit();
     }, false);
-    picker.picker.appendChild(closeButton);
+    dragColorPicker.picker.appendChild(closeButton);
     
     $('#marker-size').spinner({
         min: 32,
@@ -717,6 +648,18 @@
                     styleMap: new OpenLayers.StyleMap(iconStyle)
                 }
             }
+        }),
+        line: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Path,
+        {
+            handlerOptions: {
+                freehand: false,
+                layerOptions: {
+                    styleMap: new OpenLayers.StyleMap(brushStyle)
+                }
+            }//,
+            // title: "DrawFeature",
+            // displayClass: "olControlDrawFeaturePolygon",
+            //multi: true
         })
     };
     /*drawControls.drag.setStyle({
@@ -785,14 +728,6 @@
     document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
     document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
     
-    
-    
-
-    
-        //var parser = new OpenLayers.Format.GeoJSON()
-        //console.log(vectors);
-        //console.log(parser.write(vectors.features));
-    
     $.widget("custom.iconselectmenu", $.ui.selectmenu, {
         _renderItem: function(ul, item) {
             var li = $("<li>"),
@@ -843,6 +778,7 @@
         icon: false
     }).change(toggleControl);
     $("#tool-field").controlgroup();
+    
     /*$( "#tool-select" ).iconselectmenu({
         change: function( event, ui ) {
             console.log('change', event, ui);

@@ -17,6 +17,19 @@ body {
     border-bottom: 1px solid rgb(40, 40, 40);
     box-shadow: 0px 1px 0px 0px rgb(106, 106, 106);
 }
+.ui-controlgroup > .ui-controlgroup-item {
+    min-height: 12px;
+}
+.line-icon {
+    position: absolute;
+    background-color: white;
+    width: 2px;
+    height: 14px;
+    transform: rotateZ(45deg);
+}
+label[for="line-tool"] .tool-field-label {
+    padding-left: 12px;
+}
 .ui-widget {
     font-size: 12px;
 }
