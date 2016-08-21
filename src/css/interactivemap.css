@@ -374,7 +374,7 @@ div.olControlZoom {
         left: -3px;
     }
 }
-@media screen and (max-width: 643px) {
+@media screen and (max-width: 670px) {
     div.olControlZoom, .olControlLayerSwitcher {
         top: 75px;
     }
@@ -382,19 +382,11 @@ div.olControlZoom {
         top: 183px;
     }
 }
-@media screen and (max-width: 484px) {
+@media screen and (max-width: 337px) {
     div.olControlZoom, .olControlLayerSwitcher {
-        top: 105px;
+        top: 108px;
     }
     .controls-container {
-        top: 213px;
-    }
-}
-@media screen and (max-width: 394px) {
-    div.olControlZoom, .olControlLayerSwitcher {
-        top: 135px;
-    }
-    .controls-container {
-        top: 243px;
+        top: 216px;
     }
 }

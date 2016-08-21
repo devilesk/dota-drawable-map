@@ -845,5 +845,7 @@
         });
     });
     
+    $( document ).tooltip();
+    
     parseQueryString();
 }());
