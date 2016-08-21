@@ -295,6 +295,16 @@
 
     // Initialize map settings based on query string values
     function parseQueryString() {
+        var id = getParameterByName('id');
+        if (id) {
+            $.get('save/' + id + '.json', function (data) {
+                console.log(data);
+                var parser = new OpenLayers.Format.GeoJSON()
+                vectors.addFeatures(parser.read(data));
+            });
+            map.zoomTo(parseInt(zoom));
+        }
+        
         var zoom = getParameterByName('zoom');
         if (zoom) {
             map.zoomTo(parseInt(zoom));
@@ -304,19 +314,6 @@
         if (worldX && worldY) {
             var lonlat = worldToLatLon(worldX, worldY);
             map.setCenter(new OpenLayers.LonLat(lonlat.x, lonlat.y), undefined, false, false);
-        }
-        
-        var keys = ['observer', 'sentry'];
-        for (var i = 0; i < keys.length; i++) {
-            var wards = getParameterByName(keys[i])
-            if (wards) {
-                ward_coordinates = trim(wards, ' ;').split(';')
-                ward_coordinates.map(function(el) {
-                    var coord = el.split(',');
-                    var xy = worldToLatLon(parseFloat(coord[0]), parseFloat(coord[1]));
-                    placeWard(new OpenLayers.LonLat(xy.x, xy.y), keys[i], el);
-                });
-            }
         }
         
         var baseLayerName = getParameterByName('BaseLayer');
@@ -828,4 +825,25 @@
             OpenLayers.Event.stop(evt);
         }
     });
+    
+    $('#save').click(function () {
+        var parser = new OpenLayers.Format.GeoJSON()
+        var serialized = parser.write(vectors.features);
+        //serialized = {};
+        $.ajax({
+            type: "POST",
+            url: "save.php",
+            data: {'data': serialized},
+            dataType: "json",
+            success: function (data){
+                var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
+                console.log(saveLink);
+            },
+            failure: function (errMsg) {
+                alert("Save request failed.");
+            }
+        });
+    });
+    
+    parseQueryString();
 }());
