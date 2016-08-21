@@ -17,54 +17,53 @@
 	</head>
 	<body>
         <div id="toolbar">
-            <div class="tool-setting">
+            <div class="setting">
                 <fieldset id="tool-field">
-                    <label for="drag-tool"><i class="fa fa-paint-brush"></i> Brush</label>
+                    <label for="drag-tool"><i class="fa fa-paint-brush"></i><span class="tool-field-label"> Brush</span></label>
                     <input type="radio" name="tool-radio" id="drag-tool" class="tool-radiobutton" value="drag">
-                    <label for="icon-tool"><i class="fa fa-map-marker"></i> Icon</label>
+                    <label for="icon-tool"><i class="fa fa-map-marker"></i><span class="tool-field-label"> Icon</span></label>
                     <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
                 </fieldset>
             </div>
-            <div class="tool-group" id="drag-tool-group">
-                <div class="tool-setting">
-                    <i class="fa fa-paint-brush tool-icon"></i>
-                    <span class="tool-label">Size</span>
-                    <input type="text" class="tool-control" id="stroke-width" maxlength="4">
-                </div>
-                <div class="tool-setting">
-                    <div class="tool-icon" id="stroke-opacity-icon">
-                        <div class="opacity-preview-background">
-                            <div id="color-preview" class="preview-icon opacity-preview"></div>
-                        </div>
-                    </div>
-                    <input type="text" class="tool-control" id="color-picker">
-                </div>
-                <div class="tool-setting">
-                    <span class="tool-label">Opacity</span>
-                    <input class="tool-control" id="stroke-opacity">
-                </div>
+            <div class="tool-setting drag-tool-group">
+                <i class="fa fa-paint-brush tool-icon"></i>
+                <i class="fa fa-arrows-v tool-icon"></i>
+                <span class="tool-label show-wide">Size</span>
+                <input type="text" class="tool-control" id="stroke-width" maxlength="4">
             </div>
-            <div class="tool-group" id="icon-tool-group">
-                <div class="tool-setting">
-                    <span class="tool-label">Size</span>
-                    <input type="text" class="tool-control" id="marker-size" maxlength="4">
-                </div>
-                <div class="tool-setting">
-                    <div class="tool-icon" id="marker-opacity-icon">
-                        <div class="opacity-preview-background">
-                            <div class="preview-icon opacity-preview"></div>
-                        </div>
+            <div class="tool-setting drag-tool-group">
+                <div class="tool-icon" id="stroke-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="color-preview" class="preview-icon opacity-preview"></div>
                     </div>
-                    <span class="tool-label">Opacity</span>    
-                    <input class="tool-control" id="marker-opacity">
                 </div>
-                <div class="tool-setting">
-                    <i class="fa fa-map-marker tool-icon"></i>
-                    <select id="marker-image" class="tool-control">
-                    </select>
-                </div>
+                <input type="text" class="tool-control" id="color-picker">
             </div>
-            <div class="tool-setting">
+            <div class="tool-setting drag-tool-group">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="stroke-opacity">
+            </div>
+            <div class="tool-setting icon-tool-group">
+                <span class="tool-label">Size</span>
+                <input type="text" class="tool-control" id="marker-size" maxlength="4">
+            </div>
+            <div class="tool-setting icon-tool-group">
+                <div class="tool-icon" id="marker-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <i class="fa fa-adjust tool-icon"></i>
+                <span class="tool-label show-wide">Opacity</span>    
+                <input class="tool-control" id="marker-opacity">
+            </div>
+            <div class="tool-setting icon-tool-group">
+                <i class="fa fa-map-marker tool-icon"></i>
+                <select id="marker-image" class="tool-control">
+                </select>
+            </div>
+
+            <div class="setting">
                 <button id="draw-undo" class="tool-button"><i class="fa fa-undo"></i></button>
                 <button id="draw-redo" class="tool-button"><i class="fa fa-repeat"></i></button>
             </div>

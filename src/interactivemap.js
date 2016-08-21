@@ -271,8 +271,8 @@
     function updateTools(value) {
         console.log("updateTools", value);
         $(".tool-radiobutton").checkboxradio("refresh");
-        $('.tool-group').hide();
-        $('#' + value + '-tool-group').css('display', 'inline-block');
+        $('.tool-setting').hide();
+        $('.' + value + '-tool-group').css('display', 'inline-block');
     }
 
     // creates url for tiles. OpenLayers TMS Layer getURL property is set to this
@@ -507,9 +507,9 @@
         OpenLayers.Element.addClass(this.minimizeDiv, "minimizeDiv olButton");
         this.minimizeDiv.style.display = "none";
 
-        this.maximizeDiv.innerHTML = '&equiv;';
+        this.maximizeDiv.innerHTML;
         this.minimizeDiv.innerHTML = '&times;';
-        
+        $(this.maximizeDiv).empty().append($('<i class="fa fa-bars">'));
         this.div.appendChild(this.minimizeDiv);
     }
     map.addControl(layerSwitcher);

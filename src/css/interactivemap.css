@@ -46,7 +46,7 @@ body {
     color: rgb(233, 233, 233);
     border: 1px solid black;
 }
-.tool-setting {
+.setting, .tool-setting {
     display: inline-block;
     vertical-align: middle;
     padding: 4px 10px;
@@ -58,6 +58,17 @@ body {
     width: 18px;
     height: 18px;
     border-radius: 4px;
+}
+.opacity-preview {
+    background: rgba(0,0,0,1);
+    background: -moz-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -webkit-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -o-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -ms-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+}
+#color-preview {
+    background: none;
 }
 .opacity-preview-background {
     border-radius: 4px;
@@ -324,11 +335,20 @@ div.olControlZoom a:hover {
 div.olControlZoom {
     top: 43px;
 }
-#controls-max .fa{
+.maximizeDiv .fa{
     line-height: 22px;
     font-size: 16px;
 }
 @media screen and (max-width: 768px) {
+    .show-wide {
+        display: none;
+    }
+    .tool-field-label {
+        display: none;
+    }
+    .ui-controlgroup > .ui-controlgroup-item .fa {
+        padding: 0;
+    }
     .controls-button, div.olControlZoom a, .olControlLayerSwitcher .maximizeDiv, .olControlLayerSwitcher .minimizeDiv, .maximizeDiv::before {
         width: 50px;
         height: 50px;
@@ -338,11 +358,11 @@ div.olControlZoom {
     .controls-container {
         top: 150px;
     }
-    #controls-max .fa{
+    .maximizeDiv .fa{
         line-height: inherit;
         font-size: inherit;
     }
-    #OpenLayers_Control_MaximizeDiv_innerImage, #OpenLayers_Control_MinimizeDiv_innerImage {
+    #OpenLayers_Control_MinimizeDiv_innerImage {
         width: 100%;
         height: 100%;
     }
