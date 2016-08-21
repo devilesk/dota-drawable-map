@@ -1,0 +1,631 @@
+{
+    "heroes": [
+        {
+            "file": "abaddon.png", 
+            "id": "abaddon", 
+            "name": "Abaddon"
+        }, 
+        {
+            "file": "alchemist.png", 
+            "id": "alchemist", 
+            "name": "Alchemist"
+        }, 
+        {
+            "file": "ancient_apparition.png", 
+            "id": "ancient_apparition", 
+            "name": "Ancient Apparition"
+        }, 
+        {
+            "file": "antimage.png", 
+            "id": "antimage", 
+            "name": "Anti-Mage"
+        }, 
+        {
+            "file": "arc_warden.png", 
+            "id": "arc_warden", 
+            "name": "Arc Warden"
+        }, 
+        {
+            "file": "axe.png", 
+            "id": "axe", 
+            "name": "Axe"
+        }, 
+        {
+            "file": "bane.png", 
+            "id": "bane", 
+            "name": "Bane"
+        }, 
+        {
+            "file": "batrider.png", 
+            "id": "batrider", 
+            "name": "Batrider"
+        }, 
+        {
+            "file": "beastmaster.png", 
+            "id": "beastmaster", 
+            "name": "Beastmaster"
+        }, 
+        {
+            "file": "bloodseeker.png", 
+            "id": "bloodseeker", 
+            "name": "Bloodseeker"
+        }, 
+        {
+            "file": "bounty_hunter.png", 
+            "id": "bounty_hunter", 
+            "name": "Bounty Hunter"
+        }, 
+        {
+            "file": "brewmaster.png", 
+            "id": "brewmaster", 
+            "name": "Brewmaster"
+        }, 
+        {
+            "file": "bristleback.png", 
+            "id": "bristleback", 
+            "name": "Bristleback"
+        }, 
+        {
+            "file": "broodmother.png", 
+            "id": "broodmother", 
+            "name": "Broodmother"
+        }, 
+        {
+            "file": "centaur.png", 
+            "id": "centaur", 
+            "name": "Centaur Warrunner"
+        }, 
+        {
+            "file": "chaos_knight.png", 
+            "id": "chaos_knight", 
+            "name": "Chaos Knight"
+        }, 
+        {
+            "file": "chen.png", 
+            "id": "chen", 
+            "name": "Chen"
+        }, 
+        {
+            "file": "clinkz.png", 
+            "id": "clinkz", 
+            "name": "Clinkz"
+        }, 
+        {
+            "file": "rattletrap.png", 
+            "id": "rattletrap", 
+            "name": "Clockwerk"
+        }, 
+        {
+            "file": "crystal_maiden.png", 
+            "id": "crystal_maiden", 
+            "name": "Crystal Maiden"
+        }, 
+        {
+            "file": "crystal_maiden_alt1.png", 
+            "id": "crystal_maiden_alt1", 
+            "name": "Crystal Maiden Alt"
+        }, 
+        {
+            "file": "dark_seer.png", 
+            "id": "dark_seer", 
+            "name": "Dark Seer"
+        }, 
+        {
+            "file": "dazzle.png", 
+            "id": "dazzle", 
+            "name": "Dazzle"
+        }, 
+        {
+            "file": "death_prophet.png", 
+            "id": "death_prophet", 
+            "name": "Death Prophet"
+        }, 
+        {
+            "file": "disruptor.png", 
+            "id": "disruptor", 
+            "name": "Disruptor"
+        }, 
+        {
+            "file": "doom_bringer.png", 
+            "id": "doom_bringer", 
+            "name": "Doom"
+        }, 
+        {
+            "file": "dragon_knight.png", 
+            "id": "dragon_knight", 
+            "name": "Dragon Knight"
+        }, 
+        {
+            "file": "drow_ranger.png", 
+            "id": "drow_ranger", 
+            "name": "Drow Ranger"
+        }, 
+        {
+            "file": "earth_spirit.png", 
+            "id": "earth_spirit", 
+            "name": "Earth Spirit"
+        }, 
+        {
+            "file": "earthshaker.png", 
+            "id": "earthshaker", 
+            "name": "Earthshaker"
+        }, 
+        {
+            "file": "elder_titan.png", 
+            "id": "elder_titan", 
+            "name": "Elder Titan"
+        }, 
+        {
+            "file": "ember_spirit.png", 
+            "id": "ember_spirit", 
+            "name": "Ember Spirit"
+        }, 
+        {
+            "file": "enchantress.png", 
+            "id": "enchantress", 
+            "name": "Enchantress"
+        }, 
+        {
+            "file": "enigma.png", 
+            "id": "enigma", 
+            "name": "Enigma"
+        }, 
+        {
+            "file": "faceless_void.png", 
+            "id": "faceless_void", 
+            "name": "Faceless Void"
+        }, 
+        {
+            "file": "gyrocopter.png", 
+            "id": "gyrocopter", 
+            "name": "Gyrocopter"
+        }, 
+        {
+            "file": "huskar.png", 
+            "id": "huskar", 
+            "name": "Huskar"
+        }, 
+        {
+            "file": "invoker.png", 
+            "id": "invoker", 
+            "name": "Invoker"
+        }, 
+        {
+            "file": "wisp.png", 
+            "id": "wisp", 
+            "name": "Io"
+        }, 
+        {
+            "file": "jakiro.png", 
+            "id": "jakiro", 
+            "name": "Jakiro"
+        }, 
+        {
+            "file": "juggernaut.png", 
+            "id": "juggernaut", 
+            "name": "Juggernaut"
+        }, 
+        {
+            "file": "keeper_of_the_light.png", 
+            "id": "keeper_of_the_light", 
+            "name": "Keeper of the Light"
+        }, 
+        {
+            "file": "kunkka.png", 
+            "id": "kunkka", 
+            "name": "Kunkka"
+        }, 
+        {
+            "file": "legion_commander.png", 
+            "id": "legion_commander", 
+            "name": "Legion Commander"
+        }, 
+        {
+            "file": "legion_commander_alt1.png", 
+            "id": "legion_commander_alt1", 
+            "name": "Legion Commander Alt"
+        }, 
+        {
+            "file": "leshrac.png", 
+            "id": "leshrac", 
+            "name": "Leshrac"
+        }, 
+        {
+            "file": "lich.png", 
+            "id": "lich", 
+            "name": "Lich"
+        }, 
+        {
+            "file": "life_stealer.png", 
+            "id": "life_stealer", 
+            "name": "Lifestealer"
+        }, 
+        {
+            "file": "lina.png", 
+            "id": "lina", 
+            "name": "Lina"
+        }, 
+        {
+            "file": "lina_alt1.png", 
+            "id": "lina_alt1", 
+            "name": "Lina Alt"
+        }, 
+        {
+            "file": "lion.png", 
+            "id": "lion", 
+            "name": "Lion"
+        }, 
+        {
+            "file": "lone_druid.png", 
+            "id": "lone_druid", 
+            "name": "Lone Druid"
+        }, 
+        {
+            "file": "luna.png", 
+            "id": "luna", 
+            "name": "Luna"
+        }, 
+        {
+            "file": "lycan.png", 
+            "id": "lycan", 
+            "name": "Lycan"
+        }, 
+        {
+            "file": "magnataur.png", 
+            "id": "magnataur", 
+            "name": "Magnus"
+        }, 
+        {
+            "file": "medusa.png", 
+            "id": "medusa", 
+            "name": "Medusa"
+        }, 
+        {
+            "file": "meepo.png", 
+            "id": "meepo", 
+            "name": "Meepo"
+        }, 
+        {
+            "file": "mirana.png", 
+            "id": "mirana", 
+            "name": "Mirana"
+        }, 
+        {
+            "file": "morphling.png", 
+            "id": "morphling", 
+            "name": "Morphling"
+        }, 
+        {
+            "file": "naga_siren.png", 
+            "id": "naga_siren", 
+            "name": "Naga Siren"
+        }, 
+        {
+            "file": "furion.png", 
+            "id": "furion", 
+            "name": "Nature's Prophet"
+        }, 
+        {
+            "file": "necrolyte.png", 
+            "id": "necrolyte", 
+            "name": "Necrophos"
+        }, 
+        {
+            "file": "night_stalker.png", 
+            "id": "night_stalker", 
+            "name": "Night Stalker"
+        }, 
+        {
+            "file": "nyx_assassin.png", 
+            "id": "nyx_assassin", 
+            "name": "Nyx Assassin"
+        }, 
+        {
+            "file": "ogre_magi.png", 
+            "id": "ogre_magi", 
+            "name": "Ogre Magi"
+        }, 
+        {
+            "file": "omniknight.png", 
+            "id": "omniknight", 
+            "name": "Omniknight"
+        }, 
+        {
+            "file": "oracle.png", 
+            "id": "oracle", 
+            "name": "Oracle"
+        }, 
+        {
+            "file": "obsidian_destroyer.png", 
+            "id": "obsidian_destroyer", 
+            "name": "Outworld Devourer"
+        }, 
+        {
+            "file": "phantom_assassin.png", 
+            "id": "phantom_assassin", 
+            "name": "Phantom Assassin"
+        }, 
+        {
+            "file": "phantom_assassin_alt1.png", 
+            "id": "phantom_assassin_alt1", 
+            "name": "Phantom Assassin Alt"
+        }, 
+        {
+            "file": "phantom_lancer.png", 
+            "id": "phantom_lancer", 
+            "name": "Phantom Lancer"
+        }, 
+        {
+            "file": "phoenix.png", 
+            "id": "phoenix", 
+            "name": "Phoenix"
+        }, 
+        {
+            "file": "puck.png", 
+            "id": "puck", 
+            "name": "Puck"
+        }, 
+        {
+            "file": "pudge.png", 
+            "id": "pudge", 
+            "name": "Pudge"
+        }, 
+        {
+            "file": "pugna.png", 
+            "id": "pugna", 
+            "name": "Pugna"
+        }, 
+        {
+            "file": "queenofpain.png", 
+            "id": "queenofpain", 
+            "name": "Queen of Pain"
+        }, 
+        {
+            "file": "razor.png", 
+            "id": "razor", 
+            "name": "Razor"
+        }, 
+        {
+            "file": "riki.png", 
+            "id": "riki", 
+            "name": "Riki"
+        }, 
+        {
+            "file": "rubick.png", 
+            "id": "rubick", 
+            "name": "Rubick"
+        }, 
+        {
+            "file": "sand_king.png", 
+            "id": "sand_king", 
+            "name": "Sand King"
+        }, 
+        {
+            "file": "shadow_demon.png", 
+            "id": "shadow_demon", 
+            "name": "Shadow Demon"
+        }, 
+        {
+            "file": "nevermore.png", 
+            "id": "nevermore", 
+            "name": "Shadow Fiend"
+        }, 
+        {
+            "file": "nevermore_alt1.png", 
+            "id": "nevermore_alt1", 
+            "name": "Shadow Fiend Alt"
+        }, 
+        {
+            "file": "shadow_shaman.png", 
+            "id": "shadow_shaman", 
+            "name": "Shadow Shaman"
+        }, 
+        {
+            "file": "silencer.png", 
+            "id": "silencer", 
+            "name": "Silencer"
+        }, 
+        {
+            "file": "skywrath_mage.png", 
+            "id": "skywrath_mage", 
+            "name": "Skywrath Mage"
+        }, 
+        {
+            "file": "slardar.png", 
+            "id": "slardar", 
+            "name": "Slardar"
+        }, 
+        {
+            "file": "slark.png", 
+            "id": "slark", 
+            "name": "Slark"
+        }, 
+        {
+            "file": "sniper.png", 
+            "id": "sniper", 
+            "name": "Sniper"
+        }, 
+        {
+            "file": "spectre.png", 
+            "id": "spectre", 
+            "name": "Spectre"
+        }, 
+        {
+            "file": "spirit_breaker.png", 
+            "id": "spirit_breaker", 
+            "name": "Spirit Breaker"
+        }, 
+        {
+            "file": "storm_spirit.png", 
+            "id": "storm_spirit", 
+            "name": "Storm Spirit"
+        }, 
+        {
+            "file": "sven.png", 
+            "id": "sven", 
+            "name": "Sven"
+        }, 
+        {
+            "file": "techies.png", 
+            "id": "techies", 
+            "name": "Techies"
+        }, 
+        {
+            "file": "techies_alt1.png", 
+            "id": "techies_alt1", 
+            "name": "Techies Alt"
+        }, 
+        {
+            "file": "templar_assassin.png", 
+            "id": "templar_assassin", 
+            "name": "Templar Assassin"
+        }, 
+        {
+            "file": "terrorblade.png", 
+            "id": "terrorblade", 
+            "name": "Terrorblade"
+        }, 
+        {
+            "file": "terrorblade_alt1.png", 
+            "id": "terrorblade_alt1", 
+            "name": "Terrorblade Alt"
+        }, 
+        {
+            "file": "tidehunter.png", 
+            "id": "tidehunter", 
+            "name": "Tidehunter"
+        }, 
+        {
+            "file": "shredder.png", 
+            "id": "shredder", 
+            "name": "Timbersaw"
+        }, 
+        {
+            "file": "tinker.png", 
+            "id": "tinker", 
+            "name": "Tinker"
+        }, 
+        {
+            "file": "tiny.png", 
+            "id": "tiny", 
+            "name": "Tiny"
+        }, 
+        {
+            "file": "treant.png", 
+            "id": "treant", 
+            "name": "Treant Protector"
+        }, 
+        {
+            "file": "troll_warlord.png", 
+            "id": "troll_warlord", 
+            "name": "Troll Warlord"
+        }, 
+        {
+            "file": "tusk.png", 
+            "id": "tusk", 
+            "name": "Tusk"
+        }, 
+        {
+            "file": "undying.png", 
+            "id": "undying", 
+            "name": "Undying"
+        }, 
+        {
+            "file": "ursa.png", 
+            "id": "ursa", 
+            "name": "Ursa"
+        }, 
+        {
+            "file": "vengefulspirit.png", 
+            "id": "vengefulspirit", 
+            "name": "Vengeful Spirit"
+        }, 
+        {
+            "file": "venomancer.png", 
+            "id": "venomancer", 
+            "name": "Venomancer"
+        }, 
+        {
+            "file": "viper.png", 
+            "id": "viper", 
+            "name": "Viper"
+        }, 
+        {
+            "file": "visage.png", 
+            "id": "visage", 
+            "name": "Visage"
+        }, 
+        {
+            "file": "warlock.png", 
+            "id": "warlock", 
+            "name": "Warlock"
+        }, 
+        {
+            "file": "weaver.png", 
+            "id": "weaver", 
+            "name": "Weaver"
+        }, 
+        {
+            "file": "windrunner.png", 
+            "id": "windrunner", 
+            "name": "Windranger"
+        }, 
+        {
+            "file": "winter_wyvern.png", 
+            "id": "winter_wyvern", 
+            "name": "Winter Wyvern"
+        }, 
+        {
+            "file": "witch_doctor.png", 
+            "id": "witch_doctor", 
+            "name": "Witch Doctor"
+        }, 
+        {
+            "file": "skeleton_king.png", 
+            "id": "skeleton_king", 
+            "name": "Wraith King"
+        }, 
+        {
+            "file": "zuus.png", 
+            "id": "zuus", 
+            "name": "Zeus"
+        }, 
+        {
+            "file": "zuus_alt1.png", 
+            "id": "zuus_alt1", 
+            "name": "Zeus Alt"
+        }
+    ], 
+    "other": [
+        {
+            "file": "ward_observer.png", 
+            "id": "ward_observer", 
+            "name": "Observer Ward"
+        }, 
+        {
+            "file": "bm_earth.png", 
+            "id": "bm_earth", 
+            "name": "Primal Split - Earth"
+        }, 
+        {
+            "file": "bm_fire.png", 
+            "id": "bm_fire", 
+            "name": "Primal Split - Fire"
+        }, 
+        {
+            "file": "bm_storm.png", 
+            "id": "bm_storm", 
+            "name": "Primal Split - Storm"
+        }, 
+        {
+            "file": "roshan.png", 
+            "id": "roshan", 
+            "name": "Roshan"
+        }, 
+        {
+            "file": "ward_sentry.png", 
+            "id": "ward_sentry", 
+            "name": "Sentry Ward"
+        }
+    ]
+}

@@ -10,25 +10,70 @@
         <link rel="stylesheet" type="text/css" href="css/color-picker.css">
         <link rel="stylesheet" type="text/css" href="css/openlayers.css">
         <link rel="stylesheet" href="css/font-awesome.css">
+        <link rel="stylesheet" href="css/jquery-ui.css">
+        <link rel="stylesheet" href="css/miniheroes_sprite.css">
         <!-- @endif -->
         <link rel="stylesheet" type="text/css" href="css/interactivemap.css" />
 	</head>
 	<body>
         <div id="toolbar">
-            <i class="fa fa-dot-circle-o"></i><input type="text" class="stroke-option" id="stroke-width" value="5">
-            <i class="fa fa-adjust"></i><input type="text" class="stroke-option" id="stroke-opacity" value="1">
-            <input type="text" class="stroke-option" id="icon-size" value="500">
-            <input type="text" class="stroke-option" id="icon-opacity" value="1">
-            <i id="color-preview" class="fa fa-square"></i><input type="text" class="stroke-option" id="color-picker">
-            <i class="fa fa-map-marker"></i><select class="stroke-option" id="icon-image">
-                <option value="./img/ward_sentry.png">Sentry Ward</option>
-                <option value="./img/ward_observer.png">Observer Ward</option>
-                <option value="/media/images/miniheroes/lina.png">Lina</option>
-            </select>
+            <div class="tool-setting">
+                <fieldset id="tool-field">
+                    <label for="drag-tool"><i class="fa fa-paint-brush"></i> Brush</label>
+                    <input type="radio" name="tool-radio" id="drag-tool" class="tool-radiobutton" value="drag">
+                    <label for="icon-tool"><i class="fa fa-map-marker"></i> Icon</label>
+                    <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
+                </fieldset>
+            </div>
+            <div class="tool-group" id="drag-tool-group">
+                <div class="tool-setting">
+                    <i class="fa fa-paint-brush tool-icon"></i>
+                    <span class="tool-label">Size</span>
+                    <input type="text" class="tool-control" id="stroke-width" maxlength="4">
+                </div>
+                <div class="tool-setting">
+                    <div class="tool-icon" id="stroke-opacity-icon">
+                        <div class="opacity-preview-background">
+                            <div id="color-preview" class="preview-icon opacity-preview"></div>
+                        </div>
+                    </div>
+                    <input type="text" class="tool-control" id="color-picker">
+                </div>
+                <div class="tool-setting">
+                    <span class="tool-label">Opacity</span>
+                    <input class="tool-control" id="stroke-opacity">
+                </div>
+            </div>
+            <div class="tool-group" id="icon-tool-group">
+                <div class="tool-setting">
+                    <span class="tool-label">Size</span>
+                    <input type="text" class="tool-control" id="marker-size" maxlength="4">
+                </div>
+                <div class="tool-setting">
+                    <div class="tool-icon" id="marker-opacity-icon">
+                        <div class="opacity-preview-background">
+                            <div class="preview-icon opacity-preview"></div>
+                        </div>
+                    </div>
+                    <span class="tool-label">Opacity</span>    
+                    <input class="tool-control" id="marker-opacity">
+                </div>
+                <div class="tool-setting">
+                    <i class="fa fa-map-marker tool-icon"></i>
+                    <select id="marker-image" class="tool-control">
+                    </select>
+                </div>
+            </div>
+            <div class="tool-setting">
+                <button id="draw-undo" class="tool-button"><i class="fa fa-undo"></i></button>
+                <button id="draw-redo" class="tool-button"><i class="fa fa-repeat"></i></button>
+            </div>
         </div>
-		<div id="map"></div>
+		<div id="map">
 		<div id="controls-container" class="controls-container">
-            <a id="controls-max" class="controls-button maximizeDiv olButton olAlphaImg" href="#">+</a>
+            <a id="controls-max" class="controls-button maximizeDiv olButton olAlphaImg" href="#">
+                <i class="fa fa-cog"></i>
+            </a>
             <a id="controls-min" class="controls-button minimizeDiv olButton olAlphaImg" href="#">&times;</a>
             <div class="controls">
                 <ul id="controls-list">
@@ -37,13 +82,11 @@
                         <label for="noneToggle"><input type="radio" name="type" value="none" id="noneToggle" checked="checked" /> Navigate</label>
                     </li>
                     <li>
-                        <label for="dragToggle"><input type="radio" name="type" value="drag" id="dragToggle" /> Draw</label>
-                    </li>
-                    <li>
-                        <label for="iconToggle"><input type="radio" name="type" value="icon" id="iconToggle" /> Icon</label>
+                        <label for="drawToggle"><input type="radio" name="type" value="draw" id="drawToggle" /> Draw</label>
                     </li>
                 </ul>
             </div>
+        </div>
         </div>
         <script type="text/javascript">
 
@@ -59,6 +102,8 @@
 
         </script>
         <!-- @if NODE_ENV='development' -->
+        <script src="jquery.js"></script>
+        <script src="jquery-ui.js"></script>
         <script src="color-picker.js"></script>
         <script src="../ol2/build/OpenLayers.js"></script>
         <script src="openlayers.custompoint.js"></script>

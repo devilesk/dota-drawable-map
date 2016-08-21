@@ -1,0 +1,82 @@
+{
+    "bm_earth": {
+        "file": "bm_earth.png", 
+        "name": "Primal Split - Earth"
+    }, 
+    "bm_fire": {
+        "file": "bm_fire.png", 
+        "name": "Primal Split - Fire"
+    }, 
+    "bm_storm": {
+        "file": "bm_storm.png", 
+        "name": "Primal Split - Storm"
+    }, 
+    "crystal_maiden_alt1": {
+        "file": "crystal_maiden_alt1.png", 
+        "name": "Crystal Maiden Alt"
+    }, 
+    "doom": {
+        "file": "doom.png", 
+        "name": ""
+    }, 
+    "drow": {
+        "file": "drow.png", 
+        "name": ""
+    }, 
+    "lanaya": {
+        "file": "lanaya.png", 
+        "name": ""
+    }, 
+    "legion_commander_alt1": {
+        "file": "legion_commander_alt1.png", 
+        "name": "Legion Commander Alt"
+    }, 
+    "lina_alt1": {
+        "file": "lina_alt1.png", 
+        "name": "Lina Alt"
+    }, 
+    "nevermore_alt1": {
+        "file": "nevermore_alt1.png", 
+        "name": "Shadow Fiend Alt"
+    }, 
+    "phantom_assassin_alt1": {
+        "file": "phantom_assassin_alt1.png", 
+        "name": "Phantom Assassin Alt"
+    }, 
+    "rikimaru": {
+        "file": "rikimaru.png", 
+        "name": ""
+    }, 
+    "roshan": {
+        "file": "roshan.png", 
+        "name": "Roshan"
+    }, 
+    "sandking": {
+        "file": "sandking.png", 
+        "name": ""
+    }, 
+    "spirit_break": {
+        "file": "spirit_break.png", 
+        "name": ""
+    }, 
+    "techies_alt1": {
+        "file": "techies_alt1.png", 
+        "name": "Techies Alt"
+    }, 
+    "terrorblade_alt1": {
+        "file": "terrorblade_alt1.png", 
+        "name": "Terrorblade Alt"
+    }, 
+    "ward_observer": {
+        "file": "ward_observer.png", 
+        "name": "Observer Ward"
+    }, 
+    "ward_sentry": {
+        "file": "ward_sentry.png", 
+        "name": "Sentry Ward"
+    }, 
+    "zuus_alt1": {
+        "file": "zuus_alt1.png", 
+        "name": "Zeus Alt"
+    }
+}

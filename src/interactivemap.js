@@ -240,18 +240,39 @@
 
     function toggleControl() {
         var control;
-
+        $('#toolbar').hide();
         for (var key in drawControls) {
             control = drawControls[key];
+            console.log(this.value, key, this.checked);
             if (this.value == key && this.checked) {
                 control.activate();
-                if (key == 'icon') {
-                    console.log('icon styles', drawControls.icon.style);
+                map.updateSize();
+                console.log(key);
+                if (key == 'drag' || key == 'icon') {
+                    $('#toolbar').show();
+                    updateTools(key);
                 }
             } else {
                 control.deactivate();
             }
         }
+        if (this.value === "draw") {
+            $('#toolbar').show();
+            var selectedTool = document.querySelector('input[name="tool-radio"]:checked');
+            if (!selectedTool) {
+                selectedTool = document.querySelector('input[name="tool-radio"]');
+                selectedTool.checked = true;
+                updateTools(selectedTool.value);
+            }
+            toggleControl.call(selectedTool);
+        }
+    }
+    
+    function updateTools(value) {
+        console.log("updateTools", value);
+        $(".tool-radiobutton").checkboxradio("refresh");
+        $('.tool-group').hide();
+        $('#' + value + '-tool-group').css('display', 'inline-block');
     }
 
     // creates url for tiles. OpenLayers TMS Layer getURL property is set to this
@@ -372,14 +393,12 @@
         },
         getGraphicYOffset: function(feature) {
             if (!feature.attributes.style) return 1;
-            switch (feature.attributes.style.externalGraphic) {
-                case './img/ward_sentry.png':
-                case './img/ward_observer.png':
-                    return -feature.attributes.style.graphicHeight / map.getResolution();
-                break;
-                default:
-                    return -feature.attributes.style.graphicHeight / 2 / map.getResolution();
-                break;
+            if (feature.attributes.style.externalGraphic && ((feature.attributes.style.externalGraphic.indexOf('ward_sentry') != -1) ||
+                (feature.attributes.style.externalGraphic.indexOf('ward_observer') != -1))) {
+                return -feature.attributes.style.graphicHeight / map.getResolution();
+            }
+            else {
+                return -feature.attributes.style.graphicHeight / 2 / map.getResolution();
             }
         },
         getExternalGraphic: function(feature) {
@@ -414,12 +433,24 @@
         console.log('onButtonClick', fn);
         return function (evt) {
             var button = evt.buttonElement;
-            if (button === this.maximizeDiv && isSmallScreen()) {
-                minimizeControlList.call(document.getElementById("controls-min"));
+            if (button === this.maximizeDiv) {
+                $('.olControlLayerSwitcher').removeClass("minimized");
+                if (isSmallScreen()) {
+                    minimizeControlList();
+                }
             }
             return fn.apply(this, arguments);
         }
     })(layerSwitcher.onButtonClick);
+    layerSwitcher.minimizeControl = function (e) {
+        console.log('minimizeControl');
+        $('.olControlLayerSwitcher').addClass("minimized");
+        this.showControls(true);
+
+        if (e != null) {
+            OpenLayers.Event.stop(e);
+        }
+    }
     layerSwitcher.loadContents = function () {
         // layers list div
         this.layersDiv = document.createElement("div");
@@ -460,7 +491,7 @@
                                     null,
                                     null,
                                     null,
-                                    "absolute");
+                                    "initial");
         OpenLayers.Element.addClass(this.maximizeDiv, "maximizeDiv olButton");
         this.maximizeDiv.style.display = "none";
 
@@ -472,7 +503,7 @@
                                     null,
                                     null,
                                     null,
-                                    "absolute");
+                                    "initial");
         OpenLayers.Element.addClass(this.minimizeDiv, "minimizeDiv olButton");
         this.minimizeDiv.style.display = "none";
 
@@ -481,7 +512,6 @@
         
         this.div.appendChild(this.minimizeDiv);
     }
-    console.log(layerSwitcher.onButtonClick);
     map.addControl(layerSwitcher);
     layerSwitcher.maximizeControl();
     if (!map.getCenter()) {
@@ -495,13 +525,14 @@
         //icon: new OpenLayers.Control.Click(vectors)
     };
     drawControls.drag.setStyle({
-        strokeWidth: 5,
-        strokeColor: '#ff0000'
+        strokeWidth: 50,
+        strokeColor: '#ff0000',
+        strokeOpacity: 1
     });
     drawControls.icon.setStyle({
-        externalGraphic: document.getElementById('icon-image').value,
-        graphicHeight: document.getElementById('icon-size').value,
-        graphicOpacity: document.getElementById('icon-opacity').value
+        externalGraphic: null,
+        graphicHeight: 512,
+        graphicOpacity: 1
     });
     console.log('drawControls', drawControls.icon.style);
     // Add controls to map
@@ -527,18 +558,14 @@
 
     // Show/hide controls panel
     document.getElementById("controls-max").addEventListener("click", function(e) {
-        document.querySelector(".controls").style.display = '';
-        document.getElementById("controls-min").style.display = 'block';
-        this.style.display = 'none';
+        $('#controls-container').removeClass('minimized');
         if (isSmallScreen()) {
             layerSwitcher.minimizeControl();
         }
         if (e) e.preventDefault();
     }, false);
     function minimizeControlList(e) {
-        document.querySelector(".controls").style.display = 'none';
-        document.getElementById("controls-max").style.display = 'block';
-        this.style.display = 'none';
+        $('#controls-container').addClass('minimized');
         if (e) e.preventDefault();
     }
     document.getElementById("controls-min").addEventListener("click", minimizeControlList, false);
@@ -555,87 +582,251 @@
 
     // Set up panel radio button toggle handlers
     document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
-    document.getElementById('dragToggle').addEventListener('click', toggleControl, false);
-    document.getElementById('iconToggle').addEventListener('click', toggleControl, false);
-
-    document.getElementById('icon-image').addEventListener('change', function () {
-        drawControls.icon.setStyle({externalGraphic: this.value});
-    }, false);
-    
-    document.getElementById('stroke-width').addEventListener('change', function () {
-        console.log('stroke-width', parseInt(this.value));
-        var v = parseInt(this.value);
-        if (isNaN(v)) {
-            this.value = drawControls.drag.style.strokeWidth;
-        }
-        else {
-            drawControls.drag.setStyle({strokeWidth: v});
-        }
-    }, false);
-    
-    document.getElementById('stroke-opacity').addEventListener('change', function () {
-        console.log('stroke-opacity', parseFloat(this.value));
-        var v = parseFloat(this.value);
-        if (isNaN(v)) {
-            this.value = drawControls.drag.style.strokeOpacity;
-        }
-        else {
-            drawControls.drag.setStyle({strokeOpacity: v});
-        }
-        var parser = new OpenLayers.Format.GeoJSON()
-        console.log(vectors);
-        console.log(parser.write(vectors.features));
-    }, false);
-    
-    document.getElementById('icon-opacity').addEventListener('change', function () {
-        console.log('icon-opacity', parseFloat(this.value));
-        var v = parseFloat(this.value);
-        if (isNaN(v)) {
-            this.value = drawControls.icon.style.graphicOpacity;
-        }
-        else {
-            drawControls.icon.setStyle({graphicOpacity: v});
-        }
-        var parser = new OpenLayers.Format.GeoJSON()
-        console.log(vectors);
-        console.log(parser.write(vectors.features));
-    }, false);
-    
-    document.getElementById('icon-size').addEventListener('change', function () {
-        console.log('icon-size', parseFloat(this.value));
-        var v = parseFloat(this.value);
-        if (isNaN(v)) {
-            this.value = drawControls.icon.style.graphicHeight;
-        }
-        else {
-            drawControls.icon.setStyle({graphicHeight: v});
-        }
-        var parser = new OpenLayers.Format.GeoJSON()
-        console.log(vectors);
-        console.log(parser.write(vectors.features));
-    }, false);
+    document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
     
     var colorPreview = document.getElementById('color-preview');
     var picker = new CP(document.getElementById('color-picker'));
     picker.on("enter", function() {
         var color = '#' + this._HSV2HEX(this.set());
         colorPreview.title = color;
-        colorPreview.style.color = color;
+        colorPreview.style.backgroundColor = color;
     });
     picker.on("change", function(color) {
         this.target.value = '#' + color;
-        colorPreview.style.color = '#' + color;
+        colorPreview.style.backgroundColor = '#' + color;
         drawControls.drag.setStyle({strokeColor: '#' + color});
     });
     picker.on("exit", function() {
         this.target.value = colorPreview.title;
     });
+    $('#color-preview').click(function () {
+        if (!picker.visible) {
+            picker.enter();
+        }
+    });
     
-    var x = document.createElement('a');
-        x.href = 'javascript:;';
-        x.innerHTML = 'Close Me!';
-        x.addEventListener("click", function() {
-            picker.exit();
-        }, false);
-    picker.picker.appendChild(x);
+    var closeButton = document.createElement('button');
+    closeButton.innerHTML = 'Close';
+    closeButton.className = 'color-picker-close tool-button';
+    closeButton.addEventListener("click", function() {
+        picker.exit();
+    }, false);
+    picker.picker.appendChild(closeButton);
+    
+    function formatPercent(value) {
+        return value + '%';
+    }
+    
+    $.widget( "ui.percentspinner", $.ui.spinner, {
+        _format: formatPercent,
+        _parse: function(value) { return parseFloat(value); }
+    });
+    
+    var strokeOpacityPreview = document.querySelector('#stroke-opacity-icon .opacity-preview');
+    $('#stroke-opacity').percentspinner({
+        min: 0,
+        max: 100,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(drawControls.drag.style.strokeOpacity * 100);
+            }
+            else {
+                drawControls.drag.setStyle({strokeOpacity: v/100});
+                strokeOpacityPreview.style.opacity = drawControls.drag.style.strokeOpacity;
+            }
+            $(this).val(formatPercent(v));
+        },
+        spin: function(event, ui) {
+            strokeOpacityPreview.style.opacity = ui.value/100;
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                drawControls.drag.setStyle({strokeOpacity: v/100});
+                strokeOpacityPreview.style.opacity = drawControls.drag.style.strokeOpacity;
+            }
+        }
+    }).val(formatPercent(drawControls.drag.style.strokeOpacity*100));
+    
+    var markerOpacityPreview = document.querySelector('#marker-opacity-icon .opacity-preview');
+    $('#marker-opacity').percentspinner({
+        min: 0,
+        max: 100,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(drawControls.icon.style.graphicOpacity * 100);
+            }
+            else {
+                drawControls.icon.setStyle({graphicOpacity: v/100});
+                markerOpacityPreview.style.opacity = drawControls.icon.style.graphicOpacity;
+            }
+            $(this).val(formatPercent(v));
+        },
+        spin: function(event, ui) {
+            markerOpacityPreview.style.opacity = ui.value/100;
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                drawControls.icon.setStyle({graphicOpacity: v/100});
+                markerOpacityPreview.style.opacity = drawControls.icon.style.graphicOpacity;
+            }
+        }
+    }).val(formatPercent(drawControls.icon.style.graphicOpacity*100));
+    
+    $('#stroke-width').spinner({
+        min: 1,
+        step: 1,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(drawControls.drag.style.strokeWidth);
+            }
+            else {
+                drawControls.drag.setStyle({strokeWidth: v});
+            }
+            $(this).val(v);
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                drawControls.drag.setStyle({strokeWidth: v});
+            }
+        }
+    }).val(drawControls.drag.style.strokeWidth);
+    
+        //var parser = new OpenLayers.Format.GeoJSON()
+        //console.log(vectors);
+        //console.log(parser.write(vectors.features));
+       
+    $('#marker-size').spinner({
+        min: 32,
+        step: 32,
+        change: function (event, ui) {
+            var v = parseInt(this.value);
+            if (isNaN(v)) {
+                v = parseInt(drawControls.icon.style.graphicHeight);
+            }
+            else {
+                drawControls.icon.setStyle({graphicHeight: v});
+            }
+            $(this).val(v);
+        },
+        stop: function (event, ui) {
+            var v = parseInt(this.value);
+            if (!isNaN(v)) {
+                drawControls.icon.setStyle({graphicHeight: v});
+            }
+        }
+    }).val(drawControls.icon.style.graphicHeight);
+    
+    $.widget("custom.iconselectmenu", $.ui.selectmenu, {
+        _renderItem: function(ul, item) {
+            var li = $("<li>"),
+                wrapper = $("<div>");
+
+            if (item.disabled) {
+                li.addClass("ui-state-disabled");
+            }
+
+            $("<div>", {
+                    "class": 'selectmenu-label',
+                    text: item.label
+                })
+                .appendTo(wrapper);
+                
+            $("<div>", {
+                    style: item.element.attr("data-style"),
+                    "class": "selectmenu-icon " + item.element.attr("data-class")
+                })
+                .appendTo(wrapper);
+
+            return li.append(wrapper).appendTo(ul);
+        }
+    });
+    
+    getJSON("sprite_manifest.json", function (data) {
+        var img_root = '/media/images/miniheroes/';
+        for (var i = 0; i < data.heroes.length; i++) {
+            var $option = $('<option value="' + img_root + data.heroes[i].file + '">').text(data.heroes[i].name).attr("data-class", 'icon-miniheroes_' + data.heroes[i].id);
+            $('#marker-image').append($option);
+        }
+        for (var i = 0; i < data.other.length; i++) {
+            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'icon-miniheroes_' + data.other[i].id);
+            $('#marker-image').append($option);
+        }
+        
+        $( "#marker-image" ).iconselectmenu({
+            change: function( event, ui ) {
+                console.log('change', event, ui);
+                drawControls.icon.setStyle({externalGraphic: ui.item.value});
+            }
+        });
+        
+        drawControls.icon.setStyle({
+            externalGraphic: $('#marker-image > option')[0].value
+        });
+    });
+    
+    $(".tool-radiobutton").checkboxradio({
+        icon: false
+    }).change(toggleControl);
+    $("#tool-field").controlgroup();
+    /*$( "#tool-select" ).iconselectmenu({
+        change: function( event, ui ) {
+            console.log('change', event, ui);
+            drawControls.icon.setStyle({externalGraphic: ui.item.value});
+        }
+    });*/
+    $("#toolbar").hide();
+    
+    vectors.redoStack = [];
+    function drawUndo() {
+        console.log('undo');
+        if (vectors.features.length) {
+            var feature = vectors.features.pop();
+            vectors.removeFeatures([feature]);
+            vectors.redoStack.push(feature);
+        }
+    }
+    function drawRedo() {
+        if (vectors.redoStack.length) {
+            var feature = vectors.redoStack.pop();
+            vectors.addFeatures([feature]);
+        }
+    }
+    $('#draw-undo').click(drawUndo);
+    $('#draw-redo').click(drawRedo);
+    OpenLayers.Event.observe(document, "keydown", function(evt) {
+        var handled = false;
+        console.log(evt.keyCode);
+        switch (evt.keyCode) {
+            case 90: // z
+                if (evt.metaKey || evt.ctrlKey) {
+                    console.log(vectors.features);
+                    drawUndo();
+                    //drawControls.drag.undo();
+                    handled = true;
+                }
+                break;
+            case 89: // y
+                if (evt.metaKey || evt.ctrlKey) {
+                    //drawControls.drag.redo();
+                    drawRedo();
+                    handled = true;
+                }
+                break;
+            case 27: // esc
+                //drawControls.drag.cancel();
+                handled = true;
+                break;
+        }
+        if (handled) {
+            OpenLayers.Event.stop(evt);
+        }
+    });
 }());
