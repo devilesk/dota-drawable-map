@@ -522,7 +522,6 @@
     drawControls = {
         drag: new OpenLayers.Control.CustomDrawFeature(vectors, OpenLayers.Handler.CustomPath),
         icon: new OpenLayers.Control.CustomDrawFeature(vectors, OpenLayers.Handler.CustomPoint)
-        //icon: new OpenLayers.Control.Click(vectors)
     };
     drawControls.drag.setStyle({
         strokeWidth: 50,
