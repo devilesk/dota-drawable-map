@@ -82,7 +82,7 @@
                 strokeWidth: 50,
                 strokeColor: '#ff0000',
                 strokeOpacity: 1,
-                pointRadius: 1,
+                pointRadius: 5,
                 fillColor: '#ff0000',
                 graphicName: "triangle"
             }
@@ -791,12 +791,13 @@
 
     for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
+            if (k == 'modify') continue;
             OpenLayers.Util.extend(styleContexts['default'], styleContexts[k]);
         }
     }
     
     var styleTemplates = {
-        'default': OpenLayers.Feature.Vector.style['default'],
+        'default': {},
         brush: {
             pointRadius: "${getPointRadius}",
             strokeWidth: "${getStrokeWidth}",
@@ -849,7 +850,8 @@
     }
     
     var styles = {
-        'default': new OpenLayers.Style(styleTemplates['default'], {context: styleContexts['default']})
+        'default': new OpenLayers.Style(styleTemplates['default'], {context: styleContexts['default']}),
+        'select': OpenLayers.Feature.Vector.style['select']
     }
     for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
@@ -884,7 +886,7 @@ var styleMap = new OpenLayers.StyleMap({
     
     renderer = renderer ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
     var vectors = new OpenLayers.Layer.Vector("Canvas", {
-        styleMap: new OpenLayers.StyleMap(styles['default']),
+        styleMap: new OpenLayers.StyleMap(styles),
         //styleMap: styleMap,
         renderers: renderer //["Canvas"]
     });
