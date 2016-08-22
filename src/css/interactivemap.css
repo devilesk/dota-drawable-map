@@ -18,18 +18,20 @@ body {
     box-shadow: 0px 1px 0px 0px rgb(106, 106, 106);
     display: none;
 }
-.ui-controlgroup > .ui-controlgroup-item {
-    min-height: 12px;
+#map-tools .fa {
+    width: 17px;
+    padding-right: 5px;
 }
-.line-icon {
+#map-tools .line-icon {
     position: absolute;
     background-color: white;
     width: 2px;
     height: 14px;
     transform: rotateZ(45deg);
+    margin-left: 4px
 }
-label[for="line-tool"] .tool-field-label {
-    padding-left: 12px;
+#map-tools label[for="line-tool"] .tool-field-label {
+    padding-left: 25px;
 }
 .ui-widget {
     font-size: 12px;
@@ -66,21 +68,15 @@ label[for="line-tool"] .tool-field-label {
     padding: 4px 10px;
     
 }
-.preview-icon {
+
+.opacity-preview-icon {
     margin-top: 3px;
     vertical-align: middle;
     width: 18px;
     height: 18px;
     border-radius: 4px;
 }
-.icon-opacity-preview {
-    background: rgba(0,0,0,1);
-    background: -moz-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-    background: -webkit-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-    background: -o-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-    background: -ms-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-    background: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-}
+/* checkerboard background underneath picker color preview */
 .opacity-preview-background {
     border-radius: 4px;
     background-color: #eee;
@@ -89,6 +85,16 @@ label[for="line-tool"] .tool-field-label {
     background-size:8px 8px;
     background-position:0 0, 4px 4px
 }
+/* black to white background gradient */
+#marker-opacity-icon .opacity-preview-icon {
+    background: rgba(0,0,0,1);
+    background: -moz-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -webkit-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -o-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: -ms-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+}
+
 .tool-icon, .tool-label {
     margin-right: 6px;
 }
@@ -107,6 +113,10 @@ label[for="line-tool"] .tool-field-label {
     width: 65px;
     margin: 0;
 }
+.tool-control:focus {
+    color: black;
+    background-color: white;
+}
 .ui-spinner.ui-widget.ui-widget-content {
     border: 0;
     background: initial;
@@ -124,16 +134,7 @@ label[for="line-tool"] .tool-field-label {
     background: linear-gradient(to bottom, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
     color: rgb(233, 233, 233);
 }
-#color-picker {
-    width: 80px;
-}
-#marker-image {
-    width: 250px;
-}
-.tool-control:focus {
-    color: black;
-    background-color: white;
-}
+
 .tool-button {
     border-radius: 4px;
     background-color: rgb(83, 83, 83);
@@ -159,12 +160,14 @@ label[for="line-tool"] .tool-field-label {
 .tool-button:active {
     box-shadow: inset 0 3px 5px rgba(0,0,0,.5);
 }
+
 .color-picker-close {
     width: 100%;
     border-radius: 0;
 }
-#tool-select-button.ui-selectmenu-button.ui-button {
-    width: 80px;
+
+#marker-image-dropdown {
+    width: 250px;
 }
 .selectmenu-icon {
     height: 32px;
@@ -187,11 +190,6 @@ ul.ui-menu { max-height: 420px !important; }
     margin: 0;
     padding: 0;
     border: none;
-}
-/* tool radio button label icon */
-.ui-controlgroup > .ui-controlgroup-item .fa {
-    float: left;
-    padding-right: 5px;
 }
 
 .ui-state-active, .ui-button:active, .ui-button.ui-state-active:hover {
@@ -235,17 +233,6 @@ ul.ui-menu { max-height: 420px !important; }
 }
 #controls-list li{
 	padding:0px 5px;
-}
-#output-panel {
-	padding:5px 10px 5px 25px;
-}
-#movespeed {
-    width: 40px;
-    padding: 0px;
-    text-align: right;
-}
-#movespeed-container {
-    padding-left: 49px;
 }
 
 div.olControlMousePosition {

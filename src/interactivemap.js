@@ -39,7 +39,7 @@
             regularpolygon: {
                 snapAngle: 15,
                 sides: 4,
-                radius: 100
+                radius: 1000
             }
         },
         defaultStyles = {
@@ -496,7 +496,7 @@
     // stroke opacity spinner
     function initStrokeOpacity(key, isFill) {
         var target = isFill ? 'fill' : 'stroke';
-        var strokeOpacityPreview = document.querySelector('#' + key + '-' + target + '-opacity-icon .opacity-preview');
+        var strokeOpacityPreview = document.querySelector('#' + key + '-' + target + '-opacity-icon .opacity-preview-icon');
         $('#' + key + '-' + target + '-opacity').percentspinner({
             min: 0,
             max: 100,
@@ -645,7 +645,7 @@
     }).val(defaultStyles.icon.graphicHeight);
     
     // marker opacity spinner
-    var markerOpacityPreview = document.querySelector('#marker-opacity-icon .icon-opacity-preview');
+    var markerOpacityPreview = document.querySelector('#marker-opacity-icon .opacity-preview-icon');
     $('#marker-opacity').percentspinner({
         min: 0,
         max: 100,
@@ -678,21 +678,21 @@
         var img_root = '/media/images/miniheroes/';
         for (var i = 0; i < data.heroes.length; i++) {
             var $option = $('<option value="' + img_root + data.heroes[i].file + '">').text(data.heroes[i].name).attr("data-class", 'icon-miniheroes_' + data.heroes[i].id);
-            $('#marker-image').append($option);
+            $('#marker-image-dropdown').append($option);
         }
         for (var i = 0; i < data.other.length; i++) {
             var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'icon-miniheroes_' + data.other[i].id);
-            $('#marker-image').append($option);
+            $('#marker-image-dropdown').append($option);
         }
         
-        $( "#marker-image" ).iconselectmenu({
+        $( "#marker-image-dropdown" ).iconselectmenu({
             change: function( event, ui ) {
                 console.log('change', event, ui);
                 defaultStyles.icon.externalGraphic = ui.item.value;
             }
         });
         
-        defaultStyles.icon.externalGraphic = $('#marker-image > option')[0].value;
+        defaultStyles.icon.externalGraphic = $('#marker-image-dropdown > option')[0].value;
     });
     
     /********************
