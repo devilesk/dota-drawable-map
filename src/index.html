@@ -25,10 +25,13 @@
                     <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
                     <label for="line-tool"><div class="line-icon"></div><span class="tool-field-label"> Line</span></label>
                     <input type="radio" name="tool-radio" id="line-tool" class="tool-radiobutton" value="line">
+                    <label for="polygon-tool"><i class="fa fa-star-o"></i><span class="tool-field-label"> Polygon</span></label>
+                    <input type="radio" name="tool-radio" id="polygon-tool" class="tool-radiobutton" value="polygon">
+                    <label for="regularpolygon-tool"><i class="fa fa-square-o"></i><span class="tool-field-label"> Regular Polygon</span></label>
+                    <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
                 </fieldset>
             </div>
             <div class="tool-setting brush-tool-group" title="Stroke Size">
-                <i class="fa fa-paint-brush tool-icon"></i>
                 <i class="fa fa-arrows-v tool-icon"></i>
                 <span class="tool-label show-wide">Size</span>
                 <input type="text" class="tool-control" id="brush-stroke-width" maxlength="4">
@@ -36,10 +39,10 @@
             <div class="tool-setting brush-tool-group" title="Stroke Color">
                 <div class="tool-icon" id="brush-stroke-opacity-icon">
                     <div class="opacity-preview-background">
-                        <div id="brush-color-preview" class="preview-icon opacity-preview"></div>
+                        <div id="brush-stroke-color-preview" class="preview-icon opacity-preview"></div>
                     </div>
                 </div>
-                <input type="text" class="tool-control" id="brush-color-picker">
+                <input type="text" class="tool-control" id="brush-stroke-color-picker">
             </div>
             <div class="tool-setting brush-tool-group" title="Stroke Opacity">
                 <span class="tool-label">Opacity</span>
@@ -67,7 +70,6 @@
             </div>
 
             <div class="tool-setting line-tool-group" title="Stroke Size">
-                <i class="fa fa-paint-brush tool-icon"></i>
                 <i class="fa fa-arrows-v tool-icon"></i>
                 <span class="tool-label show-wide">Size</span>
                 <input type="text" class="tool-control" id="line-stroke-width" maxlength="4">
@@ -75,14 +77,82 @@
             <div class="tool-setting line-tool-group" title="Stroke Color">
                 <div class="tool-icon" id="line-stroke-opacity-icon">
                     <div class="opacity-preview-background">
-                        <div id="line-color-preview" class="preview-icon opacity-preview"></div>
+                        <div id="line-stroke-color-preview" class="preview-icon opacity-preview"></div>
                     </div>
                 </div>
-                <input type="text" class="tool-control" id="line-color-picker">
+                <input type="text" class="tool-control" id="line-stroke-color-picker">
             </div>
             <div class="tool-setting line-tool-group" title="Stroke Opacity">
                 <span class="tool-label">Opacity</span>
                 <input class="tool-control" id="line-stroke-opacity">
+            </div>
+
+            <div class="tool-setting polygon-tool-group" title="Stroke Size">
+                <i class="fa fa-arrows-v tool-icon"></i>
+                <span class="tool-label show-wide">Size</span>
+                <input type="text" class="tool-control" id="polygon-stroke-width" maxlength="4">
+            </div>
+            <div class="tool-setting polygon-tool-group" title="Stroke Color">
+                <div class="tool-icon" id="polygon-stroke-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="polygon-stroke-color-preview" class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <input type="text" class="tool-control" id="polygon-stroke-color-picker">
+            </div>
+            <div class="tool-setting polygon-tool-group" title="Stroke Opacity">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="polygon-stroke-opacity">
+            </div>
+            <div class="tool-setting polygon-tool-group" title="Fill Color">
+                <div class="tool-icon" id="polygon-fill-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="polygon-fill-color-preview" class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <input type="text" class="tool-control" id="polygon-fill-color-picker">
+            </div>
+            <div class="tool-setting polygon-tool-group" title="Fill Opacity">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="polygon-fill-opacity">
+            </div>
+
+            <div class="tool-setting regularpolygon-tool-group" title="Stroke Size">
+                <i class="fa fa-arrows-v tool-icon"></i>
+                <span class="tool-label show-wide">Size</span>
+                <input type="text" class="tool-control" id="regularpolygon-stroke-width" maxlength="4">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Stroke Color">
+                <div class="tool-icon" id="regularpolygon-stroke-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="regularpolygon-stroke-color-preview" class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <input type="text" class="tool-control" id="regularpolygon-stroke-color-picker">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Stroke Opacity">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="regularpolygon-stroke-opacity">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Fill Color">
+                <div class="tool-icon" id="regularpolygon-fill-opacity-icon">
+                    <div class="opacity-preview-background">
+                        <div id="regularpolygon-fill-color-preview" class="preview-icon opacity-preview"></div>
+                    </div>
+                </div>
+                <input type="text" class="tool-control" id="regularpolygon-fill-color-picker">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Fill Opacity">
+                <span class="tool-label">Opacity</span>
+                <input class="tool-control" id="regularpolygon-fill-opacity">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Side Count">
+                <span class="tool-label show-wide">Side Count</span>
+                <input type="text" class="tool-control" id="regularpolygon-side-count" maxlength="4">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Snap Angle">
+                <span class="tool-label show-wide">Snap Angle</span>
+                <input type="text" class="tool-control" id="regularpolygon-snap-angle" maxlength="4">
             </div>
             
             <div class="setting">

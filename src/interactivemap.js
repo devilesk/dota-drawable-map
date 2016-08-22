@@ -35,6 +35,12 @@
         }),
         renderer = OpenLayers.Util.getParameters(window.location.href).renderer,
         drawControls,
+        defaultHandlerOptions = {
+            regularpolygon: {
+                snapAngle: 0,
+                sides: 4
+            }
+        },
         defaultStyles = {
             brush: {
                 strokeWidth: 50,
@@ -54,9 +60,25 @@
                 strokeOpacity: 1,
                 pointRadius: 1,
                 fillColor: '#00ff00'
+            },
+            polygon: {
+                strokeWidth: 10,
+                strokeColor: '#0000ff',
+                strokeOpacity: 1,
+                pointRadius: 1,
+                fillColor: '#ff00ff',
+                fillOpacity: 0.5
+            },
+            regularpolygon: {
+                strokeWidth: 20,
+                strokeColor: '#00ffff',
+                strokeOpacity: 1,
+                pointRadius: 1,
+                fillColor: '#aa00ff',
+                fillOpacity: 1
             }
         },
-        strokeTools = ['brush', 'line'];
+        strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'];
 
     /***********************************
      * QUERY STRING FUNCTIONS *
@@ -195,6 +217,15 @@
      * UI WIDGETS *
      **************/
 
+    function formatDegree(value) {
+        return value + '°';
+    }
+    
+    $.widget( "ui.degreespinner", $.ui.spinner, {
+        _format: formatDegree,
+        _parse: function(value) { return parseFloat(value); }
+    });
+
     function formatPercent(value) {
         return value + '%';
     }
@@ -235,7 +266,7 @@
 
     function toggleControl() {
         var control;
-        var tools = ['brush', 'icon', 'line'];
+        var tools = Object.keys(defaultStyles);
         $('#toolbar').hide();
         for (var key in drawControls) {
             control = drawControls[key];
@@ -247,20 +278,12 @@
                 if (tools.indexOf(key) != -1) {
                     $('#toolbar').show();
                     updateTools(key);
-                }
-                if (key == 'brush') {
-                    vectors.events.register("sketchcomplete", drawControls.brush, onSketchCompletedHandlers.brush);
-                }
-                else if (key == 'icon') {
-                    vectors.events.register("sketchcomplete", drawControls.icon, onSketchCompletedHandlers.icon);
+                    vectors.events.register("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
                 }
             } else {
                 control.deactivate();
-                if (key == 'brush') {
-                    vectors.events.unregister("sketchcomplete", drawControls.brush, onSketchCompletedHandlers.brush);
-                }
-                else if (key == 'icon') {
-                    vectors.events.unregister("sketchcomplete", drawControls.icon, onSketchCompletedHandlers.icon);
+                if (tools.indexOf(key) != -1) {
+                    vectors.events.unregister("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
                 }
             }
         }
@@ -342,42 +365,19 @@
      ******************/
 
     strokeTools.forEach(function (key) {
-        initStrokeOpacity(key);
         initStrokeWidth(key);
+        initStrokeOpacity(key);
         initStrokeColor(key);
     });
-    // stroke opacity spinner
-    function initStrokeOpacity(key) {
-        var strokeOpacityPreview = document.querySelector('#' + key + '-stroke-opacity-icon .opacity-preview');
-        $('#' + key + '-stroke-opacity').percentspinner({
-            min: 0,
-            max: 100,
-            step: 1,
-            change: function (event, ui) {
-                var v = parseInt(this.value);
-                if (isNaN(v)) {
-                    v = parseInt(defaultStyles[key].strokeOpacity * 100);
-                }
-                else {
-                    defaultStyles[key].strokeOpacity = v/100;
-                    strokeOpacityPreview.style.opacity = defaultStyles[key].strokeOpacity;
-                }
-                $(this).val(formatPercent(v));
-            },
-            spin: function(event, ui) {
-                strokeOpacityPreview.style.opacity = ui.value/100;
-            },
-            stop: function (event, ui) {
-                var v = parseInt(this.value);
-                if (!isNaN(v)) {
-                    defaultStyles[key].strokeOpacity = v/100;
-                    strokeOpacityPreview.style.opacity = defaultStyles[key].strokeOpacity;
-                }
-            }
-        }).val(formatPercent(defaultStyles[key].strokeOpacity*100));
-    }
-
-
+    initStrokeOpacity('polygon', true);
+    initStrokeColor('polygon', true);
+    initStrokeOpacity('regularpolygon', true);
+    initStrokeColor('regularpolygon', true);
+    initDegreeSpinner('regularpolygon', 'snap-angle', 'snapAngle');
+    initSpinner('regularpolygon', 'side-count', 'sides', {
+        min: 3,
+        step: 1
+    })
     // stroke width spinner
     function initStrokeWidth(key) {
         $('#' + key + '-stroke-width').spinner({
@@ -402,11 +402,44 @@
         }).val(defaultStyles[key].strokeWidth);
     }
     
+    // stroke opacity spinner
+    function initStrokeOpacity(key, isFill) {
+        var target = isFill ? 'fill' : 'stroke';
+        var strokeOpacityPreview = document.querySelector('#' + key + '-' + target + '-opacity-icon .opacity-preview');
+        $('#' + key + '-' + target + '-opacity').percentspinner({
+            min: 0,
+            max: 100,
+            step: 1,
+            change: function (event, ui) {
+                var v = parseInt(this.value);
+                if (isNaN(v)) {
+                    v = parseInt(defaultStyles[key][target + 'Opacity'] * 100);
+                }
+                else {
+                    defaultStyles[key][target + 'Opacity'] = v/100;
+                    strokeOpacityPreview.style.opacity = defaultStyles[key][target + 'Opacity'];
+                }
+                $(this).val(formatPercent(v));
+            },
+            spin: function(event, ui) {
+                strokeOpacityPreview.style.opacity = ui.value/100;
+            },
+            stop: function (event, ui) {
+                var v = parseInt(this.value);
+                if (!isNaN(v)) {
+                    defaultStyles[key][target + 'Opacity'] = v/100;
+                    strokeOpacityPreview.style.opacity = defaultStyles[key][target + 'Opacity'];
+                }
+            }
+        }).val(formatPercent(defaultStyles[key][target + 'Opacity']*100));
+    }
+    
     // stroke color picker
-    function initStrokeColor(key) {
-        var colorPreview = document.getElementById(key + '-color-preview');
-        var colorPicker = new CP(document.getElementById(key + '-color-picker'));
-        colorPicker.set(defaultStyles[key].strokeColor);
+    function initStrokeColor(key, isFill) {
+        var target = isFill ? 'fill' : 'stroke';
+        var colorPreview = document.getElementById(key + '-' + target + '-color-preview');
+        var colorPicker = new CP(document.getElementById(key + '-' + target + '-color-picker'));
+        colorPicker.set(defaultStyles[key][target + 'Color']);
         colorPicker.on("enter", function() {
             var color = '#' + this._HSV2HEX(this.set());
             colorPreview.title = color;
@@ -415,12 +448,12 @@
         colorPicker.on("change", function(color) {
             this.target.value = '#' + color;
             colorPreview.style.backgroundColor = '#' + color;
-            defaultStyles[key].strokeColor = '#' + color;
+            defaultStyles[key][target + 'Color'] = '#' + color;
         });
         colorPicker.on("exit", function() {
             this.target.value = colorPreview.title;
         });
-        $('#' + key + '-color-preview').click(function () {
+        $(colorPreview).click(function () {
             if (!colorPicker.visible) {
                 colorPicker.enter();
             }
@@ -433,8 +466,67 @@
             colorPicker.exit();
         }, false);
         colorPicker.picker.appendChild(closeButton);
-
     }
+    
+    function initDegreeSpinner(key, name, prop) {
+        $('#' + key + '-' + name).degreespinner({
+            min: 0,
+            max: 360,
+            step: 1,
+            change: function (event, ui) {
+                var v = parseInt(this.value);
+                if (isNaN(v)) {
+                    v = parseInt(defaultHandlerOptions[key][prop]);
+                }
+                else {
+                    defaultHandlerOptions[key][prop] = v;
+                    updateHandlerOption(key, prop, v);
+                }
+                $(this).val(formatDegree(v));
+            },
+            stop: function (event, ui) {
+                var v = parseInt(this.value);
+                if (!isNaN(v)) {
+                    defaultHandlerOptions[key][prop] = v;
+                    updateHandlerOption(key, prop, v);
+                }
+            }
+        }).val(formatDegree(defaultHandlerOptions[key][prop]));
+    }
+    
+    function initSpinner(key, name, prop, options, spinnerType, formatFunction) {
+        var spinnerType = spinnerType || 'spinner';
+        var formatFunction = formatFunction || identity;
+        $('#' + key + '-' + name)[spinnerType](OpenLayers.Util.extend({
+            change: function (event, ui) {
+                var v = parseInt(this.value);
+                if (isNaN(v)) {
+                    v = parseInt(defaultHandlerOptions[key][prop]);
+                }
+                else {
+                    defaultHandlerOptions[key][prop] = v;
+                    updateHandlerOption(key, prop, v);
+                }
+                $(this).val(formatFunction(v));
+            },
+            stop: function (event, ui) {
+                var v = parseInt(this.value);
+                if (!isNaN(v)) {
+                    defaultHandlerOptions[key][prop] = v;
+                    updateHandlerOption(key, prop, v);
+                }
+            }
+        }, options)).val(formatFunction(defaultHandlerOptions[key][prop]));
+    }
+    
+    function identity(v) { return v };
+    
+    function updateHandlerOption(key, prop, value) {
+        var option = {};
+        option[prop] = value;
+        drawControls[key].handler.setOptions(option);
+    }
+    
     /****************
      * ICON UI INIT *
      ****************/
@@ -571,11 +663,24 @@
         }
     }
     
+    function createFillStyleContext(key) {
+        return {
+            getFillColor: function(feature) {
+                return feature.attributes.style ? feature.attributes.style.fillColor : getStyle(key).fillColor;
+            },
+            getFillOpacity: function(feature) {
+                return feature.attributes.style ? feature.attributes.style.fillOpacity : getStyle(key).fillOpacity;
+            }
+        }
+    }
+    
     // Returns style property stored in feature attribute or get current default style property
     var styleContexts = {
         'default': {},
         brush: createStrokeStyleContext('brush'),
         line: createStrokeStyleContext('line'),
+        polygon: OpenLayers.Util.extend(createStrokeStyleContext('polygon'), createFillStyleContext('polygon')),
+        regularpolygon: OpenLayers.Util.extend(createStrokeStyleContext('regularpolygon'), createFillStyleContext('regularpolygon')),
         icon: {
             getGraphicHeight: function(feature) {
                 return (feature.attributes.style ? feature.attributes.style.graphicHeight : getStyle('icon').graphicHeight) / map.getResolution();
@@ -617,6 +722,22 @@
             strokeWidth: "${getStrokeWidth}",
             strokeColor: "${getStrokeColor}",
             strokeOpacity: "${getStrokeOpacity}"
+        },
+        polygon: {
+            pointRadius: "${getPointRadius}",
+            strokeWidth: "${getStrokeWidth}",
+            strokeColor: "${getStrokeColor}",
+            strokeOpacity: "${getStrokeOpacity}",
+            fillColor: "${getFillColor}",
+            fillOpacity: "${getFillOpacity}"
+        },
+        regularpolygon: {
+            pointRadius: "${getPointRadius}",
+            strokeWidth: "${getStrokeWidth}",
+            strokeColor: "${getStrokeColor}",
+            strokeOpacity: "${getStrokeOpacity}",
+            fillColor: "${getFillColor}",
+            fillOpacity: "${getFillOpacity}"
         },
         icon: {
             graphicOpacity: "${getGraphicOpacity}",
@@ -778,6 +899,22 @@
                     styleMap: new OpenLayers.StyleMap(styles.line)
                 }
             }
+        }),
+        polygon: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Polygon,
+        {
+            handlerOptions: {
+                layerOptions: {
+                    styleMap: new OpenLayers.StyleMap(styles.polygon)
+                }
+            }
+        }),
+        regularpolygon: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.RegularPolygon,
+        {
+            handlerOptions: OpenLayers.Util.extend(defaultHandlerOptions.regularpolygon, {
+                layerOptions: {
+                    styleMap: new OpenLayers.StyleMap(styles.regularpolygon)
+                }
+            })
         })
     };
     
@@ -790,7 +927,9 @@
     var onSketchCompletedHandlers = {
         brush: createSketchCompletedHandler('brush'),
         icon: createSketchCompletedHandler('icon'),
-        line: createSketchCompletedHandler('line')
+        line: createSketchCompletedHandler('line'),
+        polygon: createSketchCompletedHandler('polygon'),
+        regularpolygon: createSketchCompletedHandler('regularpolygon')
     }
 
     // Add controls to map
