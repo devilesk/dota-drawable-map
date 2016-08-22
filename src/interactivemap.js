@@ -82,7 +82,7 @@
                 strokeWidth: 2,
                 strokeColor: '#ff0000',
                 strokeOpacity: 1,
-                pointRadius: 5,
+                pointRadius: 50,
                 fillColor: '#ff0000',
                 graphicName: "cross"
             }
@@ -793,6 +793,7 @@
         },
         modify: OpenLayers.Util.extend(createStrokeStyleContext('modify'), {
             getGraphicName: function(feature) {
+                console.log('getGraphicName modify', feature.attributes.style ? feature.attributes.style.graphicName : getStyle('modify').graphicName);
                 return feature.attributes.style ? feature.attributes.style.graphicName : getStyle('modify').graphicName;
             },
             getExternalGraphic: function(feature) {
@@ -846,22 +847,34 @@
         }
     }
 
+    // Collection of all style objects
     var styles = {
         select: OpenLayers.Feature.Vector.style.select,
         virtual: {
-            strokeColor: "#00ff00",
-            fillColor: "#00ff00",
-            strokeOpacity: 1,
+            strokeColor: "#ee9900",
+            fillColor: "#ee9900",
+            strokeOpacity: 0.3,
             strokeWidth: 2,
-            pointRadius: 5,
-            graphicName: "triangle"
-        }
+            pointRadius: 8,
+            fillOpacity: 0.3,
+            graphicName: "circle"
+        },
+        vertex: new OpenLayers.Style(OpenLayers.Util.applyDefaults({
+            strokeWidth: 2,
+            pointRadius: 8,
+            graphicName: "circle",
+            externalGraphic: ""
+        }, OpenLayers.Feature.Vector.style['default']), {extendDefault: false})
     };
+    
+    // Styles used by control temporary layers
     for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
             styles[k] = new OpenLayers.Style(styleTemplates[k], {context: styleContexts[k]});
         }
     }
+
+    // Custom default style returns feature attribute style values first with fallback to active tool value
     styles['default'] = new OpenLayers.Style({
         pointRadius: "${getPointRadius}",
         strokeWidth: "${getStrokeWidth}",
@@ -879,15 +892,12 @@
         extendDefault: true,
         context: {
             getPointRadius: function(feature) {
-                //console.log('getPointRadius', feature);
                 return (feature.attributes.style ? feature.attributes.style.pointRadius : getStyle(activeTool).pointRadius) / map.getResolution();
             },
             getStrokeWidth: function(feature) {
-                //console.log('getStrokeWidth', feature);
                 return (feature.attributes.style ? feature.attributes.style.strokeWidth : getStyle(activeTool).strokeWidth) / map.getResolution();
             },
             getStrokeColor: function(feature) {
-                //console.log('getStrokeColor', feature);
                 return feature.attributes.style ? feature.attributes.style.strokeColor : getStyle(activeTool).strokeColor;
             },
             getStrokeOpacity: function(feature) {
@@ -900,7 +910,6 @@
                 return feature.attributes.style ? feature.attributes.style.fillOpacity : getStyle(activeTool).fillOpacity;
             },
             getGraphicHeight: function(feature) {
-                //console.log('getGraphicHeight');
                 if (feature.attributes.style) {
                     return feature.attributes.style.graphicHeight / map.getResolution();
                 }
@@ -908,29 +917,35 @@
                     return getStyle(activeTool).graphicHeight / map.getResolution();
                 }
                 else {
-                    console.log('default', OpenLayers.Feature.Vector.style['default'].graphicHeight);
-                    return 0;
                     return OpenLayers.Feature.Vector.style['default'].graphicHeight;
                 }
                 return (feature.attributes.style ? feature.attributes.style.graphicHeight : getStyle(activeTool).graphicHeight) / map.getResolution();
             },
             getGraphicOpacity: function(feature) {
-                //console.log('getGraphicOpacity');
                 return feature.attributes.style ? feature.attributes.style.graphicOpacity : getStyle(activeTool).graphicOpacity;
             },
             getGraphicYOffset: function(feature) {
-                //console.log('getGraphicYOffset');
-                var externalGraphic = getStyle(activeTool).externalGraphic
-                if (!externalGraphic) return 0;//OpenLayers.Feature.Vector.style['default'].getGraphicYOffset;
-                if (externalGraphic.indexOf('ward_sentry') == -1 && externalGraphic.indexOf('ward_observer') == -1) {
-                    return -getStyle(activeTool).graphicHeight / map.getResolution() / 2;
+                if (feature.attributes.style) {
+                    var externalGraphic = feature.attributes.style.externalGraphic;
+                    var graphicHeight = feature.attributes.style.graphicHeight;
+                }
+                else if (getStyle(activeTool).getGraphicYOffset) {
+                    var externalGraphic = getStyle(activeTool).externalGraphic;
+                    var graphicHeight = getStyle(activeTool).graphicHeight;
                 }
                 else {
-                    return -getStyle(activeTool).graphicHeight / map.getResolution();
+                    return OpenLayers.Feature.Vector.style['default'].getGraphicYOffset;
+                }
+                if (!externalGraphic || !graphicHeight) return OpenLayers.Feature.Vector.style['default'].getGraphicYOffset;
+                
+                if (externalGraphic.indexOf('ward_sentry') == -1 && externalGraphic.indexOf('ward_observer') == -1) {
+                    return -graphicHeight / map.getResolution() / 2;
+                }
+                else {
+                    return -graphicHeight / map.getResolution();
                 }
             },
             getExternalGraphic: function(feature) {
-                //console.log('getExternalGraphic');
                 if (feature.attributes.style) {
                     return feature.attributes.style.externalGraphic;
                 }
@@ -938,14 +953,11 @@
                     return getStyle(activeTool).externalGraphic;
                 }
                 else {
-                    console.log('default', OpenLayers.Feature.Vector.style['default'].externalGraphic);
-                        return null;
                     return OpenLayers.Feature.Vector.style['default'].externalGraphic;
                 }
                 return feature.attributes.style ? feature.attributes.style.externalGraphic : getStyle(activeTool).externalGraphic;
             },
             getGraphicName: function(feature) {
-                //console.log('getGraphicName');
                 if (feature.attributes.style) {
                     return feature.attributes.style.graphicName;
                 }
@@ -953,20 +965,18 @@
                     return getStyle(activeTool).graphicName;
                 }
                 else {
-                    console.log('default', OpenLayers.Feature.Vector.style['default'].graphicName);
                     return OpenLayers.Feature.Vector.style['default'].graphicName;
                 }
                 return feature.attributes.style ? feature.attributes.style.graphicName : getStyle(activeTool).graphicName;
             }
         }
     });
-
     renderer = renderer ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
     var vectors = new OpenLayers.Layer.Vector("Canvas", {
         styleMap: new OpenLayers.StyleMap({
             'default': styles['default'],
             select: styles.select,
-            modify: styles.modify
+            vertex: styles.vertex
         }),
         renderers: renderer //["Canvas"]
     });
@@ -1118,7 +1128,7 @@
                 }
             })
         }),
-        modify: new OpenLayers.Control.ModifyFeature(vectors, {vertexRenderIntent: "modify", virtualStyle: styles.virtual})
+        modify: new OpenLayers.Control.ModifyFeature(vectors, {vertexRenderIntent: "vertex", virtualStyle: styles.virtual})
     };
     
     function createSketchCompletedHandler(key) {
