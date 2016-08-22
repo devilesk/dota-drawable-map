@@ -19,31 +19,31 @@
         <div id="toolbar">
             <div class="setting">
                 <fieldset id="tool-field">
-                    <label for="drag-tool"><i class="fa fa-paint-brush"></i><span class="tool-field-label"> Brush</span></label>
-                    <input type="radio" name="tool-radio" id="drag-tool" class="tool-radiobutton" value="drag">
+                    <label for="brush-tool"><i class="fa fa-paint-brush"></i><span class="tool-field-label"> Brush</span></label>
+                    <input type="radio" name="tool-radio" id="brush-tool" class="tool-radiobutton" value="brush">
                     <label for="icon-tool"><i class="fa fa-map-marker"></i><span class="tool-field-label"> Icon</span></label>
                     <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
                     <label for="line-tool"><div class="line-icon"></div><span class="tool-field-label"> Line</span></label>
                     <input type="radio" name="tool-radio" id="line-tool" class="tool-radiobutton" value="line">
                 </fieldset>
             </div>
-            <div class="tool-setting drag-tool-group" title="Stroke Size">
+            <div class="tool-setting brush-tool-group" title="Stroke Size">
                 <i class="fa fa-paint-brush tool-icon"></i>
                 <i class="fa fa-arrows-v tool-icon"></i>
                 <span class="tool-label show-wide">Size</span>
-                <input type="text" class="tool-control" id="stroke-width" maxlength="4">
+                <input type="text" class="tool-control" id="brush-stroke-width" maxlength="4">
             </div>
-            <div class="tool-setting drag-tool-group" title="Stroke Color">
-                <div class="tool-icon" id="stroke-opacity-icon">
+            <div class="tool-setting brush-tool-group" title="Stroke Color">
+                <div class="tool-icon" id="brush-stroke-opacity-icon">
                     <div class="opacity-preview-background">
-                        <div id="color-preview" class="preview-icon opacity-preview"></div>
+                        <div id="brush-color-preview" class="preview-icon opacity-preview"></div>
                     </div>
                 </div>
-                <input type="text" class="tool-control" id="drag-color-picker">
+                <input type="text" class="tool-control" id="brush-color-picker">
             </div>
-            <div class="tool-setting drag-tool-group" title="Stroke Opacity">
+            <div class="tool-setting brush-tool-group" title="Stroke Opacity">
                 <span class="tool-label">Opacity</span>
-                <input class="tool-control" id="stroke-opacity">
+                <input class="tool-control" id="brush-stroke-opacity">
             </div>
             
             <div class="tool-setting icon-tool-group" title="Icon Size">
@@ -53,7 +53,7 @@
             <div class="tool-setting icon-tool-group" title="Icon Opacity">
                 <div class="tool-icon" id="marker-opacity-icon">
                     <div class="opacity-preview-background">
-                        <div class="preview-icon opacity-preview"></div>
+                        <div class="preview-icon icon-opacity-preview"></div>
                     </div>
                 </div>
                 <i class="fa fa-adjust tool-icon"></i>
@@ -70,19 +70,19 @@
                 <i class="fa fa-paint-brush tool-icon"></i>
                 <i class="fa fa-arrows-v tool-icon"></i>
                 <span class="tool-label show-wide">Size</span>
-                <input type="text" class="tool-control" id="stroke-width" maxlength="4">
+                <input type="text" class="tool-control" id="line-stroke-width" maxlength="4">
             </div>
             <div class="tool-setting line-tool-group" title="Stroke Color">
-                <div class="tool-icon" id="stroke-opacity-icon">
+                <div class="tool-icon" id="line-stroke-opacity-icon">
                     <div class="opacity-preview-background">
-                        <div id="color-preview" class="preview-icon opacity-preview"></div>
+                        <div id="line-color-preview" class="preview-icon opacity-preview"></div>
                     </div>
                 </div>
                 <input type="text" class="tool-control" id="line-color-picker">
             </div>
             <div class="tool-setting line-tool-group" title="Stroke Opacity">
                 <span class="tool-label">Opacity</span>
-                <input class="tool-control" id="stroke-opacity">
+                <input class="tool-control" id="line-stroke-opacity">
             </div>
             
             <div class="setting">

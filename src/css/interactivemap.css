@@ -16,6 +16,7 @@ body {
     font-family: Arial;
     border-bottom: 1px solid rgb(40, 40, 40);
     box-shadow: 0px 1px 0px 0px rgb(106, 106, 106);
+    display: none;
 }
 .ui-controlgroup > .ui-controlgroup-item {
     min-height: 12px;
@@ -72,16 +73,13 @@ label[for="line-tool"] .tool-field-label {
     height: 18px;
     border-radius: 4px;
 }
-.opacity-preview {
+.icon-opacity-preview {
     background: rgba(0,0,0,1);
     background: -moz-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
     background: -webkit-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
     background: -o-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
     background: -ms-linear-gradient(left, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
     background: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
-}
-#color-preview {
-    background: none;
 }
 .opacity-preview-background {
     border-radius: 4px;
