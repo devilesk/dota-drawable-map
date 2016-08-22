@@ -79,12 +79,12 @@
                 fillOpacity: 1
             },
             modify: {
-                strokeWidth: 50,
+                strokeWidth: 2,
                 strokeColor: '#ff0000',
                 strokeOpacity: 1,
                 pointRadius: 5,
                 fillColor: '#ff0000',
-                graphicName: "triangle"
+                graphicName: "cross"
             }
         },
         strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'];
@@ -287,12 +287,24 @@
                 if (tools.indexOf(key) != -1) {
                     $('#toolbar').show();
                     updateTools(key);
-                    vectors.events.register("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
+                    if (key == 'modify') {
+                        //vectors.events.register("beforefeaturemodified", drawControls[key], onFeatureModified);
+                        vectors.events.register("afterfeaturemodified", drawControls[key], onFeatureModified);
+                    }
+                    else {
+                        vectors.events.register("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
+                    }
                 }
             } else {
                 control.deactivate();
                 if (tools.indexOf(key) != -1) {
-                    vectors.events.unregister("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
+                    if (key == 'modify') {
+                        //vectors.events.unregister("beforefeaturemodified", drawControls[key], onFeatureModified);
+                        vectors.events.unregister("afterfeaturemodified", drawControls[key], onFeatureModified);
+                    }
+                    else {
+                        vectors.events.unregister("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
+                    }
                 }
             }
         }
@@ -753,9 +765,8 @@
     
     // Returns style property stored in feature attribute or get current default style property
     var styleContexts = {
-        'default': {},
+        //'default': {},
         brush: createStrokeStyleContext('brush'),
-        line: createStrokeStyleContext('line'),
         line: createStrokeStyleContext('line'),
         polygon: OpenLayers.Util.extend(createStrokeStyleContext('polygon'), createFillStyleContext('polygon')),
         regularpolygon: OpenLayers.Util.extend(createStrokeStyleContext('regularpolygon'), createFillStyleContext('regularpolygon')),
@@ -789,15 +800,14 @@
         })
     }
 
-    for (k in defaultStyles) {
+    /*for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
-            if (k == 'modify') continue;
             OpenLayers.Util.extend(styleContexts['default'], styleContexts[k]);
         }
-    }
+    }*/
     
     var styleTemplates = {
-        'default': {},
+        //'default': {},
         brush: {
             pointRadius: "${getPointRadius}",
             strokeWidth: "${getStrokeWidth}",
@@ -842,16 +852,25 @@
         }
     }
 
-    var defaultStyleTemplate = {}
+    /*var defaultStyleTemplate = {}
     for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
             OpenLayers.Util.extend(styleTemplates['default'], styleTemplates[k]);
         }
-    }
+    }*/
     
     var styles = {
-        'default': new OpenLayers.Style(styleTemplates['default'], {context: styleContexts['default']}),
-        'select': OpenLayers.Feature.Vector.style['select']
+        //'default': new OpenLayers.Style(styleTemplates['default'], {context: styleContexts['default']}),
+        'default': OpenLayers.Feature.Vector.style['default'],
+        'select': OpenLayers.Feature.Vector.style['select'],
+        'vertex': {
+            strokeColor: "#ff0000",
+            fillColor: "#ff0000",
+            strokeOpacity: 1,
+            strokeWidth: 2,
+            pointRadius: 3,
+            graphicName: "cross"
+        }
     }
     for (k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
@@ -859,15 +878,6 @@
         }
     }
     
-
-var vertexStyle = {
-    strokeColor: "#ff0000",
-    fillColor: "#ff0000",
-    strokeOpacity: 1,
-    strokeWidth: 2,
-    pointRadius: 3,
-    graphicName: "cross"
-}
 
 var virtual = {
     strokeColor: "#00ff00",
@@ -877,12 +887,11 @@ var virtual = {
     pointRadius: 5,
     graphicName: "triangle"
 };
-styles.vertex = vertexStyle;
 
-var styleMap = new OpenLayers.StyleMap({
+/*var styleMap = new OpenLayers.StyleMap({
     "default": OpenLayers.Feature.Vector.style['default'],
     "vertex": vertexStyle
-}, {extendDefault: false});
+}, {extendDefault: false});*/
     
     renderer = renderer ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
     var vectors = new OpenLayers.Layer.Vector("Canvas", {
@@ -1043,6 +1052,8 @@ var styleMap = new OpenLayers.StyleMap({
     
     function createSketchCompletedHandler(key) {
         return function (event) {
+            event.feature.attributes.renderIntent = key;
+            event.feature.renderIntent = key;
             event.feature.attributes.style = getStyle(key);
         }
     }
@@ -1053,6 +1064,13 @@ var styleMap = new OpenLayers.StyleMap({
         line: createSketchCompletedHandler('line'),
         polygon: createSketchCompletedHandler('polygon'),
         regularpolygon: createSketchCompletedHandler('regularpolygon')
+    }
+
+    // Modifying feature resets renderIntent to 'default'. Reset it to stored renderIntent and redraw feature.
+    function onFeatureModified(event) {
+        console.log('onFeatureModified', OpenLayers.Util.extend({}, event.feature));
+        event.feature.renderIntent = event.feature.attributes.renderIntent;
+        event.feature.layer.drawFeature(event.feature);
     }
 
     // Add controls to map
