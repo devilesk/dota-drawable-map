@@ -17,20 +17,6 @@
 	</head>
 	<body>
         <div id="toolbar">
-            <div class="setting">
-                <fieldset id="tool-field">
-                    <label for="brush-tool"><i class="fa fa-paint-brush"></i><span class="tool-field-label"> Brush</span></label>
-                    <input type="radio" name="tool-radio" id="brush-tool" class="tool-radiobutton" value="brush">
-                    <label for="icon-tool"><i class="fa fa-map-marker"></i><span class="tool-field-label"> Icon</span></label>
-                    <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
-                    <label for="line-tool"><div class="line-icon"></div><span class="tool-field-label"> Line</span></label>
-                    <input type="radio" name="tool-radio" id="line-tool" class="tool-radiobutton" value="line">
-                    <label for="polygon-tool"><i class="fa fa-star-o"></i><span class="tool-field-label"> Polygon</span></label>
-                    <input type="radio" name="tool-radio" id="polygon-tool" class="tool-radiobutton" value="polygon">
-                    <label for="regularpolygon-tool"><i class="fa fa-square-o"></i><span class="tool-field-label"> Regular Polygon</span></label>
-                    <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
-                </fieldset>
-            </div>
             <div class="tool-setting brush-tool-group" title="Stroke Size">
                 <i class="fa fa-arrows-v tool-icon"></i>
                 <span class="tool-label show-wide">Size</span>
@@ -150,9 +136,33 @@
                 <span class="tool-label show-wide">Side Count</span>
                 <input type="text" class="tool-control" id="regularpolygon-side-count" maxlength="4">
             </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Snap">
+                <label class="show-wide" for="regularpolygon-snap">Snap</label>
+                <input type="checkbox" class="tool-control" id="regularpolygon-snap" checked>
+            </div>
             <div class="tool-setting regularpolygon-tool-group" title="Snap Angle">
                 <span class="tool-label show-wide">Snap Angle</span>
                 <input type="text" class="tool-control" id="regularpolygon-snap-angle" maxlength="4">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Irregular">
+                <label class="show-wide" for="regularpolygon-irregular">Irregular</label>
+                <input type="checkbox" class="tool-control" id="regularpolygon-irregular">
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Fixed Radius">
+                <label class="show-wide" for="regularpolygon-fixed-radius">Fixed Radius</label>
+                <input type="checkbox" class="tool-control" id="regularpolygon-fixed-radius" checked>
+            </div>
+            <div class="tool-setting regularpolygon-tool-group" title="Radius">
+                <span class="tool-label show-wide">Radius</span>
+                <input type="text" class="tool-control" id="regularpolygon-radius" maxlength="4">
+            </div>
+            
+            <div class="tool-setting modify-tool-group">
+                <span class="tool-label show-wide">Mode</span>
+                <fieldset class="tool-radiogroup">
+                    <label for="modify-reshape"><i class="fa fa-arrows"></i><span class="tool-field-label"> Reshape</span></label>
+                    <input type="radio" name="modify-tool-radio" id="modify-reshape" class="modify-tool-radiobutton" value="reshape" checked>
+                </fieldset>
             </div>
             
             <div class="setting">
@@ -170,15 +180,27 @@
                 <ul id="controls-list">
                     <b>Map Controls</b>
                     <li>
-                        <label for="noneToggle"><input type="radio" name="type" value="none" id="noneToggle" checked="checked" /> Navigate</label>
-                    </li>
-                    <li>
-                        <label for="drawToggle"><input type="radio" name="type" value="draw" id="drawToggle" /> Draw</label>
-                    </li>
-                    <li>
                         <button id="save">Save</button>
                     </li>
                 </ul>
+                <div class="setting">
+                    <fieldset id="map-tools">
+                        <label for="pan-tool"><i class="fa fa-arrows"></i><span class="tool-field-label"> Pan</span></label>
+                        <input type="radio" name="tool-radio" id="pan-tool" class="tool-radiobutton" value="none" checked>
+                        <label for="brush-tool"><i class="fa fa-paint-brush"></i><span class="tool-field-label"> Brush</span></label>
+                        <input type="radio" name="tool-radio" id="brush-tool" class="tool-radiobutton" value="brush">
+                        <label for="icon-tool"><i class="fa fa-map-marker"></i><span class="tool-field-label"> Icon</span></label>
+                        <input type="radio" name="tool-radio" id="icon-tool" class="tool-radiobutton" value="icon">
+                        <label for="line-tool"><div class="line-icon"></div><span class="tool-field-label"> Line</span></label>
+                        <input type="radio" name="tool-radio" id="line-tool" class="tool-radiobutton" value="line">
+                        <label for="polygon-tool"><i class="fa fa-star-o"></i><span class="tool-field-label"> Polygon</span></label>
+                        <input type="radio" name="tool-radio" id="polygon-tool" class="tool-radiobutton" value="polygon">
+                        <label for="regularpolygon-tool"><i class="fa fa-square-o"></i><span class="tool-field-label"> Shape</span></label>
+                        <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
+                        <label for="modify-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Edit</span></label>
+                        <input type="radio" name="tool-radio" id="modify-tool" class="tool-radiobutton" value="modify">
+                    </fieldset>
+                </div>
             </div>
         </div>
         </div>

@@ -37,8 +37,9 @@
         drawControls,
         defaultHandlerOptions = {
             regularpolygon: {
-                snapAngle: 0,
-                sides: 4
+                snapAngle: 15,
+                sides: 4,
+                radius: 100
             }
         },
         defaultStyles = {
@@ -50,7 +51,7 @@
                 fillColor: '#ff0000'
             },
             icon: {
-                externalGraphic: null,
+                externalGraphic: "",
                 graphicHeight: 512,
                 graphicOpacity: 1
             },
@@ -76,6 +77,14 @@
                 pointRadius: 1,
                 fillColor: '#aa00ff',
                 fillOpacity: 1
+            },
+            modify: {
+                strokeWidth: 50,
+                strokeColor: '#ff0000',
+                strokeOpacity: 1,
+                pointRadius: 1,
+                fillColor: '#ff0000',
+                graphicName: "triangle"
             }
         },
         strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'];
@@ -377,7 +386,75 @@
     initSpinner('regularpolygon', 'side-count', 'sides', {
         min: 3,
         step: 1
-    })
+    });
+    initSpinner('regularpolygon', 'radius', 'radius', {
+        min: 1,
+        step: 1
+    });
+    
+    $('#regularpolygon-snap').checkboxradio({icon: false}).change(function () {
+        var key = 'regularpolygon';
+        var prop = 'snapAngle';
+        var v;
+        if (this.checked) {
+            v = $(this).data('snapAngle');
+            $('#regularpolygon-snap-angle').degreespinner( "enable" );
+        }
+        else {
+            v = null;
+            $(this).data('snapAngle', defaultHandlerOptions[key][prop])
+            defaultHandlerOptions[key][prop] = null;
+            $('#regularpolygon-snap-angle').degreespinner( "disable" );
+        }
+        defaultHandlerOptions[key][prop] = v;
+        updateHandlerOption(key, prop, v);
+    }).data('snapAngle', defaultHandlerOptions.regularpolygon.snapAngle);
+    
+    $('#regularpolygon-fixed-radius').checkboxradio({icon: false}).change(function () {
+        var key = 'regularpolygon';
+        var prop = 'radius';
+        var v;
+        if (this.checked) {
+            v = $(this).data('radius');
+            $('#regularpolygon-radius').spinner( "enable" );
+            $('#regularpolygon-irregular').prop('checked', false).checkboxradio( "refresh" );
+            updateHandlerOption('regularpolygon', 'irregular', false);
+        }
+        else {
+            v = null;
+            $(this).data('radius', defaultHandlerOptions[key][prop])
+            defaultHandlerOptions[key][prop] = null;
+            $('#regularpolygon-radius').spinner( "disable" );
+        }
+        defaultHandlerOptions[key][prop] = v;
+        updateHandlerOption(key, prop, v);
+    }).data('radius', defaultHandlerOptions.regularpolygon.radius);
+    
+    $('#regularpolygon-irregular').checkboxradio({icon: false}).change(function () {
+        var key = 'regularpolygon';
+        var prop = 'irregular';
+        var v = this.checked;
+        if (this.checked) {
+            $('#regularpolygon-fixed-radius').prop('checked', false).checkboxradio( "refresh" );
+            $('#regularpolygon-radius').spinner( "disable" );
+        }
+        else {
+            
+        }
+        /*if (this.checked) {
+            v = $(this).data('snapAngle');
+            $('#regularpolygon-snap-angle').degreespinner( "enable" );
+        }
+        else {
+            v = null;
+            $(this).data('snapAngle', defaultHandlerOptions[key][prop])
+            defaultHandlerOptions[key][prop] = null;
+            $('#regularpolygon-snap-angle').degreespinner( "disable" );
+        }
+        defaultHandlerOptions[key][prop] = v;*/
+        updateHandlerOption(key, prop, v);
+    });
+    
     // stroke width spinner
     function initStrokeWidth(key) {
         $('#' + key + '-stroke-width').spinner({
@@ -679,6 +756,7 @@
         'default': {},
         brush: createStrokeStyleContext('brush'),
         line: createStrokeStyleContext('line'),
+        line: createStrokeStyleContext('line'),
         polygon: OpenLayers.Util.extend(createStrokeStyleContext('polygon'), createFillStyleContext('polygon')),
         regularpolygon: OpenLayers.Util.extend(createStrokeStyleContext('regularpolygon'), createFillStyleContext('regularpolygon')),
         icon: {
@@ -700,7 +778,15 @@
             getExternalGraphic: function(feature) {
                 return feature.attributes.style ? feature.attributes.style.externalGraphic : getStyle('icon').externalGraphic;
             }
-        }
+        },
+        modify: OpenLayers.Util.extend(createStrokeStyleContext('modify'), {
+            getGraphicName: function(feature) {
+                return feature.attributes.style ? feature.attributes.style.graphicName : getStyle('modify').graphicName;
+            },
+            getExternalGraphic: function(feature) {
+                return "";
+            }
+        })
     }
 
     for (k in defaultStyles) {
@@ -710,7 +796,7 @@
     }
     
     var styleTemplates = {
-        'default': {},
+        'default': OpenLayers.Feature.Vector.style['default'],
         brush: {
             pointRadius: "${getPointRadius}",
             strokeWidth: "${getStrokeWidth}",
@@ -744,6 +830,14 @@
             externalGraphic: "${getExternalGraphic}",
             graphicYOffset: "${getGraphicYOffset}",
             graphicHeight: "${getGraphicHeight}"
+        },
+        modify: {
+            pointRadius: "${getPointRadius}",
+            strokeWidth: "${getStrokeWidth}",
+            strokeColor: "${getStrokeColor}",
+            strokeOpacity: "${getStrokeOpacity}",
+            externalGraphic: "${getExternalGraphic}",
+            graphicName: "${getGraphicName}"
         }
     }
 
@@ -763,9 +857,35 @@
         }
     }
     
+
+var vertexStyle = {
+    strokeColor: "#ff0000",
+    fillColor: "#ff0000",
+    strokeOpacity: 1,
+    strokeWidth: 2,
+    pointRadius: 3,
+    graphicName: "cross"
+}
+
+var virtual = {
+    strokeColor: "#00ff00",
+    fillColor: "#00ff00",
+    strokeOpacity: 1,
+    strokeWidth: 2,
+    pointRadius: 5,
+    graphicName: "triangle"
+};
+styles.vertex = vertexStyle;
+
+var styleMap = new OpenLayers.StyleMap({
+    "default": OpenLayers.Feature.Vector.style['default'],
+    "vertex": vertexStyle
+}, {extendDefault: false});
+    
     renderer = renderer ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
     var vectors = new OpenLayers.Layer.Vector("Canvas", {
         styleMap: new OpenLayers.StyleMap(styles['default']),
+        //styleMap: styleMap,
         renderers: renderer //["Canvas"]
     });
     map.addLayer(vectors);
@@ -915,7 +1035,8 @@
                     styleMap: new OpenLayers.StyleMap(styles.regularpolygon)
                 }
             })
-        })
+        }),
+        modify: new OpenLayers.Control.ModifyFeature(vectors, {vertexRenderIntent: "modify", virtualStyle: virtual})
     };
     
     function createSketchCompletedHandler(key) {
@@ -972,14 +1093,19 @@
     }
 
     // Set up panel radio button toggle handlers
-    document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
-    document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
+    //document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
+    //document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
     
     // tool switcher ui initialize
     $(".tool-radiobutton").checkboxradio({
         icon: false
     }).change(toggleControl);
-    $("#tool-field").controlgroup();
+    $("#map-tools").controlgroup({direction: "vertical"});
+    
+    $(".modify-tool-radiobutton").checkboxradio({
+        icon: false
+    });
+    $(".tool-radiogroup").controlgroup();
     
     // undo/redo logic
     vectors.redoStack = [];
