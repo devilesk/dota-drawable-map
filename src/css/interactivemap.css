@@ -111,6 +111,9 @@ body {
     height: 24px;
     line-height: 24px;
 }
+#save.tool-button {
+    width: 100%;
+}
 #measure-distance.tool-control,
 #selectfeature-distance.tool-control {
     width: 100px;
@@ -237,16 +240,13 @@ ul.ui-menu { max-height: 420px !important; }
 	border-radius: 0 15px 15px 0;
     box-shadow: 1px 1px 1px 1px rgb(34, 34, 34);
 }
-#controls-list {
+#controls-header {
 	font-family:sans-serif;
 	font-weight:bold;
 	font-size:smaller;
 	list-style:none;
 	margin:0px;
 	padding:3px 10px 5px 25px;
-}
-#controls-list li{
-	padding:0px 5px;
 }
 
 div.olControlMousePosition {
