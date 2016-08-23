@@ -111,7 +111,8 @@ body {
     height: 24px;
     line-height: 24px;
 }
-#measure-distance.tool-control {
+#measure-distance.tool-control,
+#selectfeature-distance.tool-control {
     width: 100px;
 }
 .tool-control {
