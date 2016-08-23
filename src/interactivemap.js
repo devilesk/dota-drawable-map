@@ -14,7 +14,10 @@
             maxExtent: new OpenLayers.Bounds(0, 0, map_w, map_h),
             numZoomLevels: 5,
             maxResolution: Math.pow(2, 5-1 ),
-            units: "m"
+            units: "m",
+            controls: [
+                new OpenLayers.Control.Navigation()
+            ]
         }),
         baseLayers = [
             new OpenLayers.Layer.TMS("Default", map_tile_path, {

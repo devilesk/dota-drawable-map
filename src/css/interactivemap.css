@@ -232,13 +232,12 @@ ul.ui-menu { max-height: 420px !important; }
 
 .controls-container {
     position: absolute;
-    top: 100px;
+    top: 130px;
     z-index: 1000;
     color: white;
     background-color: rgba(34, 34, 34, 0.7); 
-    padding: 5px 10px;
-    padding-left: 0;
-	border-radius: 0 15px 15px 0;
+    padding: 5px 0px;
+	border-radius: 0 5px 5px 0;
     box-shadow: 1px 1px 1px 1px rgb(34, 34, 34);
 }
 #controls-header {
@@ -259,14 +258,6 @@ div.olControlMousePosition {
     padding:3px 5px;
 }
 
-div.olControlZoom a {
-    background-color: rgba(34, 34, 34, 0.7) !important; 
-}
-
-div.olControlZoom a:hover {
-    background-color: rgba(34, 34, 34, 0.9) !important; 
-}
-
 .olControlLayerSwitcher {
     background-color: rgba(34, 34, 34, 0.7);
     padding: 5px 10px;
@@ -274,7 +265,7 @@ div.olControlZoom a:hover {
 	border-radius: 15px 0 0 15px !important;
     box-shadow: -1px 1px 1px 1px rgb(34, 34, 34);
     width: auto;
-    top: 43px;
+    top: 130px;
 }
 .olControlLayerSwitcher .layersDiv {
     background-color: initial;
@@ -285,7 +276,12 @@ div.olControlZoom a:hover {
     width: 100px;
     padding-top: 10px;
 }
-
+.zoom-container {
+    display: inline;
+}
+.minimized .zoom-container {
+    display: none;
+}
 .controls-button, .olControlLayerSwitcher .minimizeDiv, .olControlLayerSwitcher .maximizeDiv {
     display: inline-block;
     vertical-align: top;
@@ -346,9 +342,6 @@ div.olControlZoom a:hover {
 #controls-container.minimized #controls-min, .controls-container.minimized .controls {
     display: none;
 }
-div.olControlZoom {
-    top: 43px;
-}
 .maximizeDiv .fa{
     line-height: 22px;
     font-size: 16px;
@@ -356,6 +349,11 @@ div.olControlZoom {
 @media screen and (max-width: 768px) {
     .show-wide {
         display: none;
+    }
+    .zoom-container {
+        display: block;
+        margin-top: 10px;
+        padding-left: 15px;
     }
     .ui-controlgroup > .ui-controlgroup-item .fa {
         padding: 0;
@@ -365,9 +363,6 @@ div.olControlZoom {
         height: 50px;
         line-height: 49px;
         font-size: 40px;
-    }
-    .controls-container {
-        top: 150px;
     }
     .maximizeDiv .fa{
         line-height: inherit;
@@ -383,21 +378,5 @@ div.olControlZoom {
     }
     div.olControlZoom {
         left: -3px;
-    }
-}
-@media screen and (max-width: 670px) {
-    div.olControlZoom, .olControlLayerSwitcher {
-        top: 75px;
-    }
-    .controls-container {
-        top: 183px;
-    }
-}
-@media screen and (max-width: 337px) {
-    div.olControlZoom, .olControlLayerSwitcher {
-        top: 108px;
-    }
-    .controls-container {
-        top: 216px;
     }
 }
