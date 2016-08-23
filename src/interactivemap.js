@@ -1010,6 +1010,7 @@
             select: styles.select,
             vertex: styles.vertex
         }),
+        rendererOptions: { zIndexing: true },
         renderers: renderer //["Canvas"]
     });
     map.addLayer(vectors);
@@ -1165,6 +1166,7 @@
     
     function createSketchCompletedHandler(key) {
         return function (event) {
+            console.log('createSketchCompletedHandler', key);
             //event.feature.attributes.renderIntent = key;
             //event.feature.renderIntent = key;
             event.feature.attributes.style = getStyle(key);
@@ -1181,7 +1183,7 @@
 
     // Modifying feature resets renderIntent to 'default'. Reset it to stored renderIntent and redraw feature.
     function onFeatureModified(event) {
-        console.log('onFeatureModified', OpenLayers.Util.extend({}, event.feature));
+        console.log('onFeatureModified', OpenLayers.Util.extend({}, event.feature), event.modified);
         //event.feature.renderIntent = event.feature.attributes.renderIntent;
         //event.feature.layer.drawFeature(event.feature);
     }
@@ -1190,7 +1192,13 @@
     for (var key in drawControls) {
         map.addControl(drawControls[key]);
     }
-
+    
+    var historyControl = new OpenLayers.Control.UndoRedo([vectors]);
+    map.addControl(historyControl);
+    vectors.events.register("featureadded", this, function (f) {
+        console.log("FEATURE ADDED", f);
+    });
+    
     // map position/zoom tracking querystring update
     map.events.register("zoomend", map, function(){
         setQueryString('zoom', map.zoom);
@@ -1244,17 +1252,19 @@
     vectors.redoStack = [];
     function drawUndo() {
         console.log('undo');
-        if (vectors.features.length) {
+        /*if (vectors.features.length) {
             var feature = vectors.features.pop();
             vectors.removeFeatures([feature]);
             vectors.redoStack.push(feature);
-        }
+        }*/
+        historyControl.undo();
     }
     function drawRedo() {
-        if (vectors.redoStack.length) {
+        /*if (vectors.redoStack.length) {
             var feature = vectors.redoStack.pop();
             vectors.addFeatures([feature]);
-        }
+        }*/
+        historyControl.redo();
     }
     
     // undo/redo ui listen
