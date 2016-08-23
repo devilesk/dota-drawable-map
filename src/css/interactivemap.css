@@ -113,6 +113,7 @@ body {
 }
 #save.tool-button {
     width: 100%;
+    margin-top: 10px;
 }
 #measure-distance.tool-control,
 #selectfeature-distance.tool-control {
@@ -281,7 +282,8 @@ div.olControlZoom a:hover {
 }
 
 .controls {
-    display: inline-block;
+    width: 100px;
+    padding-top: 10px;
 }
 
 .controls-button, .olControlLayerSwitcher .minimizeDiv, .olControlLayerSwitcher .maximizeDiv {
@@ -353,9 +355,6 @@ div.olControlZoom {
 }
 @media screen and (max-width: 768px) {
     .show-wide {
-        display: none;
-    }
-    .tool-field-label {
         display: none;
     }
     .ui-controlgroup > .ui-controlgroup-item .fa {
