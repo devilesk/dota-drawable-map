@@ -905,7 +905,7 @@
             styles[k] = new OpenLayers.Style(styleTemplates[k], {context: styleContexts[k]});
         }
     }
-
+    var zIndexCounter = 0;
     // Custom default style returns feature attribute style values first with fallback to active tool value
     styles['default'] = new OpenLayers.Style({
         pointRadius: "${getPointRadius}",
@@ -918,30 +918,31 @@
         externalGraphic: "${getExternalGraphic}",
         graphicYOffset: "${getGraphicYOffset}",
         graphicHeight: "${getGraphicHeight}",
-        graphicName: "${getGraphicName}"
+        graphicName: "${getGraphicName}",
+        graphicZIndex: "${getGraphicZIndex}"
     },
     {
         extendDefault: true,
         context: {
-            getPointRadius: function(feature) {
+            getPointRadius: function (feature) {
                 return (feature.attributes.style ? feature.attributes.style.pointRadius : getStyle(activeTool).pointRadius) / map.getResolution();
             },
-            getStrokeWidth: function(feature) {
+            getStrokeWidth: function (feature) {
                 return (feature.attributes.style ? feature.attributes.style.strokeWidth : getStyle(activeTool).strokeWidth) / map.getResolution();
             },
-            getStrokeColor: function(feature) {
+            getStrokeColor: function (feature) {
                 return feature.attributes.style ? feature.attributes.style.strokeColor : getStyle(activeTool).strokeColor;
             },
-            getStrokeOpacity: function(feature) {
+            getStrokeOpacity: function (feature) {
                 return feature.attributes.style ? feature.attributes.style.strokeOpacity : getStyle(activeTool).strokeOpacity;
             },
-            getFillColor: function(feature) {
+            getFillColor: function (feature) {
                 return feature.attributes.style ? feature.attributes.style.fillColor : getStyle(activeTool).fillColor;
             },
-            getFillOpacity: function(feature) {
+            getFillOpacity: function (feature) {
                 return feature.attributes.style ? feature.attributes.style.fillOpacity : getStyle(activeTool).fillOpacity;
             },
-            getGraphicHeight: function(feature) {
+            getGraphicHeight: function (feature) {
                 if (feature.attributes.style) {
                     return feature.attributes.style.graphicHeight / map.getResolution();
                 }
@@ -953,10 +954,10 @@
                 }
                 return (feature.attributes.style ? feature.attributes.style.graphicHeight : getStyle(activeTool).graphicHeight) / map.getResolution();
             },
-            getGraphicOpacity: function(feature) {
+            getGraphicOpacity: function (feature) {
                 return feature.attributes.style ? feature.attributes.style.graphicOpacity : getStyle(activeTool).graphicOpacity;
             },
-            getGraphicYOffset: function(feature) {
+            getGraphicYOffset: function (feature) {
                 if (feature.attributes.style) {
                     var externalGraphic = feature.attributes.style.externalGraphic;
                     var graphicHeight = feature.attributes.style.graphicHeight;
@@ -977,7 +978,7 @@
                     return -graphicHeight / map.getResolution();
                 }
             },
-            getExternalGraphic: function(feature) {
+            getExternalGraphic: function (feature) {
                 if (feature.attributes.style) {
                     return feature.attributes.style.externalGraphic;
                 }
@@ -989,7 +990,7 @@
                 }
                 return feature.attributes.style ? feature.attributes.style.externalGraphic : getStyle(activeTool).externalGraphic;
             },
-            getGraphicName: function(feature) {
+            getGraphicName: function (feature) {
                 if (feature.attributes.style) {
                     return feature.attributes.style.graphicName;
                 }
@@ -1000,6 +1001,16 @@
                     return OpenLayers.Feature.Vector.style['default'].graphicName;
                 }
                 return feature.attributes.style ? feature.attributes.style.graphicName : getStyle(activeTool).graphicName;
+            },
+            getGraphicZIndex: function (feature) {
+                console.log("graphicZIndex", feature);
+                if (feature.attributes.hasOwnProperty('zIndex')) {
+                    console.log("graphicZIndex feature.attributes", feature.attributes.zIndex);
+                    return feature.attributes.zIndex;
+                }
+                feature.attributes.zIndex = ++zIndexCounter;
+                console.log("graphicZIndex new feature.attributes", feature.attributes.zIndex);
+                return feature.attributes.zIndex;
             }
         }
     });
