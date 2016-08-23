@@ -218,8 +218,9 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
                                 OpenLayers.Util.removeItem(layer.features, updatedFeature);						
                                 //layer.removeFeatures(updatedFeature);
                                 console.log("old feature geometry: " + feature.geometry);
-                                layer.features.push(feature);
-                                layer.drawFeature(feature);
+                                //layer.features.push(feature);
+                                //layer.drawFeature(feature);
+                                layer.addFeatures([feature], {silent: true});
                                 data[component][editType][i] = updatedFeature;
                                 break;
                             default:
@@ -254,8 +255,9 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
                         switch (editType) {
                             case "Insert":
                                 console.log("redo Insert", feature);
-                                layer.features.push(feature);
-                                layer.drawFeature(feature);
+                                // layer.features.push(feature);
+                                // layer.drawFeature(feature);
+                                layer.addFeatures([feature], {silent: true});
                                 break;
                             case "Delete":
                                 console.log("redo Delete");
@@ -270,8 +272,9 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
                                 layer.eraseFeatures(oldFeature);
                                 OpenLayers.Util.removeItem(layer.features, oldFeature);
                                 console.log("updated feature id: " + oldFeature.id);
-                                layer.features.push(feature);
-                                layer.drawFeature(feature);
+                                //layer.features.push(feature);
+                                //layer.drawFeature(feature);
+                                layer.addFeatures([feature], {silent: true});
                                 data[component][editType][i] = oldFeature;
                                 break;
                             default:

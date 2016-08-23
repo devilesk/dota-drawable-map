@@ -85,6 +85,22 @@
                 pointRadius: 50,
                 fillColor: '#ff0000',
                 graphicName: "cross"
+            },
+            selectfeature: {
+                strokeWidth: 2,
+                strokeColor: '#ff0000',
+                strokeOpacity: 1,
+                pointRadius: 50,
+                fillColor: '#ff0000',
+                graphicName: "cross"
+            },
+            measure: {
+                strokeWidth: 2,
+                strokeColor: '#ff0000',
+                strokeOpacity: 1,
+                pointRadius: 50,
+                fillColor: '#ff0000',
+                graphicName: "cross"
             }
         },
         activeTool,
@@ -1172,8 +1188,33 @@
                 }
             })
         }),
-        modify: new OpenLayers.Control.ModifyFeature(vectors, {vertexRenderIntent: "vertex", virtualStyle: styles.virtual})
+        modify: new OpenLayers.Control.ModifyFeature(vectors, {vertexRenderIntent: "vertex", virtualStyle: styles.virtual}),
+        selectfeature: new OpenLayers.Control.SelectFeature(vectors),
+        measure: new OpenLayers.Control.Measure(OpenLayers.Handler.Path, {persist: true, immediate: true})
     };
+    
+    $('#measure-cancel').click(function () {
+        drawControls.measure.cancel();
+        $('#measure-distance').val("");
+    });
+    drawControls.measure.events.register("measurepartial", drawControls.measure, handleMeasurements);
+    drawControls.measure.events.register("measure", drawControls.measure, handleMeasurements);
+    
+    function handleMeasurements(event) {
+        console.log('handleMeasurements', event);
+        var geometry = event.geometry;
+        var units = event.units;
+        var order = event.order;
+        var measure = event.measure;
+        var element = document.getElementById('output');
+        var out = "";
+        if(order == 1) {
+            out += measure.toFixed(3) + " " + units;
+        } else {
+            out += measure.toFixed(3) + " " + units + "<sup>2</" + "sup>";
+        }
+        $('#measure-distance').val(out);
+    }
     
     function createSketchCompletedHandler(key) {
         return function (event) {
@@ -1206,8 +1247,17 @@
     
     var historyControl = new OpenLayers.Control.UndoRedo([vectors]);
     map.addControl(historyControl);
-    vectors.events.register("featureadded", this, function (f) {
-        console.log("FEATURE ADDED", f);
+    
+    var measureControl = new OpenLayers.Control.Measure(OpenLayers.Handler.Path);
+    map.addControl(measureControl);
+    vectors.events.register("featureselected", drawControls.selectfeature, function (event) {
+        console.log("featureselected", event);
+        if (event.feature.geometry.CLASS_NAME.indexOf('LineString') > -1) {
+            console.log('distance', measureControl.getBestLength(event.feature.geometry));
+        }
+        else {
+            console.log('area', measureControl.getBestArea(event.feature.geometry));
+        }
     });
     
     // map position/zoom tracking querystring update

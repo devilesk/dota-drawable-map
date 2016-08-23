@@ -176,6 +176,19 @@
                 <button id="modify-delete" class="tool-button" title="Delete (Del)"><i class="fa fa-trash"></i></button>
             </div>
             
+            <div class="tool-setting selectfeature-tool-group">
+                <span class="tool-label">Distance</span>
+                <input type="text" class="tool-control" id="selectfeature-distance">
+            </div>
+            
+            <div class="tool-setting measure-tool-group">
+                <span class="tool-label">Distance</span>
+                <input type="text" class="tool-control" id="measure-distance" disabled>
+            </div>
+            <div class="tool-setting measure-tool-group">
+                <button id="measure-cancel" class="tool-button tool-input-button" title="Clear">Clear</button>
+            </div>
+            
             <div class="setting">
                 <button id="draw-undo" class="tool-button" title="Undo (Ctrl+X)"><i class="fa fa-undo"></i></button>
                 <button id="draw-redo" class="tool-button" title="Redo (Ctrl+Y)"><i class="fa fa-repeat"></i></button>
@@ -210,8 +223,10 @@
                         <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
                         <label for="modify-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Edit</span></label>
                         <input type="radio" name="tool-radio" id="modify-tool" class="tool-radiobutton" value="modify">
-                        <label for="new-layer-tool"><i class="fa fa-file-o"></i><span class="tool-field-label"> Layer</span></label>
-                        <input type="radio" name="tool-radio" id="new-layer-tool" class="tool-radiobutton" value="new-layer">
+                        <label for="selectfeature-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Select</span></label>
+                        <input type="radio" name="tool-radio" id="selectfeature-tool" class="tool-radiobutton" value="selectfeature">
+                        <label for="measure-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Measure</span></label>
+                        <input type="radio" name="tool-radio" id="measure-tool" class="tool-radiobutton" value="measure">
                     </fieldset>
                 </div>
             </div>
