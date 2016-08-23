@@ -274,6 +274,35 @@
      * CONTROL HANDLERS *
      ********************/
 
+    function toggleModifyControl() {
+        console.log(this.value);
+        drawControls.modify.mode = OpenLayers.Control.ModifyFeature.RESHAPE;
+        switch (this.value) {
+            case 'reshape':
+                drawControls.modify.mode = OpenLayers.Control.ModifyFeature.RESHAPE;
+            break;
+            case 'rotate':
+                drawControls.modify.mode = OpenLayers.Control.ModifyFeature.ROTATE;
+            break;
+            case 'scale':
+                drawControls.modify.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+                drawControls.modify.mode &= ~OpenLayers.Control.ModifyFeature.RESHAPE;
+            break;
+            case 'skew':
+                drawControls.modify.mode |= OpenLayers.Control.ModifyFeature.RESIZE;
+            break;
+            case 'drag':
+                drawControls.modify.mode = OpenLayers.Control.ModifyFeature.DRAG;
+            break;
+        }
+        console.log('drawControls.modify', drawControls.modify);
+        var feature = drawControls.modify.feature;
+        if (feature) {
+            drawControls.modify.unselectFeature(feature);
+            drawControls.modify.selectFeature(feature);
+        }
+    }
+    
     function toggleControl() {
         var control;
         var tools = Object.keys(defaultStyles);
@@ -719,6 +748,9 @@
                 break;
             case 27: // esc
                 handled = true;
+                break;
+            case 46: // esc
+                if (activeTool == 'modify') modifyDeleteFeature();
                 break;
         }
         if (handled) {
@@ -1205,7 +1237,7 @@
     
     $(".modify-tool-radiobutton").checkboxradio({
         icon: false
-    });
+    }).change(toggleModifyControl);
     $(".tool-radiogroup").controlgroup();
     
     // undo/redo logic
@@ -1228,6 +1260,16 @@
     // undo/redo ui listen
     $('#draw-undo').click(drawUndo);
     $('#draw-redo').click(drawRedo);
+    
+    $('#modify-delete').click(modifyDeleteFeature);
+    
+    function modifyDeleteFeature() {
+        var feature = drawControls.modify.feature;
+        if (feature) {
+            drawControls.modify.unselectFeature(feature);
+            vectors.removeFeatures([feature]);
+        }
+    }
     
     // save drawing
     $('#save').click(function () {

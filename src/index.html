@@ -162,7 +162,18 @@
                 <fieldset class="tool-radiogroup">
                     <label for="modify-reshape"><i class="fa fa-arrows"></i><span class="tool-field-label"> Reshape</span></label>
                     <input type="radio" name="modify-tool-radio" id="modify-reshape" class="modify-tool-radiobutton" value="reshape" checked>
+                    <label for="modify-rotate"><i class="fa fa-rotate-right"></i><span class="tool-field-label"> Rotate</span></label>
+                    <input type="radio" name="modify-tool-radio" id="modify-rotate" class="modify-tool-radiobutton" value="rotate">
+                    <label for="modify-scale"><i class="fa fa-expand"></i><span class="tool-field-label"> Scale</span></label>
+                    <input type="radio" name="modify-tool-radio" id="modify-scale" class="modify-tool-radiobutton" value="scale">
+                    <label for="modify-skew"><i class="fa fa-compress"></i><span class="tool-field-label"> Skew</span></label>
+                    <input type="radio" name="modify-tool-radio" id="modify-skew" class="modify-tool-radiobutton" value="skew">
+                    <label for="modify-drag"><i class="fa fa-arrows-alt"></i><span class="tool-field-label"> Drag</span></label>
+                    <input type="radio" name="modify-tool-radio" id="modify-drag" class="modify-tool-radiobutton" value="drag">
                 </fieldset>
+            </div>
+            <div class="tool-setting modify-tool-group">
+                <button id="modify-delete" class="tool-button" title="Delete (Del)"><i class="fa fa-trash"></i></button>
             </div>
             
             <div class="setting">
@@ -199,6 +210,8 @@
                         <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
                         <label for="modify-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Edit</span></label>
                         <input type="radio" name="tool-radio" id="modify-tool" class="tool-radiobutton" value="modify">
+                        <label for="new-layer-tool"><i class="fa fa-file-o"></i><span class="tool-field-label"> Layer</span></label>
+                        <input type="radio" name="tool-radio" id="new-layer-tool" class="tool-radiobutton" value="new-layer">
                     </fieldset>
                 </div>
             </div>
