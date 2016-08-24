@@ -1,5 +1,5 @@
 (function() {
-    var IMG_DIR = "img/",
+    var IMG_DIR = "images/",
         map_data_path = "data.json",
         map_data,
         map_tile_path = "http://devilesk.com/media/images/map/687/",
@@ -16,7 +16,11 @@
             maxResolution: Math.pow(2, 5-1 ),
             units: "m",
             controls: [
-                new OpenLayers.Control.Navigation()
+                new OpenLayers.Control.Navigation(),
+                new OpenLayers.Control.Zoom({
+                    zoomInId: "zoom-in",
+                    zoomOutId: "zoom-out"
+                })
             ]
         }),
         baseLayers = [
@@ -725,11 +729,11 @@
     $.getJSON("sprite_manifest.json", function (data) {
         var img_root = '/media/images/miniheroes/';
         for (var i = 0; i < data.heroes.length; i++) {
-            var $option = $('<option value="' + img_root + data.heroes[i].file + '">').text(data.heroes[i].name).attr("data-class", 'icon-miniheroes_' + data.heroes[i].id);
+            var $option = $('<option value="' + img_root + data.heroes[i].file + '">').text(data.heroes[i].name).attr("data-class", 'miniheroes-sprite-' + data.heroes[i].id);
             $('#marker-image-dropdown').append($option);
         }
         for (var i = 0; i < data.other.length; i++) {
-            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'icon-miniheroes_' + data.other[i].id);
+            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite' + data.other[i].id);
             $('#marker-image-dropdown').append($option);
         }
         
@@ -1368,4 +1372,6 @@
     $( document ).tooltip();
     
     parseQueryString();
+    
+    $('.controls-container').show();
 }());

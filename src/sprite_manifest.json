@@ -526,6 +526,11 @@
             "name": "Tusk"
         }, 
         {
+            "file": "abyssal_underlord.png", 
+            "id": "abyssal_underlord", 
+            "name": "Underlord"
+        }, 
+        {
             "file": "undying.png", 
             "id": "undying", 
             "name": "Undying"

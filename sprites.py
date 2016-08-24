@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 with open('/home/dota-datafiles/dist/herodata.json', 'r') as f:
 	herodata = json.loads(f.read())
@@ -47,3 +48,6 @@ with open('src/sprite_manifest.json', 'w') as f:
 	f.write(json.dumps(data, indent=4, sort_keys=True))
 with open('missing_sprite_names.json', 'w') as f:
 	f.write(json.dumps(missing_data, indent=4, sort_keys=True))
+
+shutil.copyfile('/home/dota-webassets/dist/images/miniheroes/miniheroes_sprite.png', '/srv/www/dev.devilesk.com/dota2/apps/drawablemap2/src/images/miniheroes_sprite.png')
+shutil.copyfile('/home/dota-webassets/dist/css/miniheroes_sprite.css', '/srv/www/dev.devilesk.com/dota2/apps/drawablemap2/src/css/miniheroes_sprite.css')

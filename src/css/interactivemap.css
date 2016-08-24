@@ -239,6 +239,7 @@ ul.ui-menu { max-height: 420px !important; }
     padding: 5px 0px;
 	border-radius: 0 5px 5px 0;
     box-shadow: 1px 1px 1px 1px rgb(34, 34, 34);
+    display: none;
 }
 #controls-header {
 	font-family:sans-serif;
