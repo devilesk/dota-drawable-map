@@ -10,6 +10,12 @@ var pump = require('pump');
 var del = require('del');
 var path = require('path');
 var spawn = require('child_process').spawn;
+var insert = require('gulp-insert');
+var browserify = require('browserify');
+var gutil = require('gulp-util');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var sourcemaps = require('gulp-sourcemaps');
 
 var deploy_dir = '/srv/www/devilesk.com/dota2/apps/interactivemap3';
 
@@ -40,7 +46,54 @@ gulp.task('image', function () {
 gulp.task('build-ol', function (cb) {
     var dir = path.resolve(process.cwd(), './ol2/build');
     console.log(dir);
-    spawn('python', ['build.py', '../../interactivemap.cfg'], { cwd: dir, stdio: 'inherit' }).on('close', cb);
+    spawn('python', ['build.py', '-c', 'none', '../../interactivemap.cfg'], { cwd: dir, stdio: 'inherit' }).on('close', cb);
+});
+
+gulp.task('export-ol', ['build-ol'], function (cb) {
+    return gulp.src('./ol2/build/OpenLayers.js')
+        .pipe(insert.append('export { OpenLayers };'))
+        .pipe(gulp.dest('app'))
+});
+
+gulp.task('scripts', function() {
+  return gulp.src('./lib/*.js')
+    .pipe(concat('all.js'))
+    .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('concat', function() {
+  return gulp.src([
+        './ol2/build/OpenLayers.js',
+        './app/OpenLayers.Control.UndoRedo.js',
+        './app/color-picker.js',
+        './node_modules/jquery/dist/jquery.js',
+        './app/jquery-ui.js',
+        './app/app.js'
+    ])
+    .pipe(concat('all.js'))
+    .pipe(gulp.dest('./app'));
+});
+
+gulp.task('javascript', ['concat'], function () {
+    browserify({
+        entries: [
+            './app/all.js'
+        ],
+        debug: true
+    })
+    .transform("babelify", {
+        presets: ["es2015"],
+        compact: false
+    })
+    .bundle()
+    .on('error', err => {
+        gutil.log("Browserify Error", gutil.colors.red(err.message))
+    })
+    .pipe(source('bundle.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(gulp.dest('./www/js'));
 });
 
 gulp.task('minify', function (cb) {

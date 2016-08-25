@@ -1,0 +1,6 @@
+{
+    "presets": ["es2015"],
+    "ignore": [
+        "./ol2/build/OpenLayers.js"
+    ]
+}

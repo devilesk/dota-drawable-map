@@ -1,8 +1,11 @@
+import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
+
 /**
  * Class: OpenLayers.Control.UndoRedo
  * Instance of this class can be used to undo and redo vector edits.
  */
-OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
+ 
+export default OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * APIProperty: currentEditIndex
 	 * {integer} - sequence number for editing the feature[s] 
@@ -25,7 +28,7 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	isEditMulty: false,
 	
 	/**
-	 * Constructor: UndoRedo
+	 * varructor: UndoRedo
 	 * Parameters:
 	 * layers - array of {<OpenLayers.Layers.Vector>}
 	 */
@@ -38,19 +41,19 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
             console.log('registering handlers');
             layers[i].events.register("sketchstarted", this, this.onSketchStarted);
 			layers[i].events.register("featureadded", this, this.onInsert);
-            layers[i].events.register("beforefeatureremoved", this, this.onDelete);
+            layers[i].events.register("beforefeatureremoved", this, this.onDevare);
             layers[i].events.register("beforefeaturemodified", this, this.onUpdate);
-            layers[i].events.register("afterfeaturemodified", this, this.onUpdateCompleted);
+            layers[i].events.register("afterfeaturemodified", this, this.onUpdateCompvared);
 		}
 	},
     
 	/**
 	 * Method: onEdit
 	 * on any edit operation performed this has to be triggered
-	 * i.e. on insert, delete, update 
+	 * i.e. on insert, devare, update 
 	 * Parameters: 
 	 * feature - {<OpenLayers.Feature.Vector>}
-	 * editType - {string} edit type done "Insert","Delete","Update"
+	 * editType - {string} edit type done "Insert","Devare","Update"
 	 * component - {string} layer or any other identifier
 	 * Returns: 
 	 */	 
@@ -61,7 +64,7 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 		}
 		if (this.undoFeatures[this.currentEditIndex] == undefined) {
 			this.undoFeatures[this.currentEditIndex] = {};
-			this.undoFeatures[this.currentEditIndex][component] = {"Insert": [], "Update": [], "Delete": []};
+			this.undoFeatures[this.currentEditIndex][component] = {"Insert": [], "Update": [], "Devare": []};
 		}
 		if (feature.fid == undefined) {
 			feature.fid = feature.id;
@@ -85,7 +88,7 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	 * event handler for featureadded 
 	 */
 	onInsert: function (event) {	
-		feature = event.feature.clone();
+		var feature = event.feature.clone();
 		if (event.feature.fid == undefined) {
 			event.feature.fid = event.feature.id;
 		}
@@ -97,12 +100,12 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	},
 	
 	/**
-	 * Method: onDelete
+	 * Method: onDevare
 	 * event handler for beforefeatureremoved 
 	 */
-	onDelete: function (event) {
+	onDevare: function (event) {
         this.increaseEditIndex();
-		this.onEdit(event.feature, "Delete", event.feature.layer.name);
+		this.onEdit(event.feature, "Devare", event.feature.layer.name);
         return true;
 	},
 	
@@ -113,7 +116,7 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	onUpdate: function (event) {
         this.increaseEditIndex();
 		console.log("old feature geometry: ", event.feature.geometry);
-		feature = event.feature.clone();
+		var feature = event.feature.clone();
 		feature.fid = event.feature.fid;
 		feature.state = event.feature.state;
 		feature.layer = event.feature.layer;
@@ -121,11 +124,11 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	},
 	
 	/**
-	 * Method: onUpdateCompleted
+	 * Method: onUpdateCompvared
 	 * event handler for afterfeaturemodified
 	 */
-	onUpdateCompleted: function (event) {
-        console.log("onUpdateCompleted", event.modified);
+	onUpdateCompvared: function (event) {
+        console.log("onUpdateCompvared", event.modified);
         if (!event.modified) {
             this.getUndoData();
         }
@@ -183,34 +186,34 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 		var data = this.getUndoData();
 		console.log("undo data :", data);
         if (data) {
-            for (component in data) {
+            for (var component in data) {
                 console.log("component: " + component);
                 var layer = this.map.getLayersByName(component)[0];
                 console.log("got layer, name: " + layer.name);
-                for (editType in data[component]) {
-                    console.log("editType : "+editType);
+                for (var editType in data[component]) {
+                    console.log("editType : " + editType);
                     for (var i = 0; i < data[component][editType].length;i++) {
                         var feature = data[component][editType][i];
                         console.log("features before undo: " + layer.features.length, feature);
                         switch (editType) {
                             case "Insert":
                                 //layer.drawFeature(feature, {display : "none"});
-                                insertedFeature = layer.getFeatureByFid(feature.fid);
+                                var insertedFeature = layer.getFeatureByFid(feature.fid);
                                 console.log("undo Insert", insertedFeature, feature, feature.fid);
                                 layer.eraseFeatures(insertedFeature);
                                 console.log('after erase', insertedFeature, layer.features.length);
                                 OpenLayers.Util.removeItem(layer.features, insertedFeature);
                                 console.log('OpenLayers.Util.removeItem', insertedFeature, layer.features.length);
                                 break;
-                            case "Delete":
-                                console.log("undo Delete", feature);
+                            case "Devare":
+                                console.log("undo Devare", feature);
                                 // layer.features.push(feature);
                                 // layer.drawFeature(feature);
                                 layer.addFeatures([feature], {silent: true});
                                 break;
                             case "Update":
                                 console.log("undo Update");
-                                updatedFeature = layer.getFeatureByFid(feature.fid);
+                                var updatedFeature = layer.getFeatureByFid(feature.fid);
                                 console.log("old feature geometry: ", feature.geometry);
                                 console.log("updated feature geometry: ", updatedFeature.geometry);
                                 //layer.drawFeature(updatedFeature, {display : "none"});
@@ -243,11 +246,11 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 		var data = this.getRedoData();
         console.log("redo data :", data);
         if (data) {
-            for (component in data) {
+            for (var component in data) {
                 console.log("component: " + component);
                 var layer = this.map.getLayersByName(component)[0];
                 console.log("got layer, name: " + layer.name);
-                for (editType in data[component]) {
+                for (var editType in data[component]) {
                     console.log("editType : " + editType);
                     for (var i = 0; i < data[component][editType].length; i++) {
                         var feature = data[component][editType][i];
@@ -259,15 +262,15 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
                                 // layer.drawFeature(feature);
                                 layer.addFeatures([feature], {silent: true});
                                 break;
-                            case "Delete":
-                                console.log("redo Delete");
-                                deleteFeature = layer.getFeatureByFid(feature.fid)
-                                layer.eraseFeatures(deleteFeature);
-                                OpenLayers.Util.removeItem(layer.features, deleteFeature);	
+                            case "Devare":
+                                console.log("redo Devare");
+                                var devareFeature = layer.getFeatureByFid(feature.fid)
+                                layer.eraseFeatures(devareFeature);
+                                OpenLayers.Util.removeItem(layer.features, devareFeature);	
                                 break;
                             case "Update":
                                 console.log("redo Update");
-                                oldFeature = layer.getFeatureByFid(feature.fid);
+                                var oldFeature = layer.getFeatureByFid(feature.fid);
                                 console.log("old feature id: " + oldFeature.id);
                                 layer.eraseFeatures(oldFeature);
                                 OpenLayers.Util.removeItem(layer.features, oldFeature);
@@ -288,4 +291,4 @@ OpenLayers.Control.UndoRedo = OpenLayers.Class(OpenLayers.Control, {
 	},
 
 	CLASS_NAME : "OpenLayers.Control.UndoRedo"
-});	
+});

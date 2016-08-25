@@ -1,14 +1,35 @@
-(function() {
+import $ from 'jquery';
+import spinner from 'jquery-ui/ui/widgets/spinner';
+import selectmenu from 'jquery-ui/ui/widgets/selectmenu';
+import checkboxradio from 'jquery-ui/ui/widgets/checkboxradio';
+import controlgroup from 'jquery-ui/ui/widgets/controlgroup';
+import tooltip from 'jquery-ui/ui/widgets/tooltip';
+import CP from 'exports?CP!./color-picker.js';
+import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
+import UndoRedo from './OpenLayers.Control.UndoRedo';
+import {scaleLinear as d3scaleLinear} from "d3-scale";
+import {geoTransform as d3geoTransform} from "d3-geo";
+import {geoPath as d3geoPath} from "d3-geo";
+import {select as d3select} from "d3-selection";
+import {getParameterByName, setQueryString} from "./querystringutil";
+import {latLonToWorld, worldToLatLon} from "./coordinateconversion";
+import CustomLayerSwitcher from "./layerswitcher";
+console.log('jquery', $);
+console.log('spinner', spinner);
+console.log('OpenLayers', OpenLayers);
+console.log('UndoRedo', UndoRedo);
+console.log('d3select', d3select);
+
     var IMG_DIR = "images/",
         map_data_path = "data.json",
-        map_data,
         map_tile_path = "/media/images/map/687/",
         map_w = 16384,
         map_h = 16384,
         map_x_boundaries = [-8475.58617377, 9327.49124559],
         map_y_boundaries = [9028.52473332, -8836.61406266],
-        zoomify = new OpenLayers.Layer.Zoomify( "Zoomify", map_tile_path, new OpenLayers.Size( map_w, map_h ) ),
         scale = Math.abs(map_x_boundaries[1] - map_x_boundaries[0])/map_w,
+        imageToDota = latLonToWorld.bind(null, map_x_boundaries, map_y_boundaries, map_w, map_h),
+        dotaToImage = worldToLatLon.bind(null, map_x_boundaries, map_y_boundaries, map_w, map_h),
         map = new OpenLayers.Map("map", {
             theme: null,
             maxExtent: new OpenLayers.Bounds(0, 0, map_w, map_h),
@@ -37,11 +58,9 @@
                 getURL: getMyURL('immortalgardens')
             })
         ],
-        layerSwitcher = new OpenLayers.Control.LayerSwitcher({
+        layerSwitcher = new CustomLayerSwitcher({
             ascending: false
         }),
-        renderer = OpenLayers.Util.getParameters(window.location.href).renderer,
-        drawControls,
         defaultHandlerOptions = {
             regularpolygon: {
                 snapAngle: 15,
@@ -110,154 +129,22 @@
                 graphicName: "cross"
             }
         },
+        strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'],
         activeTool,
-        strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'];
-
-    /***********************************
-     * QUERY STRING FUNCTIONS *
-     ***********************************/
-
-    var trim = (function() {
-        "use strict";
-
-        function escapeRegex(string) {
-            return string.replace(/[\[\](){}?*+\^$\\.|\-]/g, "\\$&");
-        }
-
-        return function trim(str, characters, flags) {
-            flags = flags || "g";
-            if (typeof str !== "string" || typeof characters !== "string" || typeof flags !== "string") {
-                throw new TypeError("argument must be string");
-            }
-
-            if (!/^[gi]*$/.test(flags)) {
-                throw new TypeError("Invalid flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
-            }
-
-            characters = escapeRegex(characters);
-
-            return str.replace(new RegExp("^[" + characters + "]+|[" + characters + "]+$", flags), '');
-        };
-    }());
-
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(location.search);
-        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-
-    function setQueryString(key, value) {
-        history.pushState(null, "", updateQueryString(key, value));
-    }
-
-    function addQueryStringValue(key, value) {
-        console.log('addQueryStringValue', key, value);
-        var qs = getParameterByName(key);
-        qs = trim(trim(qs, ' ;') + ';' + value, ' ;');
-        history.pushState(null, "", updateQueryString(key, qs));
-    }
-
-    function removeQueryStringValue(key, value) {
-        console.log('removeQueryStringValue', key, value);
-        var qs = getParameterByName(key);
-        qs = trim(trim(qs, ' ;').replace(value, '').replace(/;;/g, ''), ' ;');
-        history.pushState(null, "", updateQueryString(key, qs != '' ? qs : null));
-    }
-
-    function updateQueryString(key, value, url) {
-        if (!url) url = window.location.href;
-        var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
-            hash;
-
-        if (re.test(url)) {
-            if (typeof value !== 'undefined' && value !== null)
-                return url.replace(re, '$1' + key + "=" + value + '$2$3');
-            else {
-                hash = url.split('#');
-                url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
-                if (typeof hash[1] !== 'undefined' && hash[1] !== null)
-                    url += '#' + hash[1];
-                return url;
-            }
-        } else {
-            if (typeof value !== 'undefined' && value !== null) {
-                var separator = url.indexOf('?') !== -1 ? '&' : '?';
-                hash = url.split('#');
-                url = hash[0] + separator + key + '=' + value;
-                if (typeof hash[1] !== 'undefined' && hash[1] !== null)
-                    url += '#' + hash[1];
-                return url;
-            } else {
-                return url;
-            }
-        }
-    }
-
-    /***********************************
-     * COORDINATE CONVERSION FUNCTIONS *
-     ***********************************/
-
-    function getTileRadius(r) {
-        return parseInt(Math.floor(r / 64));
-    }
-
-    function lerp(minVal, maxVal, pos_r) {
-        return pos_r * (maxVal - minVal) + minVal;
-    }
-
-    function reverseLerp(minVal, maxVal, pos) {
-        return (pos - minVal) / (maxVal - minVal);
-    }
-
-    function latLonToWorld(x, y) {
-        var x_r = lerp(map_x_boundaries[0], map_x_boundaries[1], x / map_w),
-            y_r = lerp(map_y_boundaries[0], map_y_boundaries[1], (map_h - y) / map_h);
-
-        return {
-            x: x_r,
-            y: y_r
-        };
-    }
-
-    function worldToLatLon(x_r, y_r) {
-        var x = reverseLerp(map_x_boundaries[0], map_x_boundaries[1], x_r) * map_w,
-            y = map_h - reverseLerp(map_y_boundaries[0], map_y_boundaries[1], y_r) * map_h;
-
-        return {
-            x: x,
-            y: y
-        };
-    }
-
-    function getScaledRadius(r) {
-        return r / (map_x_boundaries[1] - map_x_boundaries[0]) * map_w
-    }
-
-    function calculateDistance(order, units, measure) {
-        if (order == 1) {
-            if (units == "km") {
-                return measure * scale * 1000;
-            } else {
-                return measure * scale;
-            }
-        } else {
-            return measure * scale;
-        }
-    }
+        renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
 
     /**************
      * UI WIDGETS *
      **************/
 
     function formatDegree(value) {
-        return value + 'Â°';
+        return value + '°';
     }
     
-    $.widget( "ui.degreespinner", $.ui.spinner, {
+    console.log("DEGREESPINNER", $.widget( "ui.degreespinner", $.ui.spinner, {
         _format: formatDegree,
         _parse: function(value) { return parseFloat(value); }
-    });
+    }));
 
     function formatPercent(value) {
         return value + '%';
@@ -418,7 +305,7 @@
         var worldX = getParameterByName('x');
         var worldY = getParameterByName('y');
         if (worldX && worldY) {
-            var lonlat = worldToLatLon(worldX, worldY);
+            var lonlat = dotaToImage(worldX, worldY);
             map.setCenter(new OpenLayers.LonLat(lonlat.x, lonlat.y), undefined, false, false);
         }
         
@@ -923,7 +810,7 @@
     };
     
     // Styles used by control temporary layers
-    for (k in defaultStyles) {
+    for (var k in defaultStyles) {
         if (defaultStyles.hasOwnProperty(k)) {
             styles[k] = new OpenLayers.Style(styleTemplates[k], {context: styleContexts[k]});
         }
@@ -1052,7 +939,7 @@
     // X/Y coordinate update control
     var coordinateControl = new OpenLayers.Control.MousePosition();
     coordinateControl.formatOutput = function (lonlat) {
-        var worldXY = latLonToWorld(lonlat.lon, lonlat.lat);
+        var worldXY = imageToDota(lonlat.lon, lonlat.lat);
         return worldXY.x.toFixed(0) + ', ' + worldXY.y.toFixed(0);
     };
     map.addControl(coordinateControl);
@@ -1064,7 +951,7 @@
     }));
     map.addControl(new OpenLayers.Control.KeyboardDefaults());
     
-    layerSwitcher.onButtonClick = (function (fn) {
+    /*layerSwitcher.onButtonClick = (function (fn) {
         return function (evt) {
             var button = evt.buttonElement;
             if (button === this.maximizeDiv) {
@@ -1144,7 +1031,7 @@
         this.minimizeDiv.innerHTML = '&times;';
         $(this.maximizeDiv).empty().append($('<i class="fa fa-bars">'));
         this.div.appendChild(this.minimizeDiv);
-    }
+    }*/
     map.addControl(layerSwitcher);
     layerSwitcher.maximizeControl();
     if (!map.getCenter()) {
@@ -1152,7 +1039,7 @@
     }
 
     // Controls configuration
-    drawControls = {
+    var drawControls = {
         brush: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Path,
         {
             handlerOptions: {
@@ -1252,7 +1139,7 @@
         map.addControl(drawControls[key]);
     }
             
-    var historyControl = new OpenLayers.Control.UndoRedo([vectors]);
+    var historyControl = new UndoRedo([vectors]);
     map.addControl(historyControl);
     
     var measureControl = new OpenLayers.Control.Measure(OpenLayers.Handler.Path);
@@ -1272,7 +1159,7 @@
         setQueryString('zoom', map.zoom);
     });
     map.events.register("moveend", map, function(){
-        var worldXY = latLonToWorld(map.center.lon, map.center.lat);
+        var worldXY = imageToDota(map.center.lon, map.center.lat);
         setQueryString('x', worldXY.x.toFixed(0));
         setQueryString('y', worldXY.y.toFixed(0));
     });
@@ -1379,23 +1266,23 @@
         var width = 1024,
             height = 1024;
 
-        var x = d3.scaleLinear()
+        var x = d3scaleLinear()
             .range([0, width]);
 
-        var y = d3.scaleLinear()
+        var y = d3scaleLinear()
             .range([0, height]);
 
-        var projection = d3.geoTransform({
+        var projection = d3geoTransform({
             point: function(px, py) {
                 //console.log('px py', px, py, x(px), y(py));
                 this.stream.point(x(px), height - y(py));
             }
         });
 
-        var path = d3.geoPath()
+        var path = d3geoPath()
             .projection(projection);
 
-        var svg = d3.select("body").append("svg")
+        var svg = d3select("body").append("svg")
             .attr("id", "export-svg")
             .attr("width", width)
             .attr("height", height);
@@ -1421,11 +1308,11 @@
                         val = x(val);
                     }
                     if (p == 'fillColor' && d.geometry.type == 'LineString') val = 'none';
-                    d3.select(this).style(stylePropMap[p], val);
+                    d3select(this).style(stylePropMap[p], val);
                 }
                 else if (p == 'fillColor') {
                     console.log('fillColor none', d.geometry.type);
-                    d3.select(this).style(stylePropMap[p], "none");
+                    d3select(this).style(stylePropMap[p], "none");
                 }
                 else {
                     //console.log(p);
@@ -1436,14 +1323,14 @@
                 var val = d.properties.style.externalGraphic;
                 console.log('externalGraphic', val);
                 var self = this;
-                d3.select(this).attr("xlink:href", val)
+                d3select(this).attr("xlink:href", val)
                     .attr('x', x(d.geometry.coordinates[0]) - x(d.properties.style.graphicHeight) / 2)
                     .attr('y', height - y(d.geometry.coordinates[1]) - x(d.properties.style.graphicHeight) / 2)
                     .attr('width', x(d.properties.style.graphicHeight))
                     .attr('height', x(d.properties.style.graphicHeight));
                 imagesToLoad++;
                 getImageBase64(val, function (data) {
-                    d3.select(self)
+                    d3select(self)
                         .attr("href", "data:image/png;base64," + data); // replace link by data URI
                     imagesToLoad--;
                     imageLoadFinished();
@@ -1489,7 +1376,7 @@
                 .attr('height', height);
             imagesToLoad = 1;
             getImageBase64(background, function (data) {
-                d3.select(".background")
+                d3select(".background")
                     .attr("href", "data:image/png;base64," + data); // replace link by data URI
                 imagesToLoad--;
                 imageLoadFinished();
@@ -1548,7 +1435,7 @@
         }
         
         function download_png () {
-            var contents = d3.select("svg")
+            var contents = d3select("svg")
                 .attr("version", 1.1)
                 .attr("xmlns", "http://www.w3.org/2000/svg")
                 .node().outerHTML;
@@ -1599,4 +1486,3 @@
         
         $("#export").click(doExport);
     })();
-}());
