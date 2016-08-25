@@ -2,7 +2,7 @@
     var IMG_DIR = "images/",
         map_data_path = "data.json",
         map_data,
-        map_tile_path = "http://devilesk.com/media/images/map/687/",
+        map_tile_path = "/media/images/map/687/",
         map_w = 16384,
         map_h = 16384,
         map_x_boundaries = [-8475.58617377, 9327.49124559],
@@ -1479,7 +1479,9 @@
             y.domain(yExtent);
 
             // background element
-            var background = "../../drawablemapviewer/dotamap5_25.jpg";
+            var baseLayerName = map.baseLayer.name.replace(/ /g, '').toLowerCase();
+            console.log(baseLayerName);
+            var background = map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : baseLayerName) + "5_25.jpg";
             svg.append("image")
                 .attr("class", "background")
                 .attr("xlink:href", background)
