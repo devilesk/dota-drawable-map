@@ -1045,7 +1045,7 @@
             vertex: styles.vertex
         }),
         rendererOptions: { zIndexing: true },
-        renderers: renderer //["Canvas"]
+        renderers: ["Canvas"]//renderer //["Canvas"]
     });
     map.addLayer(vectors);
     
@@ -1251,7 +1251,7 @@
     for (var key in drawControls) {
         map.addControl(drawControls[key]);
     }
-    
+            
     var historyControl = new OpenLayers.Control.UndoRedo([vectors]);
     map.addControl(historyControl);
     
@@ -1374,4 +1374,227 @@
     parseQueryString();
     
     $('.controls-container').show();
+    
+    var EXPORT = (function () {
+        var width = 1024,
+            height = 1024;
+
+        var x = d3.scaleLinear()
+            .range([0, width]);
+
+        var y = d3.scaleLinear()
+            .range([0, height]);
+
+        var projection = d3.geoTransform({
+            point: function(px, py) {
+                //console.log('px py', px, py, x(px), y(py));
+                this.stream.point(x(px), height - y(py));
+            }
+        });
+
+        var path = d3.geoPath()
+            .projection(projection);
+
+        var svg = d3.select("body").append("svg")
+            .attr("id", "export-svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var stylePropMap = {
+            fillColor: 'fill',
+            fillOpacity: 'fill-opacity',
+            strokeColor: 'stroke',
+            strokeWidth: 'stroke-width',
+            strokeOpacity: 'stroke-opacity',
+            graphicOpacity: 'opacity'
+        }
+
+        var imagesToLoad;
+        
+        function setStyle(d) {
+            console.log(d.geometry.type);
+            for (var p in stylePropMap) {
+                if (d.properties.style[p]) {
+                    console.log(p);
+                    var val = d.properties.style[p];
+                    if (p == 'strokeWidth') {
+                        val = x(val);
+                    }
+                    if (p == 'fillColor' && d.geometry.type == 'LineString') val = 'none';
+                    d3.select(this).style(stylePropMap[p], val);
+                }
+                else if (p == 'fillColor') {
+                    console.log('fillColor none', d.geometry.type);
+                    d3.select(this).style(stylePropMap[p], "none");
+                }
+                else {
+                    //console.log(p);
+                }
+            }
+            if (d.properties.style.externalGraphic) {
+                console.log('imagesToLoad', imagesToLoad);
+                var val = d.properties.style.externalGraphic;
+                console.log('externalGraphic', val);
+                var self = this;
+                d3.select(this).attr("xlink:href", val)
+                    .attr('x', x(d.geometry.coordinates[0]) - x(d.properties.style.graphicHeight) / 2)
+                    .attr('y', height - y(d.geometry.coordinates[1]) - x(d.properties.style.graphicHeight) / 2)
+                    .attr('width', x(d.properties.style.graphicHeight))
+                    .attr('height', x(d.properties.style.graphicHeight));
+                imagesToLoad++;
+                getImageBase64(val, function (data) {
+                    d3.select(self)
+                        .attr("href", "data:image/png;base64," + data); // replace link by data URI
+                    imagesToLoad--;
+                    imageLoadFinished();
+                })
+            }
+        }
+        
+        function imageLoadFinished(callback) {
+            if (imagesToLoad == 0) {
+                download_png();
+            }
+        }
+
+        function featureFilter(e) {
+            return function(d) {
+                console.log(d.geometry.type);
+                return d.geometry.type == e;
+            }
+        }
+        
+        function createSVG(data) {
+            console.log(data);
+            
+            // add index of element as zIndex so they can be ordered properly later
+            data.features.forEach(function (d, i) {
+                d.zIndex = i;
+                console.log(d);
+            });
+            
+            var yExtent = [0, 16384],
+                xExtent = [0, 16384];
+            x.domain(xExtent);
+            y.domain(yExtent);
+
+            // background element
+            var background = "../../drawablemapviewer/dotamap5_25.jpg";
+            svg.append("image")
+                .attr("class", "background")
+                .attr("xlink:href", background)
+                .attr('width', width)
+                .attr('height', height);
+            imagesToLoad = 1;
+            getImageBase64(background, function (data) {
+                d3.select(".background")
+                    .attr("href", "data:image/png;base64," + data); // replace link by data URI
+                imagesToLoad--;
+                imageLoadFinished();
+            })
+                    
+            svg.selectAll("g").data(data.features.filter(featureFilter('Polygon'))).enter().append("path")
+                .attr("class", "node")
+                .attr("d", path)
+                .each(setStyle);
+
+            svg.selectAll("g").data(data.features.filter(featureFilter('LineString'))).enter().append("path")
+                .attr("class", "node")
+                .attr("d", path)
+                .each(setStyle);
+
+            svg.selectAll("g").data(data.features.filter(featureFilter('Point'))).enter().append("image")
+                .attr("class", "node")
+                .attr("d", path)
+                .each(setStyle);
+                
+            // sort by zIndex
+            svg.selectAll(".node").sort(function (a, b) {
+                console.log(a, b);
+                if (a.zIndex > b.zIndex) return 1;
+                if (a.zIndex < b.zIndex) return -1;
+                return 0;
+            });
+        }
+        
+        function converterEngine(input) { // fn BLOB => Binary => Base64 ?
+            var uInt8Array = new Uint8Array(input),
+                i = uInt8Array.length;
+            var biStr = []; //new Array(i);
+            while (i--) {
+                biStr[i] = String.fromCharCode(uInt8Array[i]);
+            }
+            var base64 = window.btoa(biStr.join(''));
+            //console.log("2. base64 produced >>> " + base64); // print-check conversion result
+            return base64;
+        }
+
+        function getImageBase64(url, callback) {
+            // 1. Loading file from url:
+            var xhr = new XMLHttpRequest(url);
+            xhr.open('GET', url, true); // url is the url of a PNG image.
+            xhr.responseType = 'arraybuffer';
+            xhr.callback = callback;
+            xhr.onload = function (e) {
+                if (this.status == 200) { // 2. When loaded, do:
+                    //console.log("1:Loaded response >>> " + this.response); // print-check xhr response 
+                    var imgBase64 = converterEngine(this.response); // convert BLOB to base64
+                    this.callback(imgBase64); //execute callback function with data
+                }
+            };
+            xhr.send();
+        }
+        
+        function download_png () {
+            var contents = d3.select("svg")
+                .attr("version", 1.1)
+                .attr("xmlns", "http://www.w3.org/2000/svg")
+                .node().outerHTML;
+            var src = 'data:image/svg+xml;utf8,' + contents;
+            
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            var context = canvas.getContext("2d");
+
+            var image = new Image;
+            image.src = src;
+            image.onload = function() {
+                context.drawImage(image, 0, 0, width, height);
+                downloadCanvas(canvas);
+            };
+        }
+
+        function dataURLtoBlob(dataurl) {
+            var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], {type:mime});
+        }
+
+        function downloadCanvas(_canvasObject) {
+            var link = document.createElement("a");
+            var imgData = _canvasObject.toDataURL({format: 'png', multiplier: 4});
+            var strDataURI = imgData.substr(22, imgData.length);
+            var blob = dataURLtoBlob(imgData);
+            var objurl = URL.createObjectURL(blob);
+
+            link.download = "image.png";
+
+            link.href = objurl;
+
+            link.click();
+        }
+        
+        function doExport() {
+            var parser = new OpenLayers.Format.GeoJSON()
+            var data = JSON.parse(parser.write(vectors.features));
+            console.log(data, vectors.features);
+            createSVG(data, download_png);
+        }
+        
+        $("#export").click(doExport);
+    })();
 }());
