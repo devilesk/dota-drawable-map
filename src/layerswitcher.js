@@ -2,12 +2,15 @@ import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
 
 export default OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
     
-    initialize: function(options) {
+    onButtonClickCallback: null,
+    
+    initialize: function(options, onButtonClickCallback) {
         OpenLayers.Control.LayerSwitcher.prototype.initialize.apply(this, arguments);
-        this.layerStates = [];
+        this.onButtonClickCallback = onButtonClickCallback;
     },
     
     onButtonClick: function(evt) {
+        if (this.onButtonClickCallback) this.onButtonClickCallback(evt);
         return OpenLayers.Control.LayerSwitcher.prototype.onButtonClick.apply(this, arguments);
     },
     

@@ -82,27 +82,27 @@
 
 	var _OpenLayersControl2 = _interopRequireDefault(_OpenLayersControl);
 
-	var _d3Scale = __webpack_require__(22);
+	var _querystringutil = __webpack_require__(22);
 
-	var _d3Geo = __webpack_require__(30);
+	var _coordinateconversion = __webpack_require__(23);
 
-	var _d3Selection = __webpack_require__(31);
-
-	var _querystringutil = __webpack_require__(32);
-
-	var _coordinateconversion = __webpack_require__(33);
-
-	var _layerswitcher = __webpack_require__(34);
+	var _layerswitcher = __webpack_require__(24);
 
 	var _layerswitcher2 = _interopRequireDefault(_layerswitcher);
 
+	var _widgets = __webpack_require__(25);
+
+	var _exportmap = __webpack_require__(26);
+
+	var _exportmap2 = _interopRequireDefault(_exportmap);
+
+	var _savemap = __webpack_require__(37);
+
+	var _savemap2 = _interopRequireDefault(_savemap);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	console.log('jquery', _jquery2.default);
-	console.log('spinner', _spinner2.default);
-	console.log('OpenLayers', _OpenLayers2.default);
-	console.log('UndoRedo', _OpenLayersControl2.default);
-	console.log('d3select', _d3Selection.select);
+	console.log('ExportMap', _exportmap2.default);
 
 	var IMG_DIR = "images/",
 	    map_data_path = "data.json",
@@ -137,6 +137,14 @@
 	})],
 	    layerSwitcher = new _layerswitcher2.default({
 	    ascending: false
+	}, function (evt) {
+	    var button = evt.buttonElement;
+	    if (button === this.maximizeDiv) {
+	        _OpenLayers2.default.Element.removeClass(this.div, "minimized");
+	        if (isSmallScreen()) {
+	            minimizeControlList();
+	        }
+	    }
 	}),
 	    defaultHandlerOptions = {
 	    regularpolygon: {
@@ -208,56 +216,8 @@
 	},
 	    strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'],
 	    activeTool,
-	    renderer = _OpenLayers2.default.Util.getParameters(window.location.href).renderer;
-
-	/**************
-	 * UI WIDGETS *
-	 **************/
-
-	function formatDegree(value) {
-	    return value + '�';
-	}
-
-	console.log("DEGREESPINNER", _jquery2.default.widget("ui.degreespinner", _jquery2.default.ui.spinner, {
-	    _format: formatDegree,
-	    _parse: function _parse(value) {
-	        return parseFloat(value);
-	    }
-	}));
-
-	function formatPercent(value) {
-	    return value + '%';
-	}
-
-	_jquery2.default.widget("ui.percentspinner", _jquery2.default.ui.spinner, {
-	    _format: formatPercent,
-	    _parse: function _parse(value) {
-	        return parseFloat(value);
-	    }
-	});
-
-	_jquery2.default.widget("custom.iconselectmenu", _jquery2.default.ui.selectmenu, {
-	    _renderItem: function _renderItem(ul, item) {
-	        var li = (0, _jquery2.default)("<li>"),
-	            wrapper = (0, _jquery2.default)("<div>");
-
-	        if (item.disabled) {
-	            li.addClass("ui-state-disabled");
-	        }
-
-	        (0, _jquery2.default)("<div>", {
-	            "class": 'selectmenu-label',
-	            text: item.label
-	        }).appendTo(wrapper);
-
-	        (0, _jquery2.default)("<div>", {
-	            style: item.element.attr("data-style"),
-	            "class": "selectmenu-icon " + item.element.attr("data-class")
-	        }).appendTo(wrapper);
-
-	        return li.append(wrapper).appendTo(ul);
-	    }
-	});
+	    renderer = _OpenLayers2.default.Util.getParameters(window.location.href).renderer,
+	    saveHandlerUrl = 'save.php';
 
 	/********************
 	 * CONTROL HANDLERS *
@@ -519,7 +479,7 @@
 	                defaultStyles[key][target + 'Opacity'] = v / 100;
 	                strokeOpacityPreview.style.opacity = defaultStyles[key][target + 'Opacity'];
 	            }
-	            (0, _jquery2.default)(this).val(formatPercent(v));
+	            (0, _jquery2.default)(this).val((0, _widgets.formatPercent)(v));
 	        },
 	        spin: function spin(event, ui) {
 	            strokeOpacityPreview.style.opacity = ui.value / 100;
@@ -531,7 +491,7 @@
 	                strokeOpacityPreview.style.opacity = defaultStyles[key][target + 'Opacity'];
 	            }
 	        }
-	    }).val(formatPercent(defaultStyles[key][target + 'Opacity'] * 100));
+	    }).val((0, _widgets.formatPercent)(defaultStyles[key][target + 'Opacity'] * 100));
 	}
 
 	// stroke color picker
@@ -581,7 +541,7 @@
 	                defaultHandlerOptions[key][prop] = v;
 	                updateHandlerOption(key, prop, v);
 	            }
-	            (0, _jquery2.default)(this).val(formatDegree(v));
+	            (0, _jquery2.default)(this).val((0, _widgets.formatDegree)(v));
 	        },
 	        stop: function stop(event, ui) {
 	            var v = parseInt(this.value);
@@ -590,7 +550,7 @@
 	                updateHandlerOption(key, prop, v);
 	            }
 	        }
-	    }).val(formatDegree(defaultHandlerOptions[key][prop]));
+	    }).val((0, _widgets.formatDegree)(defaultHandlerOptions[key][prop]));
 	}
 
 	function initSpinner(key, name, prop, options, spinnerType, formatFunction) {
@@ -666,7 +626,7 @@
 	            defaultStyles.icon.graphicOpacity = v / 100;
 	            markerOpacityPreview.style.opacity = defaultStyles.icon.graphicOpacity;
 	        }
-	        (0, _jquery2.default)(this).val(formatPercent(v));
+	        (0, _jquery2.default)(this).val((0, _widgets.formatPercent)(v));
 	    },
 	    spin: function spin(event, ui) {
 	        markerOpacityPreview.style.opacity = ui.value / 100;
@@ -678,7 +638,7 @@
 	            markerOpacityPreview.style.opacity = defaultStyles.icon.graphicOpacity;
 	        }
 	    }
-	}).val(formatPercent(defaultStyles.icon.graphicOpacity * 100));
+	}).val((0, _widgets.formatPercent)(defaultStyles.icon.graphicOpacity * 100));
 
 	// icon select dropdown
 	_jquery2.default.getJSON("sprite_manifest.json", function (data) {
@@ -1011,77 +971,6 @@
 	    }
 	}));
 	map.addControl(new _OpenLayers2.default.Control.KeyboardDefaults());
-
-	/*layerSwitcher.onButtonClick = (function (fn) {
-	    return function (evt) {
-	        var button = evt.buttonElement;
-	        if (button === this.maximizeDiv) {
-	            $('.olControlLayerSwitcher').removeClass("minimized");
-	            if (isSmallScreen()) {
-	                minimizeControlList();
-	            }
-	        }
-	        return fn.apply(this, arguments);
-	    }
-	})(layerSwitcher.onButtonClick);
-	layerSwitcher.minimizeControl = function (e) {
-	    $('.olControlLayerSwitcher').addClass("minimized");
-	    this.showControls(true);
-	     if (e != null) {
-	        OpenLayers.Event.stop(e);
-	    }
-	}
-	layerSwitcher.loadContents = function () {
-	    // layers list div
-	    this.layersDiv = document.createElement("div");
-	    this.layersDiv.id = this.id + "_layersDiv";
-	    OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
-	     this.baseLbl = document.createElement("div");
-	    this.baseLbl.innerHTML = OpenLayers.i18n("Base Layer");
-	    OpenLayers.Element.addClass(this.baseLbl, "baseLbl");
-	     this.baseLayersDiv = document.createElement("div");
-	    OpenLayers.Element.addClass(this.baseLayersDiv, "baseLayersDiv");
-	     this.dataLbl = document.createElement("div");
-	    this.dataLbl.innerHTML = OpenLayers.i18n("Overlays");
-	    OpenLayers.Element.addClass(this.dataLbl, "dataLbl");
-	     this.dataLayersDiv = document.createElement("div");
-	    OpenLayers.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
-	     if (this.ascending) {
-	        this.layersDiv.appendChild(this.baseLbl);
-	        this.layersDiv.appendChild(this.baseLayersDiv);
-	        this.layersDiv.appendChild(this.dataLbl);
-	        this.layersDiv.appendChild(this.dataLayersDiv);
-	    } else {
-	        this.layersDiv.appendChild(this.dataLbl);
-	        this.layersDiv.appendChild(this.dataLayersDiv);
-	        this.layersDiv.appendChild(this.baseLbl);
-	        this.layersDiv.appendChild(this.baseLayersDiv);
-	    }
-	     this.div.appendChild(this.layersDiv);
-	     // maximize button div
-	    this.maximizeDiv = OpenLayers.Util.createAlphaImageDiv(
-	                                "OpenLayers_Control_MaximizeDiv",
-	                                null,
-	                                null,
-	                                null,
-	                                "initial");
-	    OpenLayers.Element.addClass(this.maximizeDiv, "maximizeDiv olButton");
-	    this.maximizeDiv.style.display = "none";
-	     this.div.appendChild(this.maximizeDiv);
-	     // minimize button div
-	    this.minimizeDiv = OpenLayers.Util.createAlphaImageDiv(
-	                                "OpenLayers_Control_MinimizeDiv",
-	                                null,
-	                                null,
-	                                null,
-	                                "initial");
-	    OpenLayers.Element.addClass(this.minimizeDiv, "minimizeDiv olButton");
-	    this.minimizeDiv.style.display = "none";
-	     this.maximizeDiv.innerHTML;
-	    this.minimizeDiv.innerHTML = '&times;';
-	    $(this.maximizeDiv).empty().append($('<i class="fa fa-bars">'));
-	    this.div.appendChild(this.minimizeDiv);
-	}*/
 	map.addControl(layerSwitcher);
 	layerSwitcher.maximizeControl();
 	if (!map.getCenter()) {
@@ -1187,6 +1076,12 @@
 	var historyControl = new _OpenLayersControl2.default([vectors]);
 	map.addControl(historyControl);
 
+	var exportControl = new _exportmap2.default(map, vectors, document.getElementById('export'), map_tile_path);
+	map.addControl(exportControl);
+
+	var saveControl = new _savemap2.default(map, vectors, document.getElementById('save'), saveHandlerUrl);
+	map.addControl(saveControl);
+
 	var measureControl = new _OpenLayers2.default.Control.Measure(_OpenLayers2.default.Handler.Path);
 	map.addControl(measureControl);
 	vectors.events.register("featureselected", drawControls.selectfeature, function (event) {
@@ -1232,10 +1127,6 @@
 	    layerSwitcher.minimizeControl();
 	}
 
-	// Set up panel radio button toggle handlers
-	//document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
-	//document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
-
 	// tool switcher ui initialize
 	(0, _jquery2.default)(".tool-radiobutton").checkboxradio({
 	    icon: false
@@ -1251,18 +1142,9 @@
 	vectors.redoStack = [];
 	function drawUndo() {
 	    console.log('undo');
-	    /*if (vectors.features.length) {
-	        var feature = vectors.features.pop();
-	        vectors.removeFeatures([feature]);
-	        vectors.redoStack.push(feature);
-	    }*/
 	    historyControl.undo();
 	}
 	function drawRedo() {
-	    /*if (vectors.redoStack.length) {
-	        var feature = vectors.redoStack.pop();
-	        vectors.addFeatures([feature]);
-	    }*/
 	    historyControl.redo();
 	}
 
@@ -1280,231 +1162,12 @@
 	    }
 	}
 
-	// save drawing
-	(0, _jquery2.default)('#save').click(function () {
-	    var parser = new _OpenLayers2.default.Format.GeoJSON();
-	    var serialized = parser.write(vectors.features);
-	    _jquery2.default.ajax({
-	        type: "POST",
-	        url: "save.php",
-	        data: { 'data': serialized },
-	        dataType: "json",
-	        success: function success(data) {
-	            var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
-	            console.log(saveLink);
-	        },
-	        failure: function failure(errMsg) {
-	            alert("Save request failed.");
-	        }
-	    });
-	});
-
 	// start jquery ui tooltips
 	(0, _jquery2.default)(document).tooltip();
 
 	parseQueryString();
 
 	(0, _jquery2.default)('.controls-container').show();
-
-	var EXPORT = function () {
-	    var width = 1024,
-	        height = 1024;
-
-	    var x = (0, _d3Scale.scaleLinear)().range([0, width]);
-
-	    var y = (0, _d3Scale.scaleLinear)().range([0, height]);
-
-	    var projection = (0, _d3Geo.geoTransform)({
-	        point: function point(px, py) {
-	            //console.log('px py', px, py, x(px), y(py));
-	            this.stream.point(x(px), height - y(py));
-	        }
-	    });
-
-	    var path = (0, _d3Geo.geoPath)().projection(projection);
-
-	    var svg = (0, _d3Selection.select)("body").append("svg").attr("id", "export-svg").attr("width", width).attr("height", height);
-
-	    var stylePropMap = {
-	        fillColor: 'fill',
-	        fillOpacity: 'fill-opacity',
-	        strokeColor: 'stroke',
-	        strokeWidth: 'stroke-width',
-	        strokeOpacity: 'stroke-opacity',
-	        graphicOpacity: 'opacity'
-	    };
-
-	    var imagesToLoad;
-
-	    function setStyle(d) {
-	        console.log(d.geometry.type);
-	        for (var p in stylePropMap) {
-	            if (d.properties.style[p]) {
-	                console.log(p);
-	                var val = d.properties.style[p];
-	                if (p == 'strokeWidth') {
-	                    val = x(val);
-	                }
-	                if (p == 'fillColor' && d.geometry.type == 'LineString') val = 'none';
-	                (0, _d3Selection.select)(this).style(stylePropMap[p], val);
-	            } else if (p == 'fillColor') {
-	                console.log('fillColor none', d.geometry.type);
-	                (0, _d3Selection.select)(this).style(stylePropMap[p], "none");
-	            } else {
-	                //console.log(p);
-	            }
-	        }
-	        if (d.properties.style.externalGraphic) {
-	            console.log('imagesToLoad', imagesToLoad);
-	            var val = d.properties.style.externalGraphic;
-	            console.log('externalGraphic', val);
-	            var self = this;
-	            (0, _d3Selection.select)(this).attr("xlink:href", val).attr('x', x(d.geometry.coordinates[0]) - x(d.properties.style.graphicHeight) / 2).attr('y', height - y(d.geometry.coordinates[1]) - x(d.properties.style.graphicHeight) / 2).attr('width', x(d.properties.style.graphicHeight)).attr('height', x(d.properties.style.graphicHeight));
-	            imagesToLoad++;
-	            getImageBase64(val, function (data) {
-	                (0, _d3Selection.select)(self).attr("href", "data:image/png;base64," + data); // replace link by data URI
-	                imagesToLoad--;
-	                imageLoadFinished();
-	            });
-	        }
-	    }
-
-	    function imageLoadFinished(callback) {
-	        if (imagesToLoad == 0) {
-	            download_png();
-	        }
-	    }
-
-	    function featureFilter(e) {
-	        return function (d) {
-	            console.log(d.geometry.type);
-	            return d.geometry.type == e;
-	        };
-	    }
-
-	    function createSVG(data) {
-	        console.log(data);
-
-	        // add index of element as zIndex so they can be ordered properly later
-	        data.features.forEach(function (d, i) {
-	            d.zIndex = i;
-	            console.log(d);
-	        });
-
-	        var yExtent = [0, 16384],
-	            xExtent = [0, 16384];
-	        x.domain(xExtent);
-	        y.domain(yExtent);
-
-	        // background element
-	        var baseLayerName = map.baseLayer.name.replace(/ /g, '').toLowerCase();
-	        console.log(baseLayerName);
-	        var background = map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : baseLayerName) + "5_25.jpg";
-	        svg.append("image").attr("class", "background").attr("xlink:href", background).attr('width', width).attr('height', height);
-	        imagesToLoad = 1;
-	        getImageBase64(background, function (data) {
-	            (0, _d3Selection.select)(".background").attr("href", "data:image/png;base64," + data); // replace link by data URI
-	            imagesToLoad--;
-	            imageLoadFinished();
-	        });
-
-	        svg.selectAll("g").data(data.features.filter(featureFilter('Polygon'))).enter().append("path").attr("class", "node").attr("d", path).each(setStyle);
-
-	        svg.selectAll("g").data(data.features.filter(featureFilter('LineString'))).enter().append("path").attr("class", "node").attr("d", path).each(setStyle);
-
-	        svg.selectAll("g").data(data.features.filter(featureFilter('Point'))).enter().append("image").attr("class", "node").attr("d", path).each(setStyle);
-
-	        // sort by zIndex
-	        svg.selectAll(".node").sort(function (a, b) {
-	            console.log(a, b);
-	            if (a.zIndex > b.zIndex) return 1;
-	            if (a.zIndex < b.zIndex) return -1;
-	            return 0;
-	        });
-	    }
-
-	    function converterEngine(input) {
-	        // fn BLOB => Binary => Base64 ?
-	        var uInt8Array = new Uint8Array(input),
-	            i = uInt8Array.length;
-	        var biStr = []; //new Array(i);
-	        while (i--) {
-	            biStr[i] = String.fromCharCode(uInt8Array[i]);
-	        }
-	        var base64 = window.btoa(biStr.join(''));
-	        //console.log("2. base64 produced >>> " + base64); // print-check conversion result
-	        return base64;
-	    }
-
-	    function getImageBase64(url, callback) {
-	        // 1. Loading file from url:
-	        var xhr = new XMLHttpRequest(url);
-	        xhr.open('GET', url, true); // url is the url of a PNG image.
-	        xhr.responseType = 'arraybuffer';
-	        xhr.callback = callback;
-	        xhr.onload = function (e) {
-	            if (this.status == 200) {
-	                // 2. When loaded, do:
-	                //console.log("1:Loaded response >>> " + this.response); // print-check xhr response 
-	                var imgBase64 = converterEngine(this.response); // convert BLOB to base64
-	                this.callback(imgBase64); //execute callback function with data
-	            }
-	        };
-	        xhr.send();
-	    }
-
-	    function download_png() {
-	        var contents = (0, _d3Selection.select)("svg").attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg").node().outerHTML;
-	        var src = 'data:image/svg+xml;utf8,' + contents;
-
-	        var canvas = document.createElement('canvas');
-	        canvas.width = width;
-	        canvas.height = height;
-	        var context = canvas.getContext("2d");
-
-	        var image = new Image();
-	        image.src = src;
-	        image.onload = function () {
-	            context.drawImage(image, 0, 0, width, height);
-	            downloadCanvas(canvas);
-	        };
-	    }
-
-	    function dataURLtoBlob(dataurl) {
-	        var arr = dataurl.split(','),
-	            mime = arr[0].match(/:(.*?);/)[1],
-	            bstr = atob(arr[1]),
-	            n = bstr.length,
-	            u8arr = new Uint8Array(n);
-	        while (n--) {
-	            u8arr[n] = bstr.charCodeAt(n);
-	        }
-	        return new Blob([u8arr], { type: mime });
-	    }
-
-	    function downloadCanvas(_canvasObject) {
-	        var link = document.createElement("a");
-	        var imgData = _canvasObject.toDataURL({ format: 'png', multiplier: 4 });
-	        var strDataURI = imgData.substr(22, imgData.length);
-	        var blob = dataURLtoBlob(imgData);
-	        var objurl = URL.createObjectURL(blob);
-
-	        link.download = "image.png";
-
-	        link.href = objurl;
-
-	        link.click();
-	    }
-
-	    function doExport() {
-	        var parser = new _OpenLayers2.default.Format.GeoJSON();
-	        var data = JSON.parse(parser.write(vectors.features));
-	        console.log(data, vectors.features);
-	        createSVG(data, download_png);
-	    }
-
-	    (0, _jquery2.default)("#export").click(doExport);
-	}();
 
 	/*** EXPORTS FROM exports-loader ***/
 
@@ -59077,11 +58740,607 @@
 
 /***/ },
 /* 22 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.getParameterByName = getParameterByName;
+	exports.setQueryString = setQueryString;
+	exports.addQueryStringValue = addQueryStringValue;
+	exports.removeQueryStringValue = removeQueryStringValue;
+	exports.updateQueryString = updateQueryString;
+	/***********************************
+	 * QUERY STRING FUNCTIONS *
+	 ***********************************/
+
+	var trim = exports.trim = function () {
+	    "use strict";
+
+	    function escapeRegex(string) {
+	        return string.replace(/[\[\](){}?*+\^$\\.|\-]/g, "\\$&");
+	    }
+
+	    return function trim(str, characters, flags) {
+	        flags = flags || "g";
+	        if (typeof str !== "string" || typeof characters !== "string" || typeof flags !== "string") {
+	            throw new TypeError("argument must be string");
+	        }
+
+	        if (!/^[gi]*$/.test(flags)) {
+	            throw new TypeError("Invalid flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
+	        }
+
+	        characters = escapeRegex(characters);
+
+	        return str.replace(new RegExp("^[" + characters + "]+|[" + characters + "]+$", flags), '');
+	    };
+	}();
+
+	function getParameterByName(name) {
+	    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	        results = regex.exec(location.search);
+	    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
+
+	function setQueryString(key, value) {
+	    history.pushState(null, "", updateQueryString(key, value));
+	}
+
+	function addQueryStringValue(key, value) {
+	    console.log('addQueryStringValue', key, value);
+	    var qs = getParameterByName(key);
+	    qs = trim(trim(qs, ' ;') + ';' + value, ' ;');
+	    history.pushState(null, "", updateQueryString(key, qs));
+	}
+
+	function removeQueryStringValue(key, value) {
+	    console.log('removeQueryStringValue', key, value);
+	    var qs = getParameterByName(key);
+	    qs = trim(trim(qs, ' ;').replace(value, '').replace(/;;/g, ''), ' ;');
+	    history.pushState(null, "", updateQueryString(key, qs != '' ? qs : null));
+	}
+
+	function updateQueryString(key, value, url) {
+	    if (!url) url = window.location.href;
+	    var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
+	        hash;
+
+	    if (re.test(url)) {
+	        if (typeof value !== 'undefined' && value !== null) return url.replace(re, '$1' + key + "=" + value + '$2$3');else {
+	            hash = url.split('#');
+	            url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
+	            if (typeof hash[1] !== 'undefined' && hash[1] !== null) url += '#' + hash[1];
+	            return url;
+	        }
+	    } else {
+	        if (typeof value !== 'undefined' && value !== null) {
+	            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+	            hash = url.split('#');
+	            url = hash[0] + separator + key + '=' + value;
+	            if (typeof hash[1] !== 'undefined' && hash[1] !== null) url += '#' + hash[1];
+	            return url;
+	        } else {
+	            return url;
+	        }
+	    }
+	}
+
+	/*** EXPORTS FROM exports-loader ***/
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.getTileRadius = getTileRadius;
+	exports.lerp = lerp;
+	exports.reverseLerp = reverseLerp;
+	exports.latLonToWorld = latLonToWorld;
+	exports.worldToLatLon = worldToLatLon;
+	exports.getScaledRadius = getScaledRadius;
+	exports.calculateDistance = calculateDistance;
+	/***********************************
+	 * COORDINATE CONVERSION FUNCTIONS *
+	 ***********************************/
+
+	function getTileRadius(r) {
+	    return parseInt(Math.floor(r / 64));
+	}
+
+	function lerp(minVal, maxVal, pos_r) {
+	    return pos_r * (maxVal - minVal) + minVal;
+	}
+
+	function reverseLerp(minVal, maxVal, pos) {
+	    return (pos - minVal) / (maxVal - minVal);
+	}
+
+	function latLonToWorld(map_x_boundaries, map_y_boundaries, map_w, map_h, x, y) {
+	    var x_r = lerp(map_x_boundaries[0], map_x_boundaries[1], x / map_w),
+	        y_r = lerp(map_y_boundaries[0], map_y_boundaries[1], (map_h - y) / map_h);
+
+	    return {
+	        x: x_r,
+	        y: y_r
+	    };
+	}
+
+	function worldToLatLon(map_x_boundaries, map_y_boundaries, map_w, map_h, x_r, y_r) {
+	    var x = reverseLerp(map_x_boundaries[0], map_x_boundaries[1], x_r) * map_w,
+	        y = map_h - reverseLerp(map_y_boundaries[0], map_y_boundaries[1], y_r) * map_h;
+
+	    return {
+	        x: x,
+	        y: y
+	    };
+	}
+
+	function getScaledRadius(map_x_boundaries, map_w, r) {
+	    return r / (map_x_boundaries[1] - map_x_boundaries[0]) * map_w;
+	}
+
+	function calculateDistance(scale, order, units, measure) {
+	    if (order == 1) {
+	        if (units == "km") {
+	            return measure * scale * 1000;
+	        } else {
+	            return measure * scale;
+	        }
+	    } else {
+	        return measure * scale;
+	    }
+	}
+
+	/*** EXPORTS FROM exports-loader ***/
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _OpenLayers = __webpack_require__(20);
+
+	var _OpenLayers2 = _interopRequireDefault(_OpenLayers);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _OpenLayers2.default.Class(_OpenLayers2.default.Control.LayerSwitcher, {
+
+	    onButtonClickCallback: null,
+
+	    initialize: function initialize(options, onButtonClickCallback) {
+	        _OpenLayers2.default.Control.LayerSwitcher.prototype.initialize.apply(this, arguments);
+	        this.onButtonClickCallback = onButtonClickCallback;
+	    },
+
+	    onButtonClick: function onButtonClick(evt) {
+	        if (this.onButtonClickCallback) this.onButtonClickCallback(evt);
+	        return _OpenLayers2.default.Control.LayerSwitcher.prototype.onButtonClick.apply(this, arguments);
+	    },
+
+	    maximizeControl: function maximizeControl(e) {
+	        _OpenLayers2.default.Element.removeClass(this.div, "minimized");
+
+	        this.showControls(false);
+
+	        if (e != null) {
+	            _OpenLayers2.default.Event.stop(e);
+	        }
+	    },
+
+	    minimizeControl: function minimizeControl(e) {
+	        _OpenLayers2.default.Element.addClass(this.div, "minimized");
+
+	        this.showControls(true);
+
+	        if (e != null) {
+	            _OpenLayers2.default.Event.stop(e);
+	        }
+	    },
+
+	    loadContents: function loadContents() {
+
+	        // layers list div
+	        this.layersDiv = document.createElement("div");
+	        this.layersDiv.id = this.id + "_layersDiv";
+	        _OpenLayers2.default.Element.addClass(this.layersDiv, "layersDiv");
+
+	        this.baseLbl = document.createElement("div");
+	        this.baseLbl.innerHTML = _OpenLayers2.default.i18n("Base Layer");
+	        _OpenLayers2.default.Element.addClass(this.baseLbl, "baseLbl");
+
+	        this.baseLayersDiv = document.createElement("div");
+	        _OpenLayers2.default.Element.addClass(this.baseLayersDiv, "baseLayersDiv");
+
+	        this.dataLbl = document.createElement("div");
+	        this.dataLbl.innerHTML = _OpenLayers2.default.i18n("Overlays");
+	        _OpenLayers2.default.Element.addClass(this.dataLbl, "dataLbl");
+
+	        this.dataLayersDiv = document.createElement("div");
+	        _OpenLayers2.default.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
+
+	        if (this.ascending) {
+	            this.layersDiv.appendChild(this.baseLbl);
+	            this.layersDiv.appendChild(this.baseLayersDiv);
+	            this.layersDiv.appendChild(this.dataLbl);
+	            this.layersDiv.appendChild(this.dataLayersDiv);
+	        } else {
+	            this.layersDiv.appendChild(this.dataLbl);
+	            this.layersDiv.appendChild(this.dataLayersDiv);
+	            this.layersDiv.appendChild(this.baseLbl);
+	            this.layersDiv.appendChild(this.baseLayersDiv);
+	        }
+
+	        this.div.appendChild(this.layersDiv);
+
+	        // maximize button div
+	        this.maximizeDiv = document.createElement("div");
+	        _OpenLayers2.default.Element.addClass(this.maximizeDiv, "OpenLayers_Control_MaximizeDiv maximizeDiv olButton");
+	        this.maximizeDiv.style.display = "none";
+
+	        this.div.appendChild(this.maximizeDiv);
+
+	        // minimize button div
+	        this.minimizeDiv = document.createElement("div");
+	        _OpenLayers2.default.Element.addClass(this.minimizeDiv, "OpenLayers_Control_MinimizeDiv minimizeDiv olButton");
+	        this.minimizeDiv.style.display = "none";
+
+	        this.minimizeDiv.innerHTML = '&times;';
+
+	        var bars = document.createElement("i");
+	        _OpenLayers2.default.Element.addClass(bars, "fa fa-bars");
+	        this.maximizeDiv.appendChild(bars);
+
+	        this.div.appendChild(this.minimizeDiv);
+	    },
+
+	    CLASS_NAME: "OpenLayers.Control.LayerSwitcher"
+	});
+
+	/*** EXPORTS FROM exports-loader ***/
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.iconselectmenu = exports.percentspinner = exports.degreespinner = undefined;
+	exports.formatDegree = formatDegree;
+	exports.formatPercent = formatPercent;
+
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _spinner = __webpack_require__(2);
+
+	var _spinner2 = _interopRequireDefault(_spinner);
+
+	var _selectmenu = __webpack_require__(14);
+
+	var _selectmenu2 = _interopRequireDefault(_selectmenu);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**************
+	 * UI WIDGETS *
+	 **************/
+
+	function formatDegree(value) {
+	    return value + '�';
+	}
+
+	var degreespinner = _jquery2.default.widget("ui.degreespinner", _jquery2.default.ui.spinner, {
+	    _format: formatDegree,
+	    _parse: function _parse(value) {
+	        return parseFloat(value);
+	    }
+	});
+
+	function formatPercent(value) {
+	    return value + '%';
+	}
+
+	var percentspinner = _jquery2.default.widget("ui.percentspinner", _jquery2.default.ui.spinner, {
+	    _format: formatPercent,
+	    _parse: function _parse(value) {
+	        return parseFloat(value);
+	    }
+	});
+
+	var iconselectmenu = _jquery2.default.widget("custom.iconselectmenu", _jquery2.default.ui.selectmenu, {
+	    _renderItem: function _renderItem(ul, item) {
+	        var li = (0, _jquery2.default)("<li>"),
+	            wrapper = (0, _jquery2.default)("<div>");
+
+	        if (item.disabled) {
+	            li.addClass("ui-state-disabled");
+	        }
+
+	        (0, _jquery2.default)("<div>", {
+	            "class": 'selectmenu-label',
+	            text: item.label
+	        }).appendTo(wrapper);
+
+	        (0, _jquery2.default)("<div>", {
+	            style: item.element.attr("data-style"),
+	            "class": "selectmenu-icon " + item.element.attr("data-class")
+	        }).appendTo(wrapper);
+
+	        return li.append(wrapper).appendTo(ul);
+	    }
+	});
+
+	exports.degreespinner = degreespinner;
+	exports.percentspinner = percentspinner;
+	exports.iconselectmenu = iconselectmenu;
+
+	/*** EXPORTS FROM exports-loader ***/
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _OpenLayers = __webpack_require__(20);
+
+	var _OpenLayers2 = _interopRequireDefault(_OpenLayers);
+
+	var _d3Scale = __webpack_require__(27);
+
+	var _d3Geo = __webpack_require__(35);
+
+	var _d3Selection = __webpack_require__(36);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _OpenLayers2.default.Class(_OpenLayers2.default.Control, {
+
+	    width: 1024,
+	    height: 1024,
+	    x: null,
+	    y: null,
+	    yExtent: [0, 16384],
+	    xExtent: [0, 16384],
+	    projection: null,
+	    path: null,
+	    svg: null,
+
+	    stylePropMap: {
+	        fillColor: 'fill',
+	        fillOpacity: 'fill-opacity',
+	        strokeColor: 'stroke',
+	        strokeWidth: 'stroke-width',
+	        strokeOpacity: 'stroke-opacity',
+	        graphicOpacity: 'opacity'
+	    },
+
+	    imagesToLoad: 0,
+	    layer: null,
+
+	    initialize: function initialize(map, layer, div, map_tile_path, options) {
+	        _OpenLayers2.default.Control.prototype.initialize.apply(this, [options]);
+	        this.map = map;
+	        this.layer = layer;
+	        this.div = div;
+	        this.map_tile_path = map_tile_path;
+	        console.log("EXPORTMAP CONTROL", this.map);
+	        this.x = (0, _d3Scale.scaleLinear)().range([0, this.width]);
+	        this.y = (0, _d3Scale.scaleLinear)().range([0, this.height]);
+	        var self = this;
+	        this.projection = (0, _d3Geo.geoTransform)({
+	            point: function point(px, py) {
+	                this.stream.point(self.x(px), self.height - self.y(py));
+	            }
+	        });
+	        this.path = (0, _d3Geo.geoPath)().projection(this.projection);
+	        this.svg = (0, _d3Selection.select)("body").append("svg").attr("id", "export-svg").attr("width", this.width).attr("height", this.height);
+	        this.x.domain(this.xExtent);
+	        this.y.domain(this.yExtent);
+
+	        this.div.addEventListener('click', this.doExport.bind(this), false);
+	        var self = this;
+	        this.setStyle = function (d) {
+	            console.log(this, (0, _d3Selection.select)(this), self, d);
+	            for (var p in self.stylePropMap) {
+	                if (d.properties.style[p]) {
+	                    console.log(p);
+	                    var val = d.properties.style[p];
+	                    if (p == 'strokeWidth') {
+	                        val = self.x(val);
+	                    }
+	                    if (p == 'fillColor' && d.geometry.type == 'LineString') val = 'none';
+	                    (0, _d3Selection.select)(this).style(self.stylePropMap[p], val);
+	                } else if (p == 'fillColor') {
+	                    console.log('fillColor none', d.geometry.type);
+	                    (0, _d3Selection.select)(this).style(self.stylePropMap[p], "none");
+	                } else {
+	                    //console.log(p);
+	                }
+	            }
+	            if (d.properties.style.externalGraphic) {
+	                console.log('imagesToLoad', self.imagesToLoad);
+	                var val = d.properties.style.externalGraphic;
+	                console.log('externalGraphic', val);
+	                (0, _d3Selection.select)(this).attr("xlink:href", val).attr('x', self.x(d.geometry.coordinates[0]) - self.x(d.properties.style.graphicHeight) / 2).attr('y', self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight) / 2).attr('width', self.x(d.properties.style.graphicHeight)).attr('height', self.x(d.properties.style.graphicHeight));
+	                self.imagesToLoad++;
+	                var d3this = this;
+	                self.getImageBase64(val, function (data) {
+	                    (0, _d3Selection.select)(d3this).attr("href", "data:image/png;base64," + data); // replace link by data URI
+	                    self.imagesToLoad--;
+	                    self.imageLoadFinished();
+	                });
+	            }
+	        };
+	    },
+
+	    imageLoadFinished: function imageLoadFinished(callback) {
+	        if (this.imagesToLoad == 0) {
+	            this.download_png();
+	        }
+	    },
+
+	    featureFilter: function featureFilter(e) {
+	        return function (d) {
+	            console.log(d.geometry.type);
+	            return d.geometry.type == e;
+	        };
+	    },
+
+	    createSVG: function createSVG(data) {
+	        console.log(data);
+	        var self = this;
+	        // add index of element as zIndex so they can be ordered properly later
+	        data.features.forEach(function (d, i) {
+	            d.zIndex = i;
+	            console.log(d);
+	        });
+
+	        // background element
+	        var baseLayerName = this.map.baseLayer.name.replace(/ /g, '').toLowerCase();
+	        console.log(baseLayerName);
+	        var background = this.map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : baseLayerName) + "5_25.jpg";
+	        this.svg.append("image").attr("class", "background").attr("xlink:href", background).attr('width', this.width).attr('height', this.height);
+	        this.imagesToLoad = 1;
+	        var self = this;
+	        this.getImageBase64(background, function (data) {
+	            (0, _d3Selection.select)(".background").attr("href", "data:image/png;base64," + data); // replace link by data URI
+	            self.imagesToLoad--;
+	            self.imageLoadFinished();
+	        });
+
+	        this.svg.selectAll("g").data(data.features.filter(this.featureFilter('Polygon'))).enter().append("path").attr("class", "node").attr("d", this.path).each(this.setStyle);
+
+	        this.svg.selectAll("g").data(data.features.filter(this.featureFilter('LineString'))).enter().append("path").attr("class", "node").attr("d", this.path).each(this.setStyle);
+
+	        this.svg.selectAll("g").data(data.features.filter(this.featureFilter('Point'))).enter().append("image").attr("class", "node").attr("d", this.path).each(this.setStyle);
+
+	        // sort by zIndex
+	        this.svg.selectAll(".node").sort(function (a, b) {
+	            console.log(a, b);
+	            if (a.zIndex > b.zIndex) return 1;
+	            if (a.zIndex < b.zIndex) return -1;
+	            return 0;
+	        });
+	    },
+
+	    converterEngine: function converterEngine(input) {
+	        // fn BLOB => Binary => Base64 ?
+	        var uInt8Array = new Uint8Array(input),
+	            i = uInt8Array.length;
+	        var biStr = []; //new Array(i);
+	        while (i--) {
+	            biStr[i] = String.fromCharCode(uInt8Array[i]);
+	        }
+	        var base64 = window.btoa(biStr.join(''));
+	        //console.log("2. base64 produced >>> " + base64); // print-check conversion result
+	        return base64;
+	    },
+
+	    getImageBase64: function getImageBase64(url, callback) {
+	        // 1. Loading file from url:
+	        var xhr = new XMLHttpRequest(url);
+	        xhr.open('GET', url, true); // url is the url of a PNG image.
+	        xhr.responseType = 'arraybuffer';
+	        xhr.callback = callback;
+	        var self = this;
+	        xhr.onload = function (e) {
+	            if (this.status == 200) {
+	                // 2. When loaded, do:
+	                //console.log("1:Loaded response >>> " + this.response); // print-check xhr response 
+	                var imgBase64 = self.converterEngine(this.response); // convert BLOB to base64
+	                this.callback(imgBase64); //execute callback function with data
+	            }
+	        };
+	        xhr.send();
+	    },
+
+	    download_png: function download_png() {
+	        var contents = (0, _d3Selection.select)("svg").attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg").node().outerHTML;
+	        var src = 'data:image/svg+xml;utf8,' + contents;
+
+	        var canvas = document.createElement('canvas');
+	        canvas.width = this.width;
+	        canvas.height = this.height;
+	        var context = canvas.getContext("2d");
+
+	        var image = new Image();
+	        image.src = src;
+	        var self = this;
+	        image.onload = function () {
+	            context.drawImage(image, 0, 0, this.width, this.height);
+	            self.downloadCanvas(canvas);
+	        };
+	    },
+
+	    dataURLtoBlob: function dataURLtoBlob(dataurl) {
+	        var arr = dataurl.split(','),
+	            mime = arr[0].match(/:(.*?);/)[1],
+	            bstr = atob(arr[1]),
+	            n = bstr.length,
+	            u8arr = new Uint8Array(n);
+	        while (n--) {
+	            u8arr[n] = bstr.charCodeAt(n);
+	        }
+	        return new Blob([u8arr], { type: mime });
+	    },
+
+	    downloadCanvas: function downloadCanvas(_canvasObject) {
+	        var link = document.createElement("a");
+	        var imgData = _canvasObject.toDataURL({ format: 'png', multiplier: 4 });
+	        var strDataURI = imgData.substr(22, imgData.length);
+	        var blob = this.dataURLtoBlob(imgData);
+	        var objurl = URL.createObjectURL(blob);
+
+	        link.download = "image.png";
+
+	        link.href = objurl;
+
+	        link.click();
+	    },
+
+	    doExport: function doExport() {
+	        var parser = new _OpenLayers2.default.Format.GeoJSON();
+	        console.log('this.layer.features', this.layer, this.layer.features);
+	        var data = JSON.parse(parser.write(this.layer.features));
+	        console.log(data, this.layer.features);
+	        this.createSVG(data, this.download_png);
+	    },
+
+	    CLASS_NAME: "OpenLayers.Control.ExportMap"
+	});
+
+	/*** EXPORTS FROM exports-loader ***/
+
+/***/ },
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-scale/ Version 1.0.3. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(23), __webpack_require__(24), __webpack_require__(25), __webpack_require__(27), __webpack_require__(28), __webpack_require__(29), __webpack_require__(26)) :
+	   true ? factory(exports, __webpack_require__(28), __webpack_require__(29), __webpack_require__(30), __webpack_require__(32), __webpack_require__(33), __webpack_require__(34), __webpack_require__(31)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-array', 'd3-collection', 'd3-interpolate', 'd3-format', 'd3-time', 'd3-time-format', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3,global.d3,global.d3,global.d3,global.d3,global.d3,global.d3));
 	}(this, function (exports,d3Array,d3Collection,d3Interpolate,d3Format,d3Time,d3TimeFormat,d3Color) { 'use strict';
@@ -59983,7 +60242,7 @@
 	}));
 
 /***/ },
-/* 23 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-array/ Version 1.0.1. Copyright 2016 Mike Bostock.
@@ -60452,7 +60711,7 @@
 	}));
 
 /***/ },
-/* 24 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-collection/ Version 1.0.1. Copyright 2016 Mike Bostock.
@@ -60674,12 +60933,12 @@
 	}));
 
 /***/ },
-/* 25 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-interpolate/ Version 1.1.1. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(26)) :
+	   true ? factory(exports, __webpack_require__(31)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-color'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, function (exports,d3Color) { 'use strict';
@@ -61221,7 +61480,7 @@
 	}));
 
 /***/ },
-/* 26 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-color/ Version 1.0.1. Copyright 2016 Mike Bostock.
@@ -61743,7 +62002,7 @@
 	}));
 
 /***/ },
-/* 27 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-format/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -62077,7 +62336,7 @@
 	}));
 
 /***/ },
-/* 28 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -62459,12 +62718,12 @@
 	}));
 
 /***/ },
-/* 29 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-time-format/ Version 2.0.2. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(28)) :
+	   true ? factory(exports, __webpack_require__(33)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-time'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, function (exports,d3Time) { 'use strict';
@@ -63046,12 +63305,12 @@
 	}));
 
 /***/ },
-/* 30 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-geo/ Version 1.2.4. Copyright 2016 Mike Bostock.
 	(function (global, factory) {
-	   true ? factory(exports, __webpack_require__(23)) :
+	   true ? factory(exports, __webpack_require__(28)) :
 	  typeof define === 'function' && define.amd ? define(['exports', 'd3-array'], factory) :
 	  (factory((global.d3 = global.d3 || {}),global.d3));
 	}(this, (function (exports,d3Array) { 'use strict';
@@ -65789,7 +66048,7 @@
 	})));
 
 /***/ },
-/* 31 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org/d3-selection/ Version 1.0.2. Copyright 2016 Mike Bostock.
@@ -66767,173 +67026,10 @@
 	}));
 
 /***/ },
-/* 32 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.getParameterByName = getParameterByName;
-	exports.setQueryString = setQueryString;
-	exports.addQueryStringValue = addQueryStringValue;
-	exports.removeQueryStringValue = removeQueryStringValue;
-	exports.updateQueryString = updateQueryString;
-	/***********************************
-	 * QUERY STRING FUNCTIONS *
-	 ***********************************/
-
-	var trim = exports.trim = function () {
-	    "use strict";
-
-	    function escapeRegex(string) {
-	        return string.replace(/[\[\](){}?*+\^$\\.|\-]/g, "\\$&");
-	    }
-
-	    return function trim(str, characters, flags) {
-	        flags = flags || "g";
-	        if (typeof str !== "string" || typeof characters !== "string" || typeof flags !== "string") {
-	            throw new TypeError("argument must be string");
-	        }
-
-	        if (!/^[gi]*$/.test(flags)) {
-	            throw new TypeError("Invalid flags supplied '" + flags.match(new RegExp("[^gi]*")) + "'");
-	        }
-
-	        characters = escapeRegex(characters);
-
-	        return str.replace(new RegExp("^[" + characters + "]+|[" + characters + "]+$", flags), '');
-	    };
-	}();
-
-	function getParameterByName(name) {
-	    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-	    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-	        results = regex.exec(location.search);
-	    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-	}
-
-	function setQueryString(key, value) {
-	    history.pushState(null, "", updateQueryString(key, value));
-	}
-
-	function addQueryStringValue(key, value) {
-	    console.log('addQueryStringValue', key, value);
-	    var qs = getParameterByName(key);
-	    qs = trim(trim(qs, ' ;') + ';' + value, ' ;');
-	    history.pushState(null, "", updateQueryString(key, qs));
-	}
-
-	function removeQueryStringValue(key, value) {
-	    console.log('removeQueryStringValue', key, value);
-	    var qs = getParameterByName(key);
-	    qs = trim(trim(qs, ' ;').replace(value, '').replace(/;;/g, ''), ' ;');
-	    history.pushState(null, "", updateQueryString(key, qs != '' ? qs : null));
-	}
-
-	function updateQueryString(key, value, url) {
-	    if (!url) url = window.location.href;
-	    var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
-	        hash;
-
-	    if (re.test(url)) {
-	        if (typeof value !== 'undefined' && value !== null) return url.replace(re, '$1' + key + "=" + value + '$2$3');else {
-	            hash = url.split('#');
-	            url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
-	            if (typeof hash[1] !== 'undefined' && hash[1] !== null) url += '#' + hash[1];
-	            return url;
-	        }
-	    } else {
-	        if (typeof value !== 'undefined' && value !== null) {
-	            var separator = url.indexOf('?') !== -1 ? '&' : '?';
-	            hash = url.split('#');
-	            url = hash[0] + separator + key + '=' + value;
-	            if (typeof hash[1] !== 'undefined' && hash[1] !== null) url += '#' + hash[1];
-	            return url;
-	        } else {
-	            return url;
-	        }
-	    }
-	}
-
-	/*** EXPORTS FROM exports-loader ***/
-
-/***/ },
-/* 33 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.getTileRadius = getTileRadius;
-	exports.lerp = lerp;
-	exports.reverseLerp = reverseLerp;
-	exports.latLonToWorld = latLonToWorld;
-	exports.worldToLatLon = worldToLatLon;
-	exports.getScaledRadius = getScaledRadius;
-	exports.calculateDistance = calculateDistance;
-	/***********************************
-	 * COORDINATE CONVERSION FUNCTIONS *
-	 ***********************************/
-
-	function getTileRadius(r) {
-	    return parseInt(Math.floor(r / 64));
-	}
-
-	function lerp(minVal, maxVal, pos_r) {
-	    return pos_r * (maxVal - minVal) + minVal;
-	}
-
-	function reverseLerp(minVal, maxVal, pos) {
-	    return (pos - minVal) / (maxVal - minVal);
-	}
-
-	function latLonToWorld(map_x_boundaries, map_y_boundaries, map_w, map_h, x, y) {
-	    var x_r = lerp(map_x_boundaries[0], map_x_boundaries[1], x / map_w),
-	        y_r = lerp(map_y_boundaries[0], map_y_boundaries[1], (map_h - y) / map_h);
-
-	    return {
-	        x: x_r,
-	        y: y_r
-	    };
-	}
-
-	function worldToLatLon(map_x_boundaries, map_y_boundaries, map_w, map_h, x_r, y_r) {
-	    var x = reverseLerp(map_x_boundaries[0], map_x_boundaries[1], x_r) * map_w,
-	        y = map_h - reverseLerp(map_y_boundaries[0], map_y_boundaries[1], y_r) * map_h;
-
-	    return {
-	        x: x,
-	        y: y
-	    };
-	}
-
-	function getScaledRadius(map_x_boundaries, map_w, r) {
-	    return r / (map_x_boundaries[1] - map_x_boundaries[0]) * map_w;
-	}
-
-	function calculateDistance(scale, order, units, measure) {
-	    if (order == 1) {
-	        if (units == "km") {
-	            return measure * scale * 1000;
-	        } else {
-	            return measure * scale;
-	        }
-	    } else {
-	        return measure * scale;
-	    }
-	}
-
-	/*** EXPORTS FROM exports-loader ***/
-
-/***/ },
-/* 34 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -66943,96 +67039,73 @@
 
 	var _OpenLayers2 = _interopRequireDefault(_OpenLayers);
 
+	var _jquery = __webpack_require__(1);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.default = _OpenLayers2.default.Class(_OpenLayers2.default.Control.LayerSwitcher, {
+	exports.default = _OpenLayers2.default.Class(_OpenLayers2.default.Control, {
 
-	    initialize: function initialize(options) {
-	        _OpenLayers2.default.Control.LayerSwitcher.prototype.initialize.apply(this, arguments);
-	        this.layerStates = [];
+	    layer: null,
+
+	    save: function save() {
+	        // var parser = new OpenLayers.Format.GeoJSON()
+	        // var serialized = parser.write(this.layer.features);
+	        // console.log('savemap', {'data': serialized});
+	        // var request = new XMLHttpRequest();
+	        // request.open('POST', this.url, true);
+	        // request.setRequestHeader('Accept', 'application/json, text/javascript, */*; q=0.01');
+	        // request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8"');
+
+	        // request.onload = function() {
+	        // if (request.status >= 200 && request.status < 400) {
+	        // Success!
+	        // var data = request.responseText;            
+	        // var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
+	        // console.log(saveLink);
+	        // }
+	        // else {
+	        // We reached our target server, but it returned an error
+	        // alert("Save request failed.");
+	        // }
+	        // };
+
+	        // request.onerror = function() {
+	        // There was a connection error of some sort
+	        // alert("Save request failed.");
+	        // };
+
+	        // request.send('{"data":' + serialized + '}');
+
+	        var parser = new _OpenLayers2.default.Format.GeoJSON();
+	        var serialized = parser.write(this.layer.features);
+	        console.log('savedrawing', { 'data': serialized });
+	        _jquery2.default.ajax({
+	            type: "POST",
+	            url: this.url,
+	            data: { 'data': serialized },
+	            dataType: "json",
+	            success: function success(data) {
+	                var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
+	                console.log(saveLink);
+	            },
+	            failure: function failure(errMsg) {
+	                alert("Save request failed.");
+	            }
+	        });
 	    },
 
-	    onButtonClick: function onButtonClick(evt) {
-	        return _OpenLayers2.default.Control.LayerSwitcher.prototype.onButtonClick.apply(this, arguments);
+	    initialize: function initialize(map, layer, div, url, options) {
+	        _OpenLayers2.default.Control.prototype.initialize.apply(this, [options]);
+	        this.map = map;
+	        this.layer = layer;
+	        this.div = div;
+	        this.url = url;
+	        this.div.addEventListener('click', this.save.bind(this), false);
 	    },
 
-	    maximizeControl: function maximizeControl(e) {
-	        _OpenLayers2.default.Element.removeClass(this.div, "minimized");
-
-	        this.showControls(false);
-
-	        if (e != null) {
-	            _OpenLayers2.default.Event.stop(e);
-	        }
-	    },
-
-	    minimizeControl: function minimizeControl(e) {
-	        _OpenLayers2.default.Element.addClass(this.div, "minimized");
-
-	        this.showControls(true);
-
-	        if (e != null) {
-	            _OpenLayers2.default.Event.stop(e);
-	        }
-	    },
-
-	    loadContents: function loadContents() {
-
-	        // layers list div
-	        this.layersDiv = document.createElement("div");
-	        this.layersDiv.id = this.id + "_layersDiv";
-	        _OpenLayers2.default.Element.addClass(this.layersDiv, "layersDiv");
-
-	        this.baseLbl = document.createElement("div");
-	        this.baseLbl.innerHTML = _OpenLayers2.default.i18n("Base Layer");
-	        _OpenLayers2.default.Element.addClass(this.baseLbl, "baseLbl");
-
-	        this.baseLayersDiv = document.createElement("div");
-	        _OpenLayers2.default.Element.addClass(this.baseLayersDiv, "baseLayersDiv");
-
-	        this.dataLbl = document.createElement("div");
-	        this.dataLbl.innerHTML = _OpenLayers2.default.i18n("Overlays");
-	        _OpenLayers2.default.Element.addClass(this.dataLbl, "dataLbl");
-
-	        this.dataLayersDiv = document.createElement("div");
-	        _OpenLayers2.default.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
-
-	        if (this.ascending) {
-	            this.layersDiv.appendChild(this.baseLbl);
-	            this.layersDiv.appendChild(this.baseLayersDiv);
-	            this.layersDiv.appendChild(this.dataLbl);
-	            this.layersDiv.appendChild(this.dataLayersDiv);
-	        } else {
-	            this.layersDiv.appendChild(this.dataLbl);
-	            this.layersDiv.appendChild(this.dataLayersDiv);
-	            this.layersDiv.appendChild(this.baseLbl);
-	            this.layersDiv.appendChild(this.baseLayersDiv);
-	        }
-
-	        this.div.appendChild(this.layersDiv);
-
-	        // maximize button div
-	        this.maximizeDiv = document.createElement("div");
-	        _OpenLayers2.default.Element.addClass(this.maximizeDiv, "OpenLayers_Control_MaximizeDiv maximizeDiv olButton");
-	        this.maximizeDiv.style.display = "none";
-
-	        this.div.appendChild(this.maximizeDiv);
-
-	        // minimize button div
-	        this.minimizeDiv = document.createElement("div");
-	        _OpenLayers2.default.Element.addClass(this.minimizeDiv, "OpenLayers_Control_MinimizeDiv minimizeDiv olButton");
-	        this.minimizeDiv.style.display = "none";
-
-	        this.minimizeDiv.innerHTML = '&times;';
-
-	        var bars = document.createElement("i");
-	        _OpenLayers2.default.Element.addClass(bars, "fa fa-bars");
-	        this.maximizeDiv.appendChild(bars);
-
-	        this.div.appendChild(this.minimizeDiv);
-	    },
-
-	    CLASS_NAME: "OpenLayers.Control.LayerSwitcher"
+	    CLASS_NAME: "OpenLayers.Control.SaveMap"
 	});
 
 	/*** EXPORTS FROM exports-loader ***/

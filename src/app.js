@@ -7,18 +7,14 @@ import tooltip from 'jquery-ui/ui/widgets/tooltip';
 import CP from 'exports?CP!./color-picker.js';
 import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
 import UndoRedo from './OpenLayers.Control.UndoRedo';
-import {scaleLinear as d3scaleLinear} from "d3-scale";
-import {geoTransform as d3geoTransform} from "d3-geo";
-import {geoPath as d3geoPath} from "d3-geo";
-import {select as d3select} from "d3-selection";
 import {getParameterByName, setQueryString} from "./querystringutil";
 import {latLonToWorld, worldToLatLon} from "./coordinateconversion";
 import CustomLayerSwitcher from "./layerswitcher";
-console.log('jquery', $);
-console.log('spinner', spinner);
-console.log('OpenLayers', OpenLayers);
-console.log('UndoRedo', UndoRedo);
-console.log('d3select', d3select);
+import {formatDegree, formatPercent} from "./widgets";
+import ExportMap from "./exportmap";
+import SaveMap from "./savemap";
+
+console.log('ExportMap', ExportMap);
 
     var IMG_DIR = "images/",
         map_data_path = "data.json",
@@ -60,6 +56,14 @@ console.log('d3select', d3select);
         ],
         layerSwitcher = new CustomLayerSwitcher({
             ascending: false
+        }, function (evt) {
+            var button = evt.buttonElement;
+            if (button === this.maximizeDiv) {
+                OpenLayers.Element.removeClass(this.div, "minimized");
+                if (isSmallScreen()) {
+                    minimizeControlList();
+                }
+            }
         }),
         defaultHandlerOptions = {
             regularpolygon: {
@@ -131,54 +135,9 @@ console.log('d3select', d3select);
         },
         strokeTools = ['brush', 'line', 'polygon', 'regularpolygon'],
         activeTool,
-        renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+        renderer = OpenLayers.Util.getParameters(window.location.href).renderer,
+        saveHandlerUrl = 'save.php';
 
-    /**************
-     * UI WIDGETS *
-     **************/
-
-    function formatDegree(value) {
-        return value + '°';
-    }
-    
-    console.log("DEGREESPINNER", $.widget( "ui.degreespinner", $.ui.spinner, {
-        _format: formatDegree,
-        _parse: function(value) { return parseFloat(value); }
-    }));
-
-    function formatPercent(value) {
-        return value + '%';
-    }
-    
-    $.widget( "ui.percentspinner", $.ui.spinner, {
-        _format: formatPercent,
-        _parse: function(value) { return parseFloat(value); }
-    });
-    
-    $.widget("custom.iconselectmenu", $.ui.selectmenu, {
-        _renderItem: function(ul, item) {
-            var li = $("<li>"),
-                wrapper = $("<div>");
-
-            if (item.disabled) {
-                li.addClass("ui-state-disabled");
-            }
-
-            $("<div>", {
-                    "class": 'selectmenu-label',
-                    text: item.label
-                })
-                .appendTo(wrapper);
-                
-            $("<div>", {
-                    style: item.element.attr("data-style"),
-                    "class": "selectmenu-icon " + item.element.attr("data-class")
-                })
-                .appendTo(wrapper);
-
-            return li.append(wrapper).appendTo(ul);
-        }
-    });
     
     /********************
      * CONTROL HANDLERS *
@@ -950,88 +909,6 @@ console.log('d3select', d3select);
         }
     }));
     map.addControl(new OpenLayers.Control.KeyboardDefaults());
-    
-    /*layerSwitcher.onButtonClick = (function (fn) {
-        return function (evt) {
-            var button = evt.buttonElement;
-            if (button === this.maximizeDiv) {
-                $('.olControlLayerSwitcher').removeClass("minimized");
-                if (isSmallScreen()) {
-                    minimizeControlList();
-                }
-            }
-            return fn.apply(this, arguments);
-        }
-    })(layerSwitcher.onButtonClick);
-    layerSwitcher.minimizeControl = function (e) {
-        $('.olControlLayerSwitcher').addClass("minimized");
-        this.showControls(true);
-
-        if (e != null) {
-            OpenLayers.Event.stop(e);
-        }
-    }
-    layerSwitcher.loadContents = function () {
-        // layers list div
-        this.layersDiv = document.createElement("div");
-        this.layersDiv.id = this.id + "_layersDiv";
-        OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
-
-        this.baseLbl = document.createElement("div");
-        this.baseLbl.innerHTML = OpenLayers.i18n("Base Layer");
-        OpenLayers.Element.addClass(this.baseLbl, "baseLbl");
-
-        this.baseLayersDiv = document.createElement("div");
-        OpenLayers.Element.addClass(this.baseLayersDiv, "baseLayersDiv");
-
-        this.dataLbl = document.createElement("div");
-        this.dataLbl.innerHTML = OpenLayers.i18n("Overlays");
-        OpenLayers.Element.addClass(this.dataLbl, "dataLbl");
-
-        this.dataLayersDiv = document.createElement("div");
-        OpenLayers.Element.addClass(this.dataLayersDiv, "dataLayersDiv");
-
-        if (this.ascending) {
-            this.layersDiv.appendChild(this.baseLbl);
-            this.layersDiv.appendChild(this.baseLayersDiv);
-            this.layersDiv.appendChild(this.dataLbl);
-            this.layersDiv.appendChild(this.dataLayersDiv);
-        } else {
-            this.layersDiv.appendChild(this.dataLbl);
-            this.layersDiv.appendChild(this.dataLayersDiv);
-            this.layersDiv.appendChild(this.baseLbl);
-            this.layersDiv.appendChild(this.baseLayersDiv);
-        }
-
-        this.div.appendChild(this.layersDiv);
-
-        // maximize button div
-        this.maximizeDiv = OpenLayers.Util.createAlphaImageDiv(
-                                    "OpenLayers_Control_MaximizeDiv",
-                                    null,
-                                    null,
-                                    null,
-                                    "initial");
-        OpenLayers.Element.addClass(this.maximizeDiv, "maximizeDiv olButton");
-        this.maximizeDiv.style.display = "none";
-
-        this.div.appendChild(this.maximizeDiv);
-
-        // minimize button div
-        this.minimizeDiv = OpenLayers.Util.createAlphaImageDiv(
-                                    "OpenLayers_Control_MinimizeDiv",
-                                    null,
-                                    null,
-                                    null,
-                                    "initial");
-        OpenLayers.Element.addClass(this.minimizeDiv, "minimizeDiv olButton");
-        this.minimizeDiv.style.display = "none";
-
-        this.maximizeDiv.innerHTML;
-        this.minimizeDiv.innerHTML = '&times;';
-        $(this.maximizeDiv).empty().append($('<i class="fa fa-bars">'));
-        this.div.appendChild(this.minimizeDiv);
-    }*/
     map.addControl(layerSwitcher);
     layerSwitcher.maximizeControl();
     if (!map.getCenter()) {
@@ -1141,6 +1018,12 @@ console.log('d3select', d3select);
             
     var historyControl = new UndoRedo([vectors]);
     map.addControl(historyControl);
+            
+    var exportControl = new ExportMap(map, vectors, document.getElementById('export'), map_tile_path);
+    map.addControl(exportControl);
+            
+    var saveControl = new SaveMap(map, vectors, document.getElementById('save'), saveHandlerUrl);
+    map.addControl(saveControl);
     
     var measureControl = new OpenLayers.Control.Measure(OpenLayers.Handler.Path);
     map.addControl(measureControl);
@@ -1188,10 +1071,6 @@ console.log('d3select', d3select);
         layerSwitcher.minimizeControl();
     }
 
-    // Set up panel radio button toggle handlers
-    //document.getElementById('noneToggle').addEventListener('click', toggleControl, false);
-    //document.getElementById('drawToggle').addEventListener('click', toggleControl, false);
-    
     // tool switcher ui initialize
     $(".tool-radiobutton").checkboxradio({
         icon: false
@@ -1207,18 +1086,9 @@ console.log('d3select', d3select);
     vectors.redoStack = [];
     function drawUndo() {
         console.log('undo');
-        /*if (vectors.features.length) {
-            var feature = vectors.features.pop();
-            vectors.removeFeatures([feature]);
-            vectors.redoStack.push(feature);
-        }*/
         historyControl.undo();
     }
     function drawRedo() {
-        /*if (vectors.redoStack.length) {
-            var feature = vectors.redoStack.pop();
-            vectors.addFeatures([feature]);
-        }*/
         historyControl.redo();
     }
     
@@ -1236,253 +1106,9 @@ console.log('d3select', d3select);
         }
     }
     
-    // save drawing
-    $('#save').click(function () {
-        var parser = new OpenLayers.Format.GeoJSON()
-        var serialized = parser.write(vectors.features);
-        $.ajax({
-            type: "POST",
-            url: "save.php",
-            data: {'data': serialized},
-            dataType: "json",
-            success: function (data){
-                var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
-                console.log(saveLink);
-            },
-            failure: function (errMsg) {
-                alert("Save request failed.");
-            }
-        });
-    });
-    
     // start jquery ui tooltips
     $( document ).tooltip();
     
     parseQueryString();
     
     $('.controls-container').show();
-    
-    var EXPORT = (function () {
-        var width = 1024,
-            height = 1024;
-
-        var x = d3scaleLinear()
-            .range([0, width]);
-
-        var y = d3scaleLinear()
-            .range([0, height]);
-
-        var projection = d3geoTransform({
-            point: function(px, py) {
-                //console.log('px py', px, py, x(px), y(py));
-                this.stream.point(x(px), height - y(py));
-            }
-        });
-
-        var path = d3geoPath()
-            .projection(projection);
-
-        var svg = d3select("body").append("svg")
-            .attr("id", "export-svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        var stylePropMap = {
-            fillColor: 'fill',
-            fillOpacity: 'fill-opacity',
-            strokeColor: 'stroke',
-            strokeWidth: 'stroke-width',
-            strokeOpacity: 'stroke-opacity',
-            graphicOpacity: 'opacity'
-        }
-
-        var imagesToLoad;
-        
-        function setStyle(d) {
-            console.log(d.geometry.type);
-            for (var p in stylePropMap) {
-                if (d.properties.style[p]) {
-                    console.log(p);
-                    var val = d.properties.style[p];
-                    if (p == 'strokeWidth') {
-                        val = x(val);
-                    }
-                    if (p == 'fillColor' && d.geometry.type == 'LineString') val = 'none';
-                    d3select(this).style(stylePropMap[p], val);
-                }
-                else if (p == 'fillColor') {
-                    console.log('fillColor none', d.geometry.type);
-                    d3select(this).style(stylePropMap[p], "none");
-                }
-                else {
-                    //console.log(p);
-                }
-            }
-            if (d.properties.style.externalGraphic) {
-                console.log('imagesToLoad', imagesToLoad);
-                var val = d.properties.style.externalGraphic;
-                console.log('externalGraphic', val);
-                var self = this;
-                d3select(this).attr("xlink:href", val)
-                    .attr('x', x(d.geometry.coordinates[0]) - x(d.properties.style.graphicHeight) / 2)
-                    .attr('y', height - y(d.geometry.coordinates[1]) - x(d.properties.style.graphicHeight) / 2)
-                    .attr('width', x(d.properties.style.graphicHeight))
-                    .attr('height', x(d.properties.style.graphicHeight));
-                imagesToLoad++;
-                getImageBase64(val, function (data) {
-                    d3select(self)
-                        .attr("href", "data:image/png;base64," + data); // replace link by data URI
-                    imagesToLoad--;
-                    imageLoadFinished();
-                })
-            }
-        }
-        
-        function imageLoadFinished(callback) {
-            if (imagesToLoad == 0) {
-                download_png();
-            }
-        }
-
-        function featureFilter(e) {
-            return function(d) {
-                console.log(d.geometry.type);
-                return d.geometry.type == e;
-            }
-        }
-        
-        function createSVG(data) {
-            console.log(data);
-            
-            // add index of element as zIndex so they can be ordered properly later
-            data.features.forEach(function (d, i) {
-                d.zIndex = i;
-                console.log(d);
-            });
-            
-            var yExtent = [0, 16384],
-                xExtent = [0, 16384];
-            x.domain(xExtent);
-            y.domain(yExtent);
-
-            // background element
-            var baseLayerName = map.baseLayer.name.replace(/ /g, '').toLowerCase();
-            console.log(baseLayerName);
-            var background = map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : baseLayerName) + "5_25.jpg";
-            svg.append("image")
-                .attr("class", "background")
-                .attr("xlink:href", background)
-                .attr('width', width)
-                .attr('height', height);
-            imagesToLoad = 1;
-            getImageBase64(background, function (data) {
-                d3select(".background")
-                    .attr("href", "data:image/png;base64," + data); // replace link by data URI
-                imagesToLoad--;
-                imageLoadFinished();
-            })
-                    
-            svg.selectAll("g").data(data.features.filter(featureFilter('Polygon'))).enter().append("path")
-                .attr("class", "node")
-                .attr("d", path)
-                .each(setStyle);
-
-            svg.selectAll("g").data(data.features.filter(featureFilter('LineString'))).enter().append("path")
-                .attr("class", "node")
-                .attr("d", path)
-                .each(setStyle);
-
-            svg.selectAll("g").data(data.features.filter(featureFilter('Point'))).enter().append("image")
-                .attr("class", "node")
-                .attr("d", path)
-                .each(setStyle);
-                
-            // sort by zIndex
-            svg.selectAll(".node").sort(function (a, b) {
-                console.log(a, b);
-                if (a.zIndex > b.zIndex) return 1;
-                if (a.zIndex < b.zIndex) return -1;
-                return 0;
-            });
-        }
-        
-        function converterEngine(input) { // fn BLOB => Binary => Base64 ?
-            var uInt8Array = new Uint8Array(input),
-                i = uInt8Array.length;
-            var biStr = []; //new Array(i);
-            while (i--) {
-                biStr[i] = String.fromCharCode(uInt8Array[i]);
-            }
-            var base64 = window.btoa(biStr.join(''));
-            //console.log("2. base64 produced >>> " + base64); // print-check conversion result
-            return base64;
-        }
-
-        function getImageBase64(url, callback) {
-            // 1. Loading file from url:
-            var xhr = new XMLHttpRequest(url);
-            xhr.open('GET', url, true); // url is the url of a PNG image.
-            xhr.responseType = 'arraybuffer';
-            xhr.callback = callback;
-            xhr.onload = function (e) {
-                if (this.status == 200) { // 2. When loaded, do:
-                    //console.log("1:Loaded response >>> " + this.response); // print-check xhr response 
-                    var imgBase64 = converterEngine(this.response); // convert BLOB to base64
-                    this.callback(imgBase64); //execute callback function with data
-                }
-            };
-            xhr.send();
-        }
-        
-        function download_png () {
-            var contents = d3select("svg")
-                .attr("version", 1.1)
-                .attr("xmlns", "http://www.w3.org/2000/svg")
-                .node().outerHTML;
-            var src = 'data:image/svg+xml;utf8,' + contents;
-            
-            var canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            var context = canvas.getContext("2d");
-
-            var image = new Image;
-            image.src = src;
-            image.onload = function() {
-                context.drawImage(image, 0, 0, width, height);
-                downloadCanvas(canvas);
-            };
-        }
-
-        function dataURLtoBlob(dataurl) {
-            var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--){
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], {type:mime});
-        }
-
-        function downloadCanvas(_canvasObject) {
-            var link = document.createElement("a");
-            var imgData = _canvasObject.toDataURL({format: 'png', multiplier: 4});
-            var strDataURI = imgData.substr(22, imgData.length);
-            var blob = dataURLtoBlob(imgData);
-            var objurl = URL.createObjectURL(blob);
-
-            link.download = "image.png";
-
-            link.href = objurl;
-
-            link.click();
-        }
-        
-        function doExport() {
-            var parser = new OpenLayers.Format.GeoJSON()
-            var data = JSON.parse(parser.write(vectors.features));
-            console.log(data, vectors.features);
-            createSVG(data, download_png);
-        }
-        
-        $("#export").click(doExport);
-    })();
