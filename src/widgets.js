@@ -7,7 +7,7 @@ import selectmenu from 'jquery-ui/ui/widgets/selectmenu';
  **************/
 
 export function formatDegree(value) {
-    return value + '°';
+    return value + '\u00B0';
 }
 
 var degreespinner = $.widget( "ui.degreespinner", $.ui.spinner, {

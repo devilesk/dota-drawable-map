@@ -1,7 +1,7 @@
 body {
     margin:0;
 }
-#export-svg {
+#export-svg, #share-svg {
     display: none;
 }
 #map {
@@ -46,6 +46,17 @@ body {
 #map-tools label[for="line-tool"] .tool-field-label {
     padding-left: 25px;
 }
+#marker-list {
+    height: 32px;
+    padding: 0;
+    width: 320px;
+}
+#marker-list .selectmenu-icon:hover {
+    opacity: .8;
+}
+#marker-list .selectmenu-icon:active {
+    opacity: .5;
+}
 .ui-widget {
     font-size: 12px;
 }
@@ -79,9 +90,10 @@ body {
     display: inline-block;
     vertical-align: middle;
     padding: 4px 10px;
-    
 }
-
+.setting, .tool-setting.modify-tool-group {
+    padding: 3px 10px;
+}
 .opacity-preview-icon {
     margin-top: 3px;
     vertical-align: middle;
@@ -120,9 +132,16 @@ body {
 .controls .tool-button {
     width: 100%;
 }
-#measure-distance.tool-control,
-#selectfeature-distance.tool-control {
-    width: 100px;
+.controls #draw-undo.tool-button,
+.controls #draw-redo.tool-button {
+    width: 32px;
+}
+#undo-redo-setting {
+    width: 100%;
+    text-align: center;
+    padding: 0;
+    padding-top: 10px;
+    padding-bottom: 5px;
 }
 .tool-control {
     background-color: rgb(58, 58, 58);
@@ -136,6 +155,27 @@ body {
 .tool-control:focus {
     color: black;
     background-color: white;
+}
+#measure-cancel.tool-button {
+    width: auto;
+}
+#measure-distance.tool-control,
+#selectfeature-distance.tool-control {
+    width: 100px;
+}
+.link-container .tool-button {
+    display: inline;
+    width: 100%;
+}
+.link-container .link-button {
+    display: none;
+}
+.link-container.has-link .tool-button {
+    width: 64px;
+}
+.link-container.has-link .link-button {
+    display: inline;
+    width: 32px;
 }
 .ui-spinner.ui-widget.ui-widget-content {
     border: 0;
@@ -155,19 +195,6 @@ body {
     color: rgb(233, 233, 233);
 }
 
-.tool-button {
-    border-radius: 4px;
-    background-color: rgb(83, 83, 83);
-    background: -moz-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
-    background: -webkit-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
-    background: -o-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
-    background: -ms-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
-    background: linear-gradient(to bottom, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
-    color: rgb(233, 233, 233);
-    border: 1px solid black;
-    width: 32px;
-    height: 22px;
-}
 .tool-input-button {
     width: auto;
 }
@@ -183,6 +210,23 @@ body {
 .tool-button:active {
     box-shadow: inset 0px 1px 8px 3px rgba(0,0,0,.8);
 }
+.tool-button:disabled {
+    opacity: 0.4;
+}
+.tool-button, .tool-button[disabled] {
+    border-radius: 4px;
+    background-color: rgb(83, 83, 83);
+    background: -moz-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
+    background: -webkit-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
+    background: -o-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
+    background: -ms-linear-gradient(top, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
+    background: linear-gradient(to bottom, rgb(83,83,83) 0%, rgb(58,58,58) 100%);
+    color: rgb(233, 233, 233);
+    border: 1px solid black;
+    width: 32px;
+    height: 22px;
+    box-shadow: none;
+}
 
 .color-picker-close {
     width: 100%;
@@ -197,6 +241,10 @@ body {
     width: 32px;
     line-height: 32px;
     text-align: center;
+    display: inline-block;
+}
+.selectmenu-icon:hover {
+    cursor: hand;
 }
 .selectmenu-label {
     position: absolute;
@@ -277,7 +325,9 @@ div.olControlMousePosition {
     background-color: initial;
     display: inline-block;
 }
-
+.olControlZoom {
+    display: none;
+}
 .controls {
     width: 100px;
     padding-top: 10px;

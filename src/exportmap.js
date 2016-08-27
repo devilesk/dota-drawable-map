@@ -10,6 +10,7 @@ export default OpenLayers.Class(OpenLayers.Control, {
     height: 1024,
     x: null,
     y: null,
+    id: "export-svg",
     yExtent: [0, 16384],
     xExtent: [0, 16384],
     projection: null,
@@ -44,10 +45,6 @@ export default OpenLayers.Class(OpenLayers.Control, {
             }
         })
         this.path = d3geoPath().projection(this.projection);
-        this.svg = d3select("body").append("svg")
-            .attr("id", "export-svg")
-            .attr("width", this.width)
-            .attr("height", this.height);
         this.x.domain(this.xExtent);
         this.y.domain(this.yExtent);
         
@@ -109,7 +106,12 @@ export default OpenLayers.Class(OpenLayers.Control, {
     
     createSVG: function (data) {
         console.log(data);
-        var self = this;
+        if (this.svg) this.svg.remove();
+        this.svg = d3select("body").append("svg")
+            .attr("id", this.id)
+            .attr("width", this.width)
+            .attr("height", this.height);
+            
         // add index of element as zIndex so they can be ordered properly later
         data.features.forEach(function (d, i) {
             d.zIndex = i;
@@ -119,7 +121,7 @@ export default OpenLayers.Class(OpenLayers.Control, {
         // background element
         var baseLayerName = this.map.baseLayer.name.replace(/ /g, '').toLowerCase();
         console.log(baseLayerName);
-        var background = this.map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : baseLayerName) + "5_25.jpg";
+        var background = this.map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : '_' + baseLayerName) + "5_25.jpg";
         this.svg.append("image")
             .attr("class", "background")
             .attr("xlink:href", background)
@@ -128,7 +130,7 @@ export default OpenLayers.Class(OpenLayers.Control, {
         this.imagesToLoad = 1;
         var self = this;
         this.getImageBase64(background, function (data) {
-            d3select(".background")
+            d3select("#" + self.id + " .background")
                 .attr("href", "data:image/png;base64," + data); // replace link by data URI
             self.imagesToLoad--;
             self.imageLoadFinished();
@@ -188,8 +190,8 @@ export default OpenLayers.Class(OpenLayers.Control, {
     },
     
     download_png: function () {
-        var contents = d3select("svg")
-            .attr("version", 1.1)
+        console.log('download_png', d3select("svg"), this.svg, d3select("svg") == this.svg);
+        var contents = this.svg.attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
             .node().outerHTML;
         var src = 'data:image/svg+xml;utf8,' + contents;

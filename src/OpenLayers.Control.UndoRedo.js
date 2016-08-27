@@ -28,7 +28,7 @@ export default OpenLayers.Class(OpenLayers.Control, {
 	isEditMulty: false,
 	
 	/**
-	 * varructor: UndoRedo
+	 * constructor: UndoRedo
 	 * Parameters:
 	 * layers - array of {<OpenLayers.Layers.Vector>}
 	 */
@@ -41,19 +41,19 @@ export default OpenLayers.Class(OpenLayers.Control, {
             console.log('registering handlers');
             layers[i].events.register("sketchstarted", this, this.onSketchStarted);
 			layers[i].events.register("featureadded", this, this.onInsert);
-            layers[i].events.register("beforefeatureremoved", this, this.onDevare);
+            layers[i].events.register("beforefeatureremoved", this, this.onDelete);
             layers[i].events.register("beforefeaturemodified", this, this.onUpdate);
-            layers[i].events.register("afterfeaturemodified", this, this.onUpdateCompvared);
+            layers[i].events.register("afterfeaturemodified", this, this.onUpdateCompleted);
 		}
 	},
     
 	/**
 	 * Method: onEdit
 	 * on any edit operation performed this has to be triggered
-	 * i.e. on insert, devare, update 
+	 * i.e. on insert, delete, update 
 	 * Parameters: 
 	 * feature - {<OpenLayers.Feature.Vector>}
-	 * editType - {string} edit type done "Insert","Devare","Update"
+	 * editType - {string} edit type done "Insert","Delete","Update"
 	 * component - {string} layer or any other identifier
 	 * Returns: 
 	 */	 
@@ -64,7 +64,7 @@ export default OpenLayers.Class(OpenLayers.Control, {
 		}
 		if (this.undoFeatures[this.currentEditIndex] == undefined) {
 			this.undoFeatures[this.currentEditIndex] = {};
-			this.undoFeatures[this.currentEditIndex][component] = {"Insert": [], "Update": [], "Devare": []};
+			this.undoFeatures[this.currentEditIndex][component] = {"Insert": [], "Update": [], "Delete": []};
 		}
 		if (feature.fid == undefined) {
 			feature.fid = feature.id;
@@ -100,12 +100,12 @@ export default OpenLayers.Class(OpenLayers.Control, {
 	},
 	
 	/**
-	 * Method: onDevare
+	 * Method: onDelete
 	 * event handler for beforefeatureremoved 
 	 */
-	onDevare: function (event) {
+	onDelete: function (event) {
         this.increaseEditIndex();
-		this.onEdit(event.feature, "Devare", event.feature.layer.name);
+		this.onEdit(event.feature, "Delete", event.feature.layer.name);
         return true;
 	},
 	
@@ -124,11 +124,11 @@ export default OpenLayers.Class(OpenLayers.Control, {
 	},
 	
 	/**
-	 * Method: onUpdateCompvared
+	 * Method: onUpdateCompleted
 	 * event handler for afterfeaturemodified
 	 */
-	onUpdateCompvared: function (event) {
-        console.log("onUpdateCompvared", event.modified);
+	onUpdateCompleted: function (event) {
+        console.log("onUpdateCompleted", event.modified);
         if (!event.modified) {
             this.getUndoData();
         }
@@ -205,8 +205,8 @@ export default OpenLayers.Class(OpenLayers.Control, {
                                 OpenLayers.Util.removeItem(layer.features, insertedFeature);
                                 console.log('OpenLayers.Util.removeItem', insertedFeature, layer.features.length);
                                 break;
-                            case "Devare":
-                                console.log("undo Devare", feature);
+                            case "Delete":
+                                console.log("undo Delete", feature);
                                 // layer.features.push(feature);
                                 // layer.drawFeature(feature);
                                 layer.addFeatures([feature], {silent: true});
@@ -262,11 +262,11 @@ export default OpenLayers.Class(OpenLayers.Control, {
                                 // layer.drawFeature(feature);
                                 layer.addFeatures([feature], {silent: true});
                                 break;
-                            case "Devare":
-                                console.log("redo Devare");
-                                var devareFeature = layer.getFeatureByFid(feature.fid)
-                                layer.eraseFeatures(devareFeature);
-                                OpenLayers.Util.removeItem(layer.features, devareFeature);	
+                            case "Delete":
+                                console.log("redo Delete");
+                                var deleteFeature = layer.getFeatureByFid(feature.fid)
+                                layer.eraseFeatures(deleteFeature);
+                                OpenLayers.Util.removeItem(layer.features, deleteFeature);	
                                 break;
                             case "Update":
                                 console.log("redo Update");

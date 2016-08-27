@@ -1,5 +1,6 @@
 import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
 import $ from 'jquery';
+import {setQueryString} from "./querystringutil";
 
 export default OpenLayers.Class(OpenLayers.Control, {
 
@@ -37,14 +38,29 @@ export default OpenLayers.Class(OpenLayers.Control, {
         var parser = new OpenLayers.Format.GeoJSON()
         var serialized = parser.write(this.layer.features);
         console.log('savedrawing', {'data': serialized});
+        $("#save-link").hide();
+        $("#save-container").removeClass("has-link");
         $.ajax({
             type: "POST",
             url: this.url,
             data: {'data': serialized},
             dataType: "json",
             success: function (data){
-                var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
-                console.log(saveLink);
+                if (data.error) {
+                    alert("Save request failed.");
+                }
+                else {
+                    var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
+                    console.log(saveLink);
+                    setQueryString("id", data.file);
+                    $("#save-container").addClass("has-link");
+                    $("#save-link-message").attr("href", saveLink);
+                    $("#save-link-message").text(saveLink);
+                    $("#save-link").off("click").fadeIn();
+                    $("#save-link").click(function () {
+                        $("#save-link-modal").dialog("open");
+                    });
+                }
             },
             failure: function (errMsg) {
                 alert("Save request failed.");

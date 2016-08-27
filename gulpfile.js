@@ -10,37 +10,81 @@ var pump = require('pump');
 var del = require('del');
 var path = require('path');
 var spawn = require('child_process').spawn;
-var insert = require('gulp-insert');
-var browserify = require('browserify');
+var fs = require('fs');
 var gutil = require('gulp-util');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var sourcemaps = require('gulp-sourcemaps');
+var replace = require('gulp-replace');
 
-var deploy_dir = '/srv/www/devilesk.com/dota2/apps/interactivemap3';
+var webpack = require('webpack');
+var AssetsPlugin = require('assets-webpack-plugin');
+var assetsPluginInstance = new AssetsPlugin();
+var webpackConfig = require('./webpack.config');
+var webpackProductionConfig = require('./webpack.production.config');
+
+var deploy_dir = '/srv/www/devilesk.com/dota2/apps/drawablemap';
+
+function getHash() {
+    var obj = JSON.parse(fs.readFileSync('webpack-assets.json', 'utf8'));
+    console.log(obj.main.js.split(".")[1]);
+    return obj.main.js.split(".")[1];
+}
 
 gulp.task('default', ['build']);
 
+gulp.task('build', gulpSequence('clean-build', 'webpack-production', ['css', 'html', 'image', 'fonts', 'copy-files']));
+
+gulp.task("webpack-dev", function(callback) {
+    // run webpack
+    webpack(webpackConfig, function(err, stats) {
+        if(err) throw new gutil.PluginError("webpack", err);
+        gutil.log("[webpack]", stats.toString({
+            // output options
+        }));
+        callback();
+    });
+});
+
+gulp.task("webpack-production", ['build-ol'], function(callback) {
+    // run webpack
+    webpack(webpackProductionConfig, function(err, stats) {
+        if(err) throw new gutil.PluginError("webpack", err);
+        gutil.log("[webpack]", stats.toString({
+            // output options
+        }));
+        callback();
+    });
+});
+
 gulp.task('css', function () {
     return gulp.src([
-          'src/openlayers.css',
-          'src/interactivemap.css'
+            'www/css/miniheroes_sprite.css',
+            'www/css/jquery-ui.css',
+            'www/css/font-awesome.css',
+            'www/css/color-picker.css',
+            'www/css/openlayers.css',
+            'www/css/interactivemap.css'
         ])
-        .pipe(concat('interactivemap.css'))
+        .pipe(concat('interactivemap.' + getHash() + '.css'))
         .pipe(minifyCSS())
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('dist/css'))
 });
 
 gulp.task('html', function () {
-    return gulp.src('src/index.html')
+    return gulp.src('www/index.html')
         .pipe(preprocess({context: { NODE_ENV: 'production'}})) //To set environment variables in-line 
+        .pipe(replace('css/interactivemap.css', 'css/interactivemap.' + getHash() + '.css'))
+        .pipe(replace('js/interactivemap.js', 'js/interactivemap.' + getHash() + '.js'))
         .pipe(gulp.dest('dist/'))
 });
 
+gulp.task('fonts', function () {
+    return gulp.src('www/fonts/**/*')
+        .pipe(gulp.dest('dist/fonts'))
+});
+
 gulp.task('image', function () {
-    return gulp.src('src/img/*')
+    return gulp.src('www/images/**/*')
         .pipe(imagemin())
-        .pipe(gulp.dest('dist/img'))
+        .pipe(gulp.dest('dist/images'))
 });
 
 gulp.task('build-ol', function (cb) {
@@ -49,70 +93,12 @@ gulp.task('build-ol', function (cb) {
     spawn('python', ['build.py', '-c', 'none', '../../interactivemap.cfg'], { cwd: dir, stdio: 'inherit' }).on('close', cb);
 });
 
-gulp.task('export-ol', ['build-ol'], function (cb) {
-    return gulp.src('./ol2/build/OpenLayers.js')
-        .pipe(insert.append('export { OpenLayers };'))
-        .pipe(gulp.dest('app'))
-});
-
-gulp.task('scripts', function() {
-  return gulp.src('./lib/*.js')
-    .pipe(concat('all.js'))
-    .pipe(gulp.dest('./dist/'));
-});
-
-gulp.task('concat', function() {
-  return gulp.src([
-        './ol2/build/OpenLayers.js',
-        './app/OpenLayers.Control.UndoRedo.js',
-        './app/color-picker.js',
-        './node_modules/jquery/dist/jquery.js',
-        './app/jquery-ui.js',
-        './app/app.js'
-    ])
-    .pipe(concat('all.js'))
-    .pipe(gulp.dest('./app'));
-});
-
-gulp.task('javascript', ['concat'], function () {
-    browserify({
-        entries: [
-            './app/all.js'
-        ],
-        debug: true
-    })
-    .transform("babelify", {
-        presets: ["es2015"],
-        compact: false
-    })
-    .bundle()
-    .on('error', err => {
-        gutil.log("Browserify Error", gutil.colors.red(err.message))
-    })
-    .pipe(source('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(gulp.dest('./www/js'));
-});
-
-gulp.task('minify', function (cb) {
-    pump([
-        gulp.src([
-            'ol2/build/OpenLayers.js',
-            'src/interactivemap.js'
-        ]),
-        uglify({ compress: { drop_console: true, dead_code: true } }),
-        concat('interactivemap.js'),
-        gulp.dest('dist')
-    ],
-    cb
-    );
-});
-
-gulp.task('copy-data', function () {
+gulp.task('copy-files', function () {
     return gulp
-        .src('src/data.json')
+        .src([
+            'www/*.json',
+            'www/save.php'
+        ])
         .pipe(gulp.dest('dist'));
 });
 
@@ -122,11 +108,11 @@ gulp.task('clean-build', function () {
     ], {force: true});
 });
 
-gulp.task('build', gulpSequence('clean-build', ['css', 'html', 'image', 'build-ol', 'copy-data'], 'minify'));
-
 gulp.task('clean', function () {
     return del([
-        deploy_dir +'/**/*'
+        deploy_dir +'/**/*',
+        '!' + deploy_dir +'/save',
+        '!' + deploy_dir +'/save/*'
     ], {force: true});
 });
 

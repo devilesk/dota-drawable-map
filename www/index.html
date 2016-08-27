@@ -1,8 +1,8 @@
 <html>
 	<head>
         <link rel="shortcut icon" href="/media/favicon.png">
-		<title>Dota 2 Interactive Map 3</title>
-        <meta name="description" content="Dota 2 Interactive Map. View, pan, and zoom in on any part of the Dota 2 map. Turn on various overlays for more information, place wards to see sight ranges, and measure distances.">
+		<title>Dota 2 Drawable Map</title>
+        <meta name="description" content="Dota 2 Drawable Map. Create, save, and share drawings on an interactive Dota 2 map.">
         <meta name="author" content="devilesk">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -53,6 +53,9 @@
                 <i class="fa fa-map-marker tool-icon" title="Icon Image"></i>
                 <select id="marker-image-dropdown" class="tool-control">
                 </select>
+            </div>
+            <div id="marker-list" class="tool-setting icon-tool-group">
+                
             </div>
 
             <div class="tool-setting line-tool-group" title="Stroke Size">
@@ -188,11 +191,6 @@
             <div class="tool-setting measure-tool-group">
                 <button id="measure-cancel" class="tool-button tool-input-button" title="Clear">Clear</button>
             </div>
-            
-            <div class="setting">
-                <button id="draw-undo" class="tool-button" title="Undo (Ctrl+X)"><i class="fa fa-undo"></i></button>
-                <button id="draw-redo" class="tool-button" title="Redo (Ctrl+Y)"><i class="fa fa-repeat"></i></button>
-            </div>
         </div>
 		<div id="map">
             <div id="controls-container" class="controls-container">
@@ -201,8 +199,8 @@
                 </a>
                 <a id="controls-min" class="controls-button minimizeDiv olButton olAlphaImg" href="#">&times;</a>
                 <div class="zoom-container">
-                    <button id="zoom-out" class="tool-button"><i class="fa fa-search-minus"></i></button>
-                    <button id="zoom-in" class="tool-button"><i class="fa fa-search-plus"></i></button>
+                    <button id="zoom-out" class="tool-button" title="Zoom Out"><i class="fa fa-search-minus"></i></button>
+                    <button id="zoom-in" class="tool-button" title="Zoom In"><i class="fa fa-search-plus"></i></button>
                 </div>
                 <div class="controls">
                     <fieldset id="map-tools">
@@ -220,17 +218,33 @@
                         <input type="radio" name="tool-radio" id="regularpolygon-tool" class="tool-radiobutton" value="regularpolygon">
                         <label for="modify-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Edit</span></label>
                         <input type="radio" name="tool-radio" id="modify-tool" class="tool-radiobutton" value="modify">
-                        <label for="selectfeature-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Select</span></label>
+                        <label for="selectfeature-tool"><i class="fa fa-hand-pointer-o"></i><span class="tool-field-label"> Select</span></label>
                         <input type="radio" name="tool-radio" id="selectfeature-tool" class="tool-radiobutton" value="selectfeature">
-                        <label for="measure-tool"><i class="fa fa-pencil-square-o"></i><span class="tool-field-label"> Measure</span></label>
+                        <label for="measure-tool"><i class="fa fa-line-chart"></i><span class="tool-field-label"> Measure</span></label>
                         <input type="radio" name="tool-radio" id="measure-tool" class="tool-radiobutton" value="measure">
                     </fieldset>
-                    <button id="save" class="tool-button">Save</button>
-                    <button id="export" class="tool-button">Export</button>
+                    <button id="export" class="tool-button" title="Download drawing as a png image">Download</button>
+                    <div id="save-container" class="link-container">
+                        <button id="save" class="tool-button" title="Create a link to this drawing">Save</button>
+                        <button id="save-link" class="tool-button link-button"><i class="fa fa-link"></i></button>
+                    </div>
+                    <div id="share-container" class="link-container">
+                        <button id="share" class="tool-button" title="Upload drawing to imgur.com">Share</button>
+                        <button id="share-link" class="tool-button link-button"><i class="fa fa-link"></i></button>
+                    </div>
+                    <div id="undo-redo-setting" class="setting">
+                        <button id="draw-undo" class="tool-button" title="Undo (Ctrl+X)"><i class="fa fa-undo"></i></button>
+                        <button id="draw-redo" class="tool-button" title="Redo (Ctrl+Y)"><i class="fa fa-repeat"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
-        <canvas id="mapCanvas"></canvas>
+        <div id="save-link-modal" class="link-modal" title="Save Link">
+            <a id="save-link-message" href="#" target="_blank"></a>
+        </div>
+        <div id="share-link-modal" class="link-modal" title="Share Link">
+            <a id="share-link-message" href="#" target="_blank"></a>
+        </div>
         <script type="text/javascript">
 
           var _gaq = _gaq || [];
@@ -244,21 +258,6 @@
           })();
 
         </script>
-        <!-- @if NODE_ENV='development' 
-        <!--<script src="jquery.js"></script>
-        <script src="jquery-ui.js"></script>
-        <script src="color-picker.js"></script>
-        <script src="../ol2/build/OpenLayers.js"></script>
-        <script src="OpenLayers.Control.UndoRedo.js"></script>
-        <script src="https://d3js.org/d3-selection.v1.min.js"></script>
-        <script src="https://d3js.org/d3-array.v1.min.js"></script>
-        <script src="https://d3js.org/d3-collection.v1.min.js"></script>
-        <script src="https://d3js.org/d3-color.v1.min.js"></script>
-        <script src="https://d3js.org/d3-format.v1.min.js"></script>
-        <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-        <script src="https://d3js.org/d3-scale.v1.min.js"></script>
-        <script src="https://d3js.org/d3-geo.v1.min.js"></script>-->
-        <!-- @endif -->
-        <script src="js/bundle.js"></script>
+        <script src="js/interactivemap.js"></script>
 	</body>
 </html>

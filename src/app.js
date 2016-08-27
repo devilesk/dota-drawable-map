@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import dialog from 'jquery-ui/ui/widgets/dialog';
 import spinner from 'jquery-ui/ui/widgets/spinner';
 import selectmenu from 'jquery-ui/ui/widgets/selectmenu';
 import checkboxradio from 'jquery-ui/ui/widgets/checkboxradio';
@@ -8,10 +9,11 @@ import CP from 'exports?CP!./color-picker.js';
 import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
 import UndoRedo from './OpenLayers.Control.UndoRedo';
 import {getParameterByName, setQueryString} from "./querystringutil";
-import {latLonToWorld, worldToLatLon} from "./coordinateconversion";
+import {latLonToWorld, worldToLatLon, calculateDistance} from "./coordinateconversion";
 import CustomLayerSwitcher from "./layerswitcher";
 import {formatDegree, formatPercent} from "./widgets";
 import ExportMap from "./exportmap";
+import ShareMap from "./sharemap";
 import SaveMap from "./savemap";
 
 console.log('ExportMap', ExportMap);
@@ -186,36 +188,32 @@ console.log('ExportMap', ExportMap);
                 if (tools.indexOf(key) != -1) {
                     $('#toolbar').show();
                     updateTools(key);
-                    if (key == 'modify') {
-                        //vectors.events.register("beforefeaturemodified", drawControls[key], onFeatureModified);
+                    /*if (key == 'modify') {
+                        vectors.events.register("beforefeaturemodified", drawControls[key], onBeforeFeatureModified);
                         vectors.events.register("afterfeaturemodified", drawControls[key], onFeatureModified);
                     }
                     else {
                         vectors.events.register("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
-                    }
+                    }*/
                 }
             } else {
                 control.deactivate();
                 if (tools.indexOf(key) != -1) {
-                    if (key == 'modify') {
-                        //vectors.events.unregister("beforefeaturemodified", drawControls[key], onFeatureModified);
+                    /*if (key == 'modify') {
+                        vectors.events.unregister("beforefeaturemodified", drawControls[key], onBeforeFeatureModified);
                         vectors.events.unregister("afterfeaturemodified", drawControls[key], onFeatureModified);
                     }
                     else {
                         vectors.events.unregister("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
-                    }
+                    }*/
                 }
             }
         }
-        if (this.value === "draw") {
-            $('#toolbar').show();
-            var selectedTool = document.querySelector('input[name="tool-radio"]:checked');
-            if (!selectedTool) {
-                selectedTool = document.querySelector('input[name="tool-radio"]');
-                selectedTool.checked = true;
-                updateTools(selectedTool.value);
+        if (this.value == 'modify') {
+            console.log("layer selected features", vectors.selectedFeatures);
+            if (vectors.selectedFeatures.length) {
+                drawControls.modify.selectFeature(vectors.selectedFeatures[0]);
             }
-            toggleControl.call(selectedTool);
         }
     }
     
@@ -583,14 +581,47 @@ console.log('ExportMap', ExportMap);
             $('#marker-image-dropdown').append($option);
         }
         
+        var $markerList = $('#marker-list');
         $( "#marker-image-dropdown" ).iconselectmenu({
             change: function( event, ui ) {
                 console.log('change', event, ui);
                 defaultStyles.icon.externalGraphic = ui.item.value;
+                var iconClass = ui.item.element.attr("data-class");
+                console.log('iconClass', iconClass);
+                var bInList = false;
+                $markerList.children().each(function (i) {
+                    if ($(this).hasClass(iconClass)) {
+                        console.log('hasClass');
+                        $(this).prependTo('#marker-list');
+                        bInList = true;
+                        return false;
+                    }
+                });
+                if (bInList) return;
+                
+                addIcon(iconClass, ui.item.value);
+                
+                var len = $markerList.children().length;
+                while (len > 10) {
+                    $('div:last-child', $markerList).remove();
+                    len--;
+                }
             }
         });
         
+        function addIcon(iconClass, value) {
+            var $icon = $('<div>')
+                .addClass("selectmenu-icon " + iconClass);
+            $icon.click(function () {
+                console.log('click', value);
+                defaultStyles.icon.externalGraphic = value;
+                $('#marker-image-dropdown').val(value).iconselectmenu( "refresh" );
+            });
+            $markerList.prepend($icon);
+        }
+        
         defaultStyles.icon.externalGraphic = $('#marker-image-dropdown > option')[0].value;
+        addIcon($('#marker-image-dropdown > option').attr("data-class"), defaultStyles.icon.externalGraphic);
     });
     
     /********************
@@ -973,26 +1004,29 @@ console.log('ExportMap', ExportMap);
     
     function handleMeasurements(event) {
         console.log('handleMeasurements', event);
-        var geometry = event.geometry;
-        var units = event.units;
-        var order = event.order;
-        var measure = event.measure;
-        var element = document.getElementById('output');
+        displayMeasure(document.getElementById('measure-distance'), event.order, event.units, event.measure);
+    }
+    
+    function displayMeasure(element, order, units, measure) {
+        console.log('displayMeasure(element, order, units, measure)', element, order, units, measure);
+        var val = calculateDistance(scale, order, units, measure);
         var out = "";
         if(order == 1) {
-            out += measure.toFixed(3) + " " + units;
+            out += val.toFixed(0) + " units";
         } else {
-            out += measure.toFixed(3) + " " + units + "<sup>2</" + "sup>";
+            out += val.toFixed(0) + " units<sup>2</" + "sup>";
         }
-        $('#measure-distance').val(out);
+        element.value = out;
     }
     
     function createSketchCompletedHandler(key) {
         return function (event) {
-            console.log('createSketchCompletedHandler', key);
-            //event.feature.attributes.renderIntent = key;
-            //event.feature.renderIntent = key;
-            event.feature.attributes.style = getStyle(key);
+            if (drawControls[key].active) {
+                console.log('createSketchCompletedHandler', key);
+                //event.feature.attributes.renderIntent = key;
+                //event.feature.renderIntent = key;
+                event.feature.attributes.style = getStyle(key);
+            }
         }
     }
     
@@ -1006,14 +1040,27 @@ console.log('ExportMap', ExportMap);
 
     // Modifying feature resets renderIntent to 'default'. Reset it to stored renderIntent and redraw feature.
     function onFeatureModified(event) {
-        console.log('onFeatureModified', OpenLayers.Util.extend({}, event.feature), event.modified);
-        //event.feature.renderIntent = event.feature.attributes.renderIntent;
-        //event.feature.layer.drawFeature(event.feature);
+        console.log("onFeatureModified");
+        document.getElementById('draw-undo').disabled = false;
+        document.getElementById('draw-redo').disabled = false;
+        
+    }
+    function onBeforeFeatureModified(event) {
+        console.log("onBeforeFeatureModified");
+        document.getElementById('draw-undo').disabled = true;
+        document.getElementById('draw-redo').disabled = true;
     }
 
     // Add controls to map
     for (var key in drawControls) {
         map.addControl(drawControls[key]);
+        if (key == 'modify') {
+            vectors.events.register("beforefeaturemodified", drawControls[key], onBeforeFeatureModified);
+            vectors.events.register("afterfeaturemodified", drawControls[key], onFeatureModified);
+        }
+        else {
+            vectors.events.register("sketchcomplete", drawControls[key], onSketchCompletedHandlers[key]);
+        }
     }
             
     var historyControl = new UndoRedo([vectors]);
@@ -1021,6 +1068,9 @@ console.log('ExportMap', ExportMap);
             
     var exportControl = new ExportMap(map, vectors, document.getElementById('export'), map_tile_path);
     map.addControl(exportControl);
+            
+    var shareControl = new ShareMap(map, vectors, document.getElementById('share'), map_tile_path);
+    map.addControl(shareControl);
             
     var saveControl = new SaveMap(map, vectors, document.getElementById('save'), saveHandlerUrl);
     map.addControl(saveControl);
@@ -1030,7 +1080,9 @@ console.log('ExportMap', ExportMap);
     vectors.events.register("featureselected", drawControls.selectfeature, function (event) {
         console.log("featureselected", event);
         if (event.feature.geometry.CLASS_NAME.indexOf('LineString') > -1) {
-            console.log('distance', measureControl.getBestLength(event.feature.geometry));
+            var data = measureControl.getBestLength(event.feature.geometry)
+            console.log('distance', data);
+            displayMeasure(document.getElementById('selectfeature-distance'), 1, data[1], data[0]);
         }
         else {
             console.log('area', measureControl.getBestArea(event.feature.geometry));
@@ -1086,9 +1138,11 @@ console.log('ExportMap', ExportMap);
     vectors.redoStack = [];
     function drawUndo() {
         console.log('undo');
+        drawControls.selectfeature.unselectAll();
         historyControl.undo();
     }
     function drawRedo() {
+        drawControls.selectfeature.unselectAll();
         historyControl.redo();
     }
     
@@ -1112,3 +1166,14 @@ console.log('ExportMap', ExportMap);
     parseQueryString();
     
     $('.controls-container').show();
+    
+    $(".link-modal").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 'auto',
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
