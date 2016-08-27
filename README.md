@@ -1,5 +1,5 @@
-#dota-interactive-map
+#dota-drawable-map
 
-Interactive dota map for patch 6.87
+Drawing app on an interactive Dota 2 map
 
-http://devilesk.com/dota2/apps/interactivemap3/
+http://devilesk.com/dota2/apps/drawablemap/
