@@ -1,7 +1,7 @@
 {
-  "name": "dota-interactive-map",
+  "name": "dota-drawable-map",
   "version": "1.0.0",
-  "description": "Interactive Dota 2 Map",
+  "description": "Drawable  Dota 2 Map",
   "main": "interactivemap.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,14 +12,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devilesk/dota-interactive-map.git"
+    "url": "git+https://github.com/devilesk/dota-drawable-map.git"
   },
   "author": "devilesk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/devilesk/dota-interactive-map/issues"
+    "url": "https://github.com/devilesk/dota-drawable-map/issues"
   },
-  "homepage": "https://github.com/devilesk/dota-interactive-map#readme",
+  "homepage": "https://github.com/devilesk/dota-drawable-map#readme",
   "private": true,
   "devDependencies": {
     "assets-webpack-plugin": "^3.4.0",
