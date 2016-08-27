@@ -577,7 +577,7 @@ console.log('ExportMap', ExportMap);
             $('#marker-image-dropdown').append($option);
         }
         for (var i = 0; i < data.other.length; i++) {
-            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite' + data.other[i].id);
+            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite-' + data.other[i].id);
             $('#marker-image-dropdown').append($option);
         }
         

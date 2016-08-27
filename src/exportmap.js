@@ -74,9 +74,16 @@ export default OpenLayers.Class(OpenLayers.Control, {
                 console.log('imagesToLoad', self.imagesToLoad);
                 var val = d.properties.style.externalGraphic;
                 console.log('externalGraphic', val);
+                
+                if (val.indexOf('ward_sentry') == -1 && val.indexOf('ward_observer') == -1) {
+                    var yPos = self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight) / 2;
+                }
+                else {
+                    var yPos = self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight);
+                }
                 d3select(this).attr("xlink:href", val)
                     .attr('x', self.x(d.geometry.coordinates[0]) - self.x(d.properties.style.graphicHeight) / 2)
-                    .attr('y', self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight) / 2)
+                    .attr('y', yPos)
                     .attr('width', self.x(d.properties.style.graphicHeight))
                     .attr('height', self.x(d.properties.style.graphicHeight));
                 self.imagesToLoad++;

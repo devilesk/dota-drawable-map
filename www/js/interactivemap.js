@@ -654,7 +654,7 @@
 	        (0, _jquery2.default)('#marker-image-dropdown').append($option);
 	    }
 	    for (var i = 0; i < data.other.length; i++) {
-	        var $option = (0, _jquery2.default)('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite' + data.other[i].id);
+	        var $option = (0, _jquery2.default)('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite-' + data.other[i].id);
 	        (0, _jquery2.default)('#marker-image-dropdown').append($option);
 	    }
 
@@ -63263,7 +63263,13 @@
 	                console.log('imagesToLoad', self.imagesToLoad);
 	                var val = d.properties.style.externalGraphic;
 	                console.log('externalGraphic', val);
-	                (0, _d3Selection.select)(this).attr("xlink:href", val).attr('x', self.x(d.geometry.coordinates[0]) - self.x(d.properties.style.graphicHeight) / 2).attr('y', self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight) / 2).attr('width', self.x(d.properties.style.graphicHeight)).attr('height', self.x(d.properties.style.graphicHeight));
+
+	                if (val.indexOf('ward_sentry') == -1 && val.indexOf('ward_observer') == -1) {
+	                    var yPos = self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight) / 2;
+	                } else {
+	                    var yPos = self.height - self.y(d.geometry.coordinates[1]) - self.x(d.properties.style.graphicHeight);
+	                }
+	                (0, _d3Selection.select)(this).attr("xlink:href", val).attr('x', self.x(d.geometry.coordinates[0]) - self.x(d.properties.style.graphicHeight) / 2).attr('y', yPos).attr('width', self.x(d.properties.style.graphicHeight)).attr('height', self.x(d.properties.style.graphicHeight));
 	                self.imagesToLoad++;
 	                var d3this = this;
 	                self.getImageBase64(val, function (data) {
@@ -71256,16 +71262,20 @@
 	            data: { 'data': serialized },
 	            dataType: "json",
 	            success: function success(data) {
-	                var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
-	                console.log(saveLink);
-	                (0, _querystringutil.setQueryString)("id", data.file);
-	                (0, _jquery2.default)("#save-container").addClass("has-link");
-	                (0, _jquery2.default)("#save-link-message").attr("href", saveLink);
-	                (0, _jquery2.default)("#save-link-message").text(saveLink);
-	                (0, _jquery2.default)("#save-link").off("click").fadeIn();
-	                (0, _jquery2.default)("#save-link").click(function () {
-	                    (0, _jquery2.default)("#save-link-modal").dialog("open");
-	                });
+	                if (data.error) {
+	                    alert("Save request failed.");
+	                } else {
+	                    var saveLink = [location.protocol, '//', location.host, location.pathname].join('') + '?id=' + data.file;
+	                    console.log(saveLink);
+	                    (0, _querystringutil.setQueryString)("id", data.file);
+	                    (0, _jquery2.default)("#save-container").addClass("has-link");
+	                    (0, _jquery2.default)("#save-link-message").attr("href", saveLink);
+	                    (0, _jquery2.default)("#save-link-message").text(saveLink);
+	                    (0, _jquery2.default)("#save-link").off("click").fadeIn();
+	                    (0, _jquery2.default)("#save-link").click(function () {
+	                        (0, _jquery2.default)("#save-link-modal").dialog("open");
+	                    });
+	                }
 	            },
 	            failure: function failure(errMsg) {
 	                alert("Save request failed.");
