@@ -20,7 +20,7 @@ var assetsPluginInstance = new AssetsPlugin();
 var webpackConfig = require('./webpack.config');
 var webpackProductionConfig = require('./webpack.production.config');
 
-var deploy_dir = '/srv/www/devilesk.com/dota2/apps/drawablemap';
+var deploy_dir = '/srv/www/dev.devilesk.com/dota2/apps/dota-drawable-map/deploy';
 
 function getHash() {
     var obj = JSON.parse(fs.readFileSync('webpack-assets.json', 'utf8'));
