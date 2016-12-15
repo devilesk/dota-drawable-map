@@ -237,7 +237,9 @@ export default OpenLayers.Class(OpenLayers.Control, {
 
         link.href = objurl;
 
+        document.body.appendChild(link); // Required for FF
         link.click();
+        document.body.removeChild(link); // Required for FF
     },
     
     doExport: function () {
