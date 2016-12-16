@@ -1,26 +1,70 @@
-import $ from 'jquery';
-import dialog from 'jquery-ui/ui/widgets/dialog';
-import spinner from 'jquery-ui/ui/widgets/spinner';
-import selectmenu from 'jquery-ui/ui/widgets/selectmenu';
-import checkboxradio from 'jquery-ui/ui/widgets/checkboxradio';
-import controlgroup from 'jquery-ui/ui/widgets/controlgroup';
-import tooltip from 'jquery-ui/ui/widgets/tooltip';
-import CP from 'exports?CP!./color-picker.js';
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
-import UndoRedo from './OpenLayers.Control.UndoRedo';
-import {getParameterByName, setQueryString} from "./querystringutil";
-import {latLonToWorld, worldToLatLon, calculateDistance} from "./coordinateconversion";
-import CustomLayerSwitcher from "./layerswitcher";
-import {formatDegree, formatPercent} from "./widgets";
-import ExportMap from "./exportmap";
-import ShareMap from "./sharemap";
-import SaveMap from "./savemap";
+var $ = require("jquery");
+require("jquery-ui/ui/version");
+require("jquery-ui/ui/safe-active-element");
+require("jquery-ui/ui/widget");
+require("jquery-ui/ui/escape-selector");
+require("jquery-ui/ui/form");
+require("jquery-ui/ui/form-reset-mixin");
+require("jquery-ui/ui/keycode");
+require("jquery-ui/ui/labels");
+require("jquery-ui/ui/position");
+require("jquery-ui/ui/unique-id");
+require("jquery-ui/ui/focusable");
+require("jquery-ui/ui/safe-blur");
+require("jquery-ui/ui/tabbable");
+require("jquery-ui/ui/plugin");
+require("jquery-ui/ui/data");
+require("jquery-ui/ui/ie");
+require("jquery-ui/ui/scroll-parent");
+require("jquery-ui/ui/disable-selection");
+
+require("jquery-ui/ui/widgets/button");
+require("jquery-ui/ui/widgets/menu");
+require("jquery-ui/ui/widgets/mouse");
+require("jquery-ui/ui/widgets/draggable");
+require("jquery-ui/ui/widgets/resizable");
+
+var spinner = require("jquery-ui/ui/widgets/spinner");
+var selectmenu = require("jquery-ui/ui/widgets/selectmenu");
+var dialog = require("jquery-ui/ui/widgets/dialog");
+var checkboxradio = require("jquery-ui/ui/widgets/checkboxradio");
+var controlgroup = require("jquery-ui/ui/widgets/controlgroup");
+var tooltip = require("jquery-ui/ui/widgets/tooltip");
+
+var CP = require("./color-picker.js");
+var OpenLayers = require("../ol2/build/OpenLayers.js");
+var UndoRedo = require("./OpenLayers.Control.UndoRedo");
+var querystringutil = require("./querystringutil");
+var coordinateconversion = require("./coordinateconversion");
+var CustomLayerSwitcher = require("./layerswitcher");
+var widgets = require("./widgets");
+var ExportMap = require("./exportmap");
+var ShareMap = require("./sharemap");
+var SaveMap = require("./savemap");
+
+var sprite_manifest = require("./sprite_manifest.json");
+sprite_manifest.heroes = sprite_manifest.heroes.sort(function (a, b) {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+});
+sprite_manifest.other = sprite_manifest.other.sort(function (a, b) {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+});
+
+var latLonToWorld = coordinateconversion.latLonToWorld
+var worldToLatLon = coordinateconversion.worldToLatLon
+var calculateDistance = coordinateconversion.calculateDistance
+var formatDegree = widgets.formatDegree;
+var formatPercent = widgets.formatPercent;
+var getParameterByName = querystringutil.getParameterByName;
+var setQueryString = querystringutil.setQueryString;
 
 console.log('ExportMap', ExportMap);
 
     var IMG_DIR = "images/",
-        map_data_path = "data.json",
-        map_tile_path = "/media/images/map/687/",
         map_w = 16384,
         map_h = 16384,
         map_x_boundaries = [-8475.58617377, 9327.49124559],
@@ -43,18 +87,10 @@ console.log('ExportMap', ExportMap);
             ]
         }),
         baseLayers = [
-            new OpenLayers.Layer.TMS("Default", map_tile_path, {
-                type: "jpg",
-                getURL: getMyURL('default')
-            }),
-            new OpenLayers.Layer.TMS("Desert", map_tile_path, {
-                type: "jpg",
-                getURL: getMyURL('desert')
-            }),
-            new OpenLayers.Layer.TMS("Immortal Gardens", map_tile_path, {
-                type: "jpg",
-                getURL: getMyURL('immortalgardens')
-            })
+            baseLayerFactory('700', 'default', '7.00 Default', map_tile_path),
+            baseLayerFactory('687', 'default', '6.87 Default', map_tile_path),
+            baseLayerFactory('687', 'desert', '7.00 Desert', map_tile_path),
+            baseLayerFactory('687', 'immortalgardens', '7.00 Immortal Gardens', map_tile_path)
         ],
         layerSwitcher = new CustomLayerSwitcher({
             ascending: false
@@ -140,7 +176,15 @@ console.log('ExportMap', ExportMap);
         renderer = OpenLayers.Util.getParameters(window.location.href).renderer,
         saveHandlerUrl = 'save.php';
 
-    
+    function baseLayerFactory(map_patch, map_id, name, map_tile_path) {
+        var layer = new OpenLayers.Layer.TMS(name, map_tile_path, {
+            type: "jpg",
+            getURL: getMyURL(map_patch, map_id)
+        })
+        layer.map_patch = map_patch;
+        layer.map_id = map_id;
+        return layer;
+    }
     /********************
      * CONTROL HANDLERS *
      ********************/
@@ -226,7 +270,7 @@ console.log('ExportMap', ExportMap);
     }
 
     // creates url for tiles. OpenLayers TMS Layer getURL property is set to this
-    function getMyURL(baseLayer) {
+    function getMyURL(patch, baseLayer) {
         return function(bounds) {
             //console.log('getMyURL', baseLayer);
             var res = this.map.getResolution(),
@@ -239,7 +283,7 @@ console.log('ExportMap', ExportMap);
             if (url instanceof Array) {
                 url = this.selectUrl(path, url)
             }
-            return url + baseLayer + '/' + path
+            return url + patch + '/' + baseLayer + '/' + path
         }
     }
 
@@ -570,59 +614,57 @@ console.log('ExportMap', ExportMap);
     }).val(formatPercent(defaultStyles.icon.graphicOpacity*100));
     
     // icon select dropdown
-    $.getJSON("sprite_manifest.json", function (data) {
-        var img_root = '/media/images/miniheroes/';
-        for (var i = 0; i < data.heroes.length; i++) {
-            var $option = $('<option value="' + img_root + data.heroes[i].file + '">').text(data.heroes[i].name).attr("data-class", 'miniheroes-sprite-' + data.heroes[i].id);
-            $('#marker-image-dropdown').append($option);
-        }
-        for (var i = 0; i < data.other.length; i++) {
-            var $option = $('<option value="' + img_root + data.other[i].file + '">').text(data.other[i].name).attr("data-class", 'miniheroes-sprite-' + data.other[i].id);
-            $('#marker-image-dropdown').append($option);
-        }
-        
-        var $markerList = $('#marker-list');
-        $( "#marker-image-dropdown" ).iconselectmenu({
-            change: function( event, ui ) {
-                console.log('change', event, ui);
-                defaultStyles.icon.externalGraphic = ui.item.value;
-                var iconClass = ui.item.element.attr("data-class");
-                console.log('iconClass', iconClass);
-                var bInList = false;
-                $markerList.children().each(function (i) {
-                    if ($(this).hasClass(iconClass)) {
-                        console.log('hasClass');
-                        $(this).prependTo('#marker-list');
-                        bInList = true;
-                        return false;
-                    }
-                });
-                if (bInList) return;
-                
-                addIcon(iconClass, ui.item.value);
-                
-                var len = $markerList.children().length;
-                while (len > 10) {
-                    $('div:last-child', $markerList).remove();
-                    len--;
+    var img_root = '/media/images/miniheroes/';
+    for (var i = 0; i < sprite_manifest.heroes.length; i++) {
+        var $option = $('<option value="' + img_root + sprite_manifest.heroes[i].file + '">').text(sprite_manifest.heroes[i].name).attr("data-class", 'miniheroes-sprite-' + sprite_manifest.heroes[i].id);
+        $('#marker-image-dropdown').append($option);
+    }
+    for (var i = 0; i < sprite_manifest.other.length; i++) {
+        var $option = $('<option value="' + img_root + sprite_manifest.other[i].file + '">').text(sprite_manifest.other[i].name).attr("data-class", 'miniheroes-sprite-' + sprite_manifest.other[i].id);
+        $('#marker-image-dropdown').append($option);
+    }
+    
+    var $markerList = $('#marker-list');
+    $( "#marker-image-dropdown" ).iconselectmenu({
+        change: function( event, ui ) {
+            console.log('change', event, ui);
+            defaultStyles.icon.externalGraphic = ui.item.value;
+            var iconClass = ui.item.element.attr("data-class");
+            console.log('iconClass', iconClass);
+            var bInList = false;
+            $markerList.children().each(function (i) {
+                if ($(this).hasClass(iconClass)) {
+                    console.log('hasClass');
+                    $(this).prependTo('#marker-list');
+                    bInList = true;
+                    return false;
                 }
-            }
-        });
-        
-        function addIcon(iconClass, value) {
-            var $icon = $('<div>')
-                .addClass("selectmenu-icon " + iconClass);
-            $icon.click(function () {
-                console.log('click', value);
-                defaultStyles.icon.externalGraphic = value;
-                $('#marker-image-dropdown').val(value).iconselectmenu( "refresh" );
             });
-            $markerList.prepend($icon);
+            if (bInList) return;
+            
+            addIcon(iconClass, ui.item.value);
+            
+            var len = $markerList.children().length;
+            while (len > 10) {
+                $('div:last-child', $markerList).remove();
+                len--;
+            }
         }
-        
-        defaultStyles.icon.externalGraphic = $('#marker-image-dropdown > option')[0].value;
-        addIcon($('#marker-image-dropdown > option').attr("data-class"), defaultStyles.icon.externalGraphic);
     });
+    
+    function addIcon(iconClass, value) {
+        var $icon = $('<div>')
+            .addClass("selectmenu-icon " + iconClass);
+        $icon.click(function () {
+            console.log('click', value);
+            defaultStyles.icon.externalGraphic = value;
+            $('#marker-image-dropdown').val(value).iconselectmenu( "refresh" );
+        });
+        $markerList.prepend($icon);
+    }
+    
+    defaultStyles.icon.externalGraphic = $('#marker-image-dropdown > option')[0].value;
+    addIcon($('#marker-image-dropdown > option').attr("data-class"), defaultStyles.icon.externalGraphic);
     
     /********************
      * INITITIALIZATION *

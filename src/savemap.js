@@ -1,8 +1,8 @@
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
-import $ from 'jquery';
-import {setQueryString} from "./querystringutil";
+var OpenLayers = require("../ol2/build/OpenLayers.js");
+var $ = require("jquery");
+var setQueryString = require("./querystringutil").setQueryString;
 
-export default OpenLayers.Class(OpenLayers.Control, {
+module.exports = OpenLayers.Class(OpenLayers.Control, {
 
     layer: null,
     

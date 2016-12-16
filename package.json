@@ -1,9 +1,24 @@
 {
   "name": "dota-drawable-map",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Drawable  Dota 2 Map",
   "main": "interactivemap.js",
   "scripts": {
+    "browserify:dev": "browserify -u 'jquery' src/app.js > www/bundle.js",
+    "uglify": "uglifyjs --compress drop_console --mangle -- www/bundle.js > build/bundle.min.js",
+    "clean:build": "rm -rf build/*",
+    "build:js": "npm run browserify:dev && npm run uglify",
+    "build:ol": "node scripts/build_ol.js",
+    "build:img": "imagemin www/img/* --out-dir=build/img",
+    "build:css": "mkdir -p build/css && cat www/css/color-picker.css www/css/openlayers.css www/css/font-awesome.css www/css/jquery-ui.css www/css/miniheroes_sprite_png.css www/css/interactivemap.css | cleancss --skip-rebase -o build/css/app.min.css",
+    "build:html": "NODE_ENV=prod node scripts/preprocess.js",
+    "build:copy": "cp www/*.php build/ && cp -r www/fonts build/ && npm run chmod",
+    "build": "npm run clean:build && npm run build:ol && npm run build:js && npm run build:img && npm run build:css && npm run build:html && npm run build:copy",
+    "chmod": "node scripts/chmod.js",
+    "stage:rev": "node scripts/rev.js",
+    "stage": "npm run build && npm run stage:rev",
+    "deploy:copy": "node scripts/deploy.js",
+    "deploy": "npm run stage && npm run deploy:copy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -22,10 +37,9 @@
   "homepage": "https://github.com/devilesk/dota-drawable-map#readme",
   "private": true,
   "devDependencies": {
-    "assets-webpack-plugin": "^3.4.0",
-    "babel-core": "^6.14.0",
-    "babel-loader": "^6.2.5",
-    "babel-preset-es2015": "^6.14.0",
+    "browserify": "^13.1.1",
+    "browserify-shim": "^3.8.12",
+    "chmod": "^0.2.1",
     "d3-array": "^1.0.1",
     "d3-collection": "^1.0.1",
     "d3-color": "^1.0.1",
@@ -35,20 +49,24 @@
     "d3-scale": "^1.0.3",
     "d3-selection": "^1.0.2",
     "del": "^2.2.2",
-    "exports-loader": "^0.6.3",
-    "gulp": "^3.9.1",
-    "gulp-clean-css": "^2.0.12",
-    "gulp-concat": "^2.6.0",
-    "gulp-imagemin": "^3.0.3",
-    "gulp-preprocess": "^2.0.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.4",
-    "gulp-sequence": "^0.4.5",
-    "gulp-uglify": "^2.0.0",
-    "imports-loader": "^0.6.5",
+    "git-rev-sync": "^1.8.0",
+    "glob": "^7.1.1",
     "jquery": "^3.1.0",
     "jquery-ui": "^1.12.0",
-    "pump": "^1.0.1",
-    "webpack": "^1.13.2"
+    "replace": "^0.3.0"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "jquery": "global:$",
+    "./ol2/build/OpenLayers.js": "OpenLayers",
+    "jquery-ui": {
+      "depends": [
+        "jquery:$"
+      ]
+    }
   }
 }

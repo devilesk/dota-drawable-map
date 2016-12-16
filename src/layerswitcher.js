@@ -1,6 +1,6 @@
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
+var OpenLayers = require("../ol2/build/OpenLayers.js");
 
-export default OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
+module.exports = OpenLayers.Class(OpenLayers.Control.LayerSwitcher, {
     
     onButtonClickCallback: null,
     

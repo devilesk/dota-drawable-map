@@ -1,12 +1,23 @@
-import $ from 'jquery';
-import spinner from 'jquery-ui/ui/widgets/spinner';
-import selectmenu from 'jquery-ui/ui/widgets/selectmenu';
+var $ = require("jquery");
+require("jquery-ui/ui/version");
+require("jquery-ui/ui/safe-active-element");
+require("jquery-ui/ui/widget");
+require("jquery-ui/ui/escape-selector");
+require("jquery-ui/ui/form-reset-mixin");
+require("jquery-ui/ui/keycode");
+require("jquery-ui/ui/labels");
+require("jquery-ui/ui/position");
+require("jquery-ui/ui/unique-id");
+require("jquery-ui/ui/widgets/button");
+require("jquery-ui/ui/widgets/menu");
+var spinner = require("jquery-ui/ui/widgets/spinner");
+var selectmenu = require("jquery-ui/ui/widgets/selectmenu");
 
 /**************
  * UI WIDGETS *
  **************/
 
-export function formatDegree(value) {
+var formatDegree = function (value) {
     return value + '\u00B0';
 }
 
@@ -15,7 +26,7 @@ var degreespinner = $.widget( "ui.degreespinner", $.ui.spinner, {
     _parse: function(value) { return parseFloat(value); }
 })
 
-export function formatPercent(value) {
+var formatPercent = function (value) {
     return value + '%';
 }
 
@@ -49,4 +60,10 @@ var iconselectmenu = $.widget("custom.iconselectmenu", $.ui.selectmenu, {
     }
 });
 
-export {degreespinner, percentspinner, iconselectmenu};
+module.exports = {
+    formatDegree: formatDegree,
+    degreespinner: degreespinner,
+    formatPercent: formatPercent,
+    percentspinner: percentspinner,
+    iconselectmenu: iconselectmenu
+};

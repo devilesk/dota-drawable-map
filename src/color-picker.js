@@ -514,3 +514,5 @@ var CP = function(target, how) {
     return r;
 
 };
+
+module.exports = CP;

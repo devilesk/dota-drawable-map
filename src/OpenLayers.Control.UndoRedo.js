@@ -1,11 +1,11 @@
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
-
+var OpenLayers = require("../ol2/build/OpenLayers.js");
+console.log(OpenLayers);
 /**
  * Class: OpenLayers.Control.UndoRedo
  * Instance of this class can be used to undo and redo vector edits.
  */
  
-export default OpenLayers.Class(OpenLayers.Control, {
+module.exports = OpenLayers.Class(OpenLayers.Control, {
 	/**
 	 * APIProperty: currentEditIndex
 	 * {integer} - sequence number for editing the feature[s] 

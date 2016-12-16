@@ -6,14 +6,17 @@
         <meta name="author" content="devilesk">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="content-type" content="text/html;charset=UTF-8">
-        <!-- @if NODE_ENV='development' -->
+        <!-- @if NODE_ENV='dev' -->
         <link rel="stylesheet" type="text/css" href="css/color-picker.css">
         <link rel="stylesheet" type="text/css" href="css/openlayers.css">
-        <link rel="stylesheet" href="css/font-awesome.css">
-        <link rel="stylesheet" href="css/jquery-ui.css">
-        <link rel="stylesheet" href="css/miniheroes_sprite.css">
+        <link rel="stylesheet" type="text/css" href="css/font-awesome.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="css/miniheroes_sprite_png.css">
+        <link rel="stylesheet" type="text/css" href="css/interactivemap.css">
         <!-- @endif -->
-        <link rel="stylesheet" type="text/css" href="css/interactivemap.css" />
+        <!-- @if NODE_ENV='prod' !>
+        <link rel="stylesheet" type="text/css" href="css/app.min.css" />
+        <!-- @endif -->
 	</head>
 	<body>
         <div id="toolbar">
@@ -245,19 +248,22 @@
         <div id="share-link-modal" class="link-modal" title="Share Link">
             <a id="share-link-message" href="#" target="_blank"></a>
         </div>
-        <script type="text/javascript">
-
-          var _gaq = _gaq || [];
-          _gaq.push(['_setAccount', 'UA-39435120-1']);
-          _gaq.push(['_trackPageview']);
-
-          (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
+        <!-- @if NODE_ENV='dev' -->
+        <script src="../ol2/build/OpenLayers.js"></script>
+        <script>
+            var map_tile_path = "http://devilesk.com/media/images/map/";
         </script>
-        <script src="js/interactivemap.js"></script>
+        <script src="bundle.js"></script>
+        <!-- @endif -->
+        <script>
+            <!-- @if NODE_ENV='prod' !>
+            var map_tile_path = "<!-- @echo map_data_path -->";
+            <!-- @endif -->
+        </script>
+        <!-- @if NODE_ENV='prod' !>
+        <script src="bundle.min.js"></script>
+        <!-- @endif -->
+        <!-- @include .analytics.html -->
 	</body>
 </html>

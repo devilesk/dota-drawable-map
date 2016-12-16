@@ -2,7 +2,7 @@
  * QUERY STRING FUNCTIONS *
  ***********************************/
 
-export const trim = (function() {
+var trim = (function() {
     "use strict";
 
     function escapeRegex(string) {
@@ -25,32 +25,32 @@ export const trim = (function() {
     };
 }());
 
-export function getParameterByName(name) {
+var getParameterByName = function (name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
-export function setQueryString(key, value) {
+var setQueryString = function (key, value) {
     history.pushState(null, "", updateQueryString(key, value));
 }
 
-export function addQueryStringValue(key, value) {
+var addQueryStringValue = function (key, value) {
     console.log('addQueryStringValue', key, value);
     var qs = getParameterByName(key);
     qs = trim(trim(qs, ' ;') + ';' + value, ' ;');
     history.pushState(null, "", updateQueryString(key, qs));
 }
 
-export function removeQueryStringValue(key, value) {
+var removeQueryStringValue = function (key, value) {
     console.log('removeQueryStringValue', key, value);
     var qs = getParameterByName(key);
     qs = trim(trim(qs, ' ;').replace(value, '').replace(/;;/g, ''), ' ;');
     history.pushState(null, "", updateQueryString(key, qs != '' ? qs : null));
 }
 
-export function updateQueryString(key, value, url) {
+var updateQueryString = function (key, value, url) {
     if (!url) url = window.location.href;
     var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
         hash;
@@ -77,4 +77,13 @@ export function updateQueryString(key, value, url) {
             return url;
         }
     }
+}
+
+module.exports = {
+    trim: trim,
+    getParameterByName: getParameterByName,
+    setQueryString: setQueryString,
+    addQueryStringValue: addQueryStringValue,
+    removeQueryStringValue: removeQueryStringValue,
+    updateQueryString: updateQueryString
 }

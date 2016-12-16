@@ -1,8 +1,8 @@
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
-import ExportMap from "./exportmap";
-import $ from 'jquery';
+var OpenLayers = require("../ol2/build/OpenLayers.js");
+var ExportMap = require("./exportmap");
+var $ = require("jquery");
 
-export default OpenLayers.Class(ExportMap, {
+module.exports = OpenLayers.Class(ExportMap, {
     
     id: "share-svg",
     

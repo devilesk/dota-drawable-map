@@ -1,10 +1,10 @@
-import OpenLayers from 'exports?OpenLayers!../ol2/build/OpenLayers.js';
-import {scaleLinear as d3scaleLinear} from "d3-scale";
-import {geoTransform as d3geoTransform} from "d3-geo";
-import {geoPath as d3geoPath} from "d3-geo";
-import {select as d3select} from "d3-selection";
+var OpenLayers = require("../ol2/build/OpenLayers.js");
+var d3scaleLinear = require("d3-scale").scaleLinear;
+var d3geoTransform = require("d3-geo").geoTransform;
+var d3geoPath = require("d3-geo").geoPath;
+var d3select = require("d3-selection").select;
 
-export default OpenLayers.Class(OpenLayers.Control, {
+module.exports = OpenLayers.Class(OpenLayers.Control, {
 
     width: 1024,
     height: 1024,
@@ -126,9 +126,8 @@ export default OpenLayers.Class(OpenLayers.Control, {
         });
 
         // background element
-        var baseLayerName = this.map.baseLayer.name.replace(/ /g, '').toLowerCase();
-        console.log(baseLayerName);
-        var background = this.map_tile_path + baseLayerName + "/dotamap" + (baseLayerName == 'default' ? '' : '_' + baseLayerName) + "5_25.jpg";
+        console.log(this.map.baseLayer);
+        var background = this.map_tile_path + this.map.baseLayer.map_patch + "/" + this.map.baseLayer.map_id + "/dotamap" + (this.map.baseLayer.map_id == 'default' ? '' : '_' + this.map.baseLayer.map_id) + "5_25.jpg";
         this.svg.append("image")
             .attr("class", "background")
             .attr("xlink:href", background)
