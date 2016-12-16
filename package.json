@@ -1,8 +1,8 @@
 {
   "name": "dota-drawable-map",
   "version": "0.1.0",
-  "description": "Drawable  Dota 2 Map",
-  "main": "interactivemap.js",
+  "description": "Drawable Dota 2 Map",
+  "main": "src/app.js",
   "scripts": {
     "browserify:dev": "browserify -u 'jquery' src/app.js > www/bundle.js",
     "uglify": "uglifyjs --compress drop_console --mangle -- www/bundle.js > build/bundle.min.js",
