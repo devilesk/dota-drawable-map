@@ -1,4 +1,4 @@
-var OpenLayers = require("../../ol2/build/OpenLayers.js");
+var OpenLayers = require("./OpenLayers.js");
 var $ = require("jquery");
 var setQueryString = require("./querystringutil").setQueryString;
 

@@ -1,4 +1,4 @@
-var OpenLayers = require("../../ol2/build/OpenLayers.js");
+var OpenLayers = require("./OpenLayers.js");
 var d3scaleLinear = require("d3-scale").scaleLinear;
 var d3geoTransform = require("d3-geo").geoTransform;
 var d3geoPath = require("d3-geo").geoPath;

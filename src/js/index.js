@@ -34,7 +34,7 @@ var controlgroup = require("jquery-ui/ui/widgets/controlgroup");
 var tooltip = require("jquery-ui/ui/widgets/tooltip");
 
 var CP = require("./color-picker.js");
-var OpenLayers = require("../../ol2/build/OpenLayers.js");
+var OpenLayers = require("./OpenLayers.js");
 var UndoRedo = require("./OpenLayers.Control.UndoRedo");
 var querystringutil = require("./querystringutil");
 var coordinateconversion = require("./coordinateconversion");
