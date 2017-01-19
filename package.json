@@ -19,7 +19,7 @@
     "stage": "npm run build && npm run stage:rev",
     "deploy:copy": "node scripts/deploy.js",
     "deploy": "npm run stage && npm run deploy:copy",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "render": "python scripts/render.py"
   },
   "keywords": [
     "dota",

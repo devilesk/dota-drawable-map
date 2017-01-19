@@ -1,0 +1,7 @@
+---
+extends: root.j2
+title: Dota 2 Drawable Map
+description: Dota 2 Drawable Map. Create, save, and share drawings on an interactive Dota 2 map.
+active_menu: page-webapps
+header: Drawable Map
+---
