@@ -2,16 +2,11 @@
 
 {% block head %}
 {{ super() }}
-<!-- @if NODE_ENV='dev' -->
-<link rel="stylesheet" type="text/css" href="css/color-picker.css">
-<link rel="stylesheet" type="text/css" href="css/openlayers.css">
-<link rel="stylesheet" type="text/css" href="css/font-awesome.css">
-<link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
-<link rel="stylesheet" type="text/css" href="css/miniheroes_sprite_png.css">
-<link rel="stylesheet" type="text/css" href="css/interactivemap.css">
+<!-- @if NODE_ENV!='production' -->
+<link rel="stylesheet" href="app.css" type="text/css">
 <!-- @endif -->
-<!-- @if NODE_ENV='prod' !>
-<link rel="stylesheet" type="text/css" href="css/app.min.css" />
+<!-- @if NODE_ENV='production' !>
+<link rel="stylesheet" href="app-<!-- @echo COMMIT_HASH !>.min.css" type="text/css">
 <!-- @endif -->
 {% endblock head %}
 
@@ -249,20 +244,18 @@
     {% block js %}
         {{ super() }}
         <script src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
-        <!-- @if NODE_ENV='dev' -->
+        <!-- @if NODE_ENV!='production' -->
         <script src="../ol2/build/OpenLayers.js"></script>
         <script>
-            var map_tile_path = "http://devilesk.com/media/images/map/";
+            var map_tile_path = "tiles/";
         </script>
         <script src="bundle.js"></script>
         <!-- @endif -->
+        <!-- @if NODE_ENV='production' !>
         <script>
-            <!-- @if NODE_ENV='prod' !>
-            var map_tile_path = "<!-- @echo map_data_path -->";
-            <!-- @endif -->
+            var map_tile_path = "<!-- @echo map_data_path !>";
         </script>
-        <!-- @if NODE_ENV='prod' !>
-        <script src="bundle.min.js"></script>
+        <script src="bundle-<!-- @echo COMMIT_HASH !>.min.js"></script>
         <!-- @endif -->
     {% endblock js %}
 {% endblock body %}

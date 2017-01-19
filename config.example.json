@@ -1,0 +1,15 @@
+{
+    "appName": "DotaDrawableMap",
+    "rollbar": {
+        "client_token": "",
+        "server_token": "",
+        "local_username": "",
+        "username": "",
+        "sourceMappingURLPrefix": ""
+    },
+    "deployPath": {
+        "production": "dist",
+        "development": "dist"
+    },
+    "map_data_path": "tiles/"
+}
