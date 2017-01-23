@@ -82,7 +82,7 @@
   },
   "browserify-shim": {
     "jquery": "global:$",
-    "./ol2/build/OpenLayers.js": "OpenLayers",
+    "./src/js/OpenLayers.js": "OpenLayers",
     "jquery-ui": {
       "depends": [
         "jquery:$"
