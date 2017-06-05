@@ -66,11 +66,11 @@ var setQueryString = querystringutil.setQueryString;
 
 console.log('ExportMap', ExportMap);
 
-    var IMG_DIR = "images/",
+    var IMG_DIR = "img/",
         map_w = 16384,
         map_h = 16384,
-        map_x_boundaries = [-8475.58617377, 9327.49124559],
-        map_y_boundaries = [9028.52473332, -8836.61406266],
+        map_x_boundaries = [-8507.4, 9515],
+        map_y_boundaries = [8888.12001679, -8953.45782627],
         scale = Math.abs(map_x_boundaries[1] - map_x_boundaries[0])/map_w,
         imageToDota = latLonToWorld.bind(null, map_x_boundaries, map_y_boundaries, map_w, map_h),
         dotaToImage = worldToLatLon.bind(null, map_x_boundaries, map_y_boundaries, map_w, map_h),
@@ -89,10 +89,16 @@ console.log('ExportMap', ExportMap);
             ]
         }),
         baseLayers = [
+            baseLayerFactory('706', 'default', '7.06 Default', map_tile_path),
+            baseLayerFactory('706', 'autumn', '7.06 Autumn', map_tile_path),
+            baseLayerFactory('706', 'desert', '7.06 Desert', map_tile_path),
+            baseLayerFactory('706', 'immortalgardens', '7.06 Immortal Gardens', map_tile_path),
+            baseLayerFactory('706', 'journey', '7.06 New Journey', map_tile_path),
+            baseLayerFactory('706', 'reef', '7.06 Reef\'s Edge', map_tile_path),
+            baseLayerFactory('706', 'spring', '7.06 Spring', map_tile_path),
+            baseLayerFactory('706', 'winter', '7.06 Winter', map_tile_path),
             baseLayerFactory('700', 'default', '7.00 Default', map_tile_path),
-            baseLayerFactory('687', 'default', '6.87 Default', map_tile_path),
-            baseLayerFactory('687', 'desert', '7.00 Desert', map_tile_path),
-            baseLayerFactory('687', 'immortalgardens', '7.00 Immortal Gardens', map_tile_path)
+            baseLayerFactory('688', 'default', '6.88 Default', map_tile_path)
         ],
         layerSwitcher = new CustomLayerSwitcher({
             ascending: false
