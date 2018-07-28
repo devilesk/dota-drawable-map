@@ -18800,7 +18800,24 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
         xhr.send();
     },
     
+    triggerDownload: function (imgURI) {
+        console.log('triggerDownload');
+        var evt = new MouseEvent('click', {
+            view: window,
+            bubbles: false,
+            cancelable: true
+        });
+
+        var a = document.createElement('a');
+        a.setAttribute('download', 'image.png');
+        a.setAttribute('href', imgURI);
+        a.setAttribute('target', '_blank');
+
+        a.dispatchEvent(evt);
+    },
+    
     download_png: function () {
+        var self = this;
         console.log('download_png', d3select("svg"), this.svg, d3select("svg") == this.svg);
         var contents = this.svg.attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -18810,15 +18827,28 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
         var canvas = document.createElement('canvas');
         canvas.width = this.width;
         canvas.height = this.height;
-        var context = canvas.getContext("2d");
+        var ctx = canvas.getContext('2d');
+        var data = (new XMLSerializer()).serializeToString(this.svg.attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg").node());
+        console.log(data);
+        var DOMURL = window.URL || window.webkitURL || window;
 
-        var image = new Image;
-        image.src = src;
-        var self = this;
-        image.onload = function() {
-            context.drawImage(image, 0, 0, this.width, this.height);
-            self.downloadCanvas(canvas);
+        var img = new Image();
+        var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+        var url = DOMURL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+            console.log('onload');
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+
+            var imgURI = canvas
+                .toDataURL('image/png')
+                .replace('image/png', 'image/octet-stream');
+
+            self.triggerDownload(imgURI);
         };
+
+        img.src = url;
     },
 
     dataURLtoBlob: function (dataurl) {
@@ -20288,7 +20318,7 @@ var rollbarConfig = {
         client: {
             javascript: {
                 source_map_enabled: true,
-                code_version: "d940f8e9b5bc081b5fecf6b6a20d2d320136e237",
+                code_version: "dd002fac64aba67adfcd0ec76e61f8c0dd1d4818",
                 // Optionally have Rollbar guess which frames the error was thrown from
                 // when the browser does not provide line and column numbers.
                 guess_uncaught_frames: true

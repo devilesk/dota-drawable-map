@@ -195,7 +195,24 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
         xhr.send();
     },
     
+    triggerDownload: function (imgURI) {
+        console.log('triggerDownload');
+        var evt = new MouseEvent('click', {
+            view: window,
+            bubbles: false,
+            cancelable: true
+        });
+
+        var a = document.createElement('a');
+        a.setAttribute('download', 'image.png');
+        a.setAttribute('href', imgURI);
+        a.setAttribute('target', '_blank');
+
+        a.dispatchEvent(evt);
+    },
+    
     download_png: function () {
+        var self = this;
         console.log('download_png', d3select("svg"), this.svg, d3select("svg") == this.svg);
         var contents = this.svg.attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -205,15 +222,30 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
         var canvas = document.createElement('canvas');
         canvas.width = this.width;
         canvas.height = this.height;
-        var context = canvas.getContext("2d");
+        var ctx = canvas.getContext('2d');
+        var data = (new XMLSerializer()).serializeToString(this.svg.attr("version", 1.1).attr("xmlns", "http://www.w3.org/2000/svg").node());
+        console.log(data);
+        var DOMURL = window.URL || window.webkitURL || window;
 
-        var image = new Image;
-        image.src = src;
-        var self = this;
-        image.onload = function() {
-            context.drawImage(image, 0, 0, this.width, this.height);
+        var img = new Image();
+        var svgBlob = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+        var url = DOMURL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+            console.log('onload');
+            //ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, this.width, this.height);
             self.downloadCanvas(canvas);
+            DOMURL.revokeObjectURL(url);
+
+            /*var imgURI = canvas
+                .toDataURL('image/png')
+                .replace('image/png', 'image/octet-stream');
+
+            self.triggerDownload(imgURI);*/
         };
+
+        img.src = url;
     },
 
     dataURLtoBlob: function (dataurl) {
@@ -230,7 +262,7 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
         var imgData = _canvasObject.toDataURL({format: 'png', multiplier: 4});
         var strDataURI = imgData.substr(22, imgData.length);
         var blob = this.dataURLtoBlob(imgData);
-        var objurl = URL.createObjectURL(blob);
+        var objurl = URL.createObjectURL(_canvasObject.toBlob());
 
         link.download = "image.png";
 
