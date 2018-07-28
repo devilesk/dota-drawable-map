@@ -89,6 +89,9 @@ console.log('ExportMap', ExportMap);
             ]
         }),
         baseLayers = [
+            baseLayerFactory('715', 'default', '7.15 Default', map_tile_path),
+            baseLayerFactory('709', 'default', '7.09 Default', map_tile_path),
+            baseLayerFactory('707', 'default', '7.07 Default', map_tile_path),
             baseLayerFactory('706', 'default', '7.06 Default', map_tile_path),
             baseLayerFactory('706', 'autumn', '7.06 Autumn', map_tile_path),
             baseLayerFactory('706', 'desert', '7.06 Desert', map_tile_path),

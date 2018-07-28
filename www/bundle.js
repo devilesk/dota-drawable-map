@@ -18949,6 +18949,9 @@ console.log('ExportMap', ExportMap);
             ]
         }),
         baseLayers = [
+            baseLayerFactory('715', 'default', '7.15 Default', map_tile_path),
+            baseLayerFactory('709', 'default', '7.09 Default', map_tile_path),
+            baseLayerFactory('707', 'default', '7.07 Default', map_tile_path),
             baseLayerFactory('706', 'default', '7.06 Default', map_tile_path),
             baseLayerFactory('706', 'autumn', '7.06 Autumn', map_tile_path),
             baseLayerFactory('706', 'desert', '7.06 Desert', map_tile_path),
@@ -20285,7 +20288,7 @@ var rollbarConfig = {
         client: {
             javascript: {
                 source_map_enabled: true,
-                code_version: "53784e63981237bc29adfc72794683141a082ddc",
+                code_version: "d940f8e9b5bc081b5fecf6b6a20d2d320136e237",
                 // Optionally have Rollbar guess which frames the error was thrown from
                 // when the browser does not provide line and column numbers.
                 guess_uncaught_frames: true
