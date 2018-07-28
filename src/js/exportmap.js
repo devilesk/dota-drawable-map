@@ -259,18 +259,20 @@ module.exports = OpenLayers.Class(OpenLayers.Control, {
 
     downloadCanvas: function (_canvasObject) {
         var link = document.createElement("a");
-        var imgData = _canvasObject.toDataURL({format: 'png', multiplier: 4});
-        var strDataURI = imgData.substr(22, imgData.length);
-        var blob = this.dataURLtoBlob(imgData);
-        var objurl = URL.createObjectURL(_canvasObject.toBlob());
+        //var imgData = _canvasObject.toDataURL({format: 'png', multiplier: 4});
+        //var strDataURI = imgData.substr(22, imgData.length);
+        //var blob = this.dataURLtoBlob(imgData);
+        _canvasObject.toBlob(function (blob) {
+            var objurl = URL.createObjectURL(blob);
 
-        link.download = "image.png";
+            link.download = "image.png";
 
-        link.href = objurl;
+            link.href = objurl;
 
-        document.body.appendChild(link); // Required for FF
-        link.click();
-        document.body.removeChild(link); // Required for FF
+            document.body.appendChild(link); // Required for FF
+            link.click();
+            document.body.removeChild(link); // Required for FF
+        });
     },
     
     doExport: function () {
